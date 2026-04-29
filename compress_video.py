@@ -15,6 +15,7 @@ DEFAULT_TARGET_BYTES = 1_000_000
 MAX_RECOMMENDED_INPUT_BYTES = 10_000_000
 GOOD_QUALITY_CQ = 45
 HIGH_QUALITY_CRF = "18"
+QUALITY_ATTEMPTS = ("18", "20", "21")
 
 
 def human_size(size: int) -> str:
@@ -132,7 +133,7 @@ def output_extension_for_encoder(encoder: str) -> str:
     return ".webm" if encoder == "libvpx-vp9" else ".mp4"
 
 
-def build_video_args(source: Path, encoder: str) -> list[str]:
+def build_video_args(source: Path, encoder: str, quality: str) -> list[str]:
     if encoder == "libvpx-vp9":
         return [
             "-y",
@@ -143,7 +144,7 @@ def build_video_args(source: Path, encoder: str) -> list[str]:
             "-c:v",
             "libvpx-vp9",
             "-crf",
-            HIGH_QUALITY_CRF,
+            quality,
             "-b:v",
             "0",
             "-row-mt",
@@ -190,7 +191,7 @@ def build_video_args(source: Path, encoder: str) -> list[str]:
             "-pix_fmt",
             "yuv420p",
             "-crf",
-            HIGH_QUALITY_CRF,
+            quality,
         ]
 
     return [
@@ -208,7 +209,7 @@ def build_video_args(source: Path, encoder: str) -> list[str]:
         "-pix_fmt",
         "yuv420p",
         "-crf",
-        HIGH_QUALITY_CRF,
+        quality,
     ]
 
 
@@ -219,48 +220,53 @@ def compress_video(source: Path, output: Path, target_bytes: int) -> tuple[bool,
 
     lines = [
         f"Source: {source.name} | {human_size(source.stat().st_size)} | {duration:.1f}s",
-        "Mode: High quality 18 / smallest high-quality format | original dimensions/fps",
+        "Mode: High quality 18 with 20/21 fallback | smallest high-quality format",
     ]
 
     with tempfile.TemporaryDirectory(prefix="compress-video-") as tmp_name:
         temp_output = Path(tmp_name) / "candidate.webm"
         last_error = ""
         source_size = source.stat().st_size
-        best_candidate: tuple[Path, int, str, bool, str] | None = None
+        best_candidate: tuple[Path, int, str, bool, str, str] | None = None
 
-        for encoder, codec_label, is_hardware_encoder in encoder_options(ffmpeg):
-            if temp_output.exists():
-                temp_output.unlink()
-            candidate_output = temp_output.with_suffix(output_extension_for_encoder(encoder))
-            if candidate_output.exists():
-                candidate_output.unlink()
+        for quality in QUALITY_ATTEMPTS:
+            lines.append(f"Trying quality {quality}...")
+            for encoder, codec_label, is_hardware_encoder in encoder_options(ffmpeg):
+                if temp_output.exists():
+                    temp_output.unlink()
+                candidate_output = temp_output.with_suffix(output_extension_for_encoder(encoder))
+                if candidate_output.exists():
+                    candidate_output.unlink()
 
-            command = [
-                ffmpeg,
-                *build_video_args(source, encoder),
-            ]
-            if encoder == "libvpx-vp9":
-                command.extend(["-map", "0:a?", "-c:a", "libopus", "-b:a", "96k"])
-            else:
-                command.extend(["-map", "0:a?", "-c:a", "copy", "-movflags", "+faststart"])
-            command.append(str(candidate_output))
-            result = run(command)
-            if result.returncode != 0:
-                last_error = result.stderr.strip()
-                continue
+                command = [
+                    ffmpeg,
+                    *build_video_args(source, encoder, quality),
+                ]
+                if encoder == "libvpx-vp9":
+                    command.extend(["-map", "0:a?", "-c:a", "libopus", "-b:a", "96k"])
+                else:
+                    command.extend(["-map", "0:a?", "-c:a", "copy", "-movflags", "+faststart"])
+                command.append(str(candidate_output))
+                result = run(command)
+                if result.returncode != 0:
+                    last_error = result.stderr.strip()
+                    continue
 
-            output_size = candidate_output.stat().st_size
-            if output_size >= source_size:
-                lines.append(f"[SKIP] {codec_label} was not smaller than the original.")
-                continue
+                output_size = candidate_output.stat().st_size
+                if output_size >= source_size:
+                    lines.append(f"[SKIP] {codec_label} quality {quality} was not smaller than the original.")
+                    continue
 
-            candidate_copy = Path(tmp_name) / f"best{output_extension_for_encoder(encoder)}"
-            shutil.copy2(candidate_output, candidate_copy)
-            if best_candidate is None or output_size < best_candidate[1]:
-                best_candidate = (candidate_copy, output_size, codec_label, is_hardware_encoder, encoder)
+                candidate_copy = Path(tmp_name) / f"best-q{quality}{output_extension_for_encoder(encoder)}"
+                shutil.copy2(candidate_output, candidate_copy)
+                if best_candidate is None or output_size < best_candidate[1]:
+                    best_candidate = (candidate_copy, output_size, codec_label, is_hardware_encoder, encoder, quality)
+
+            if best_candidate is not None:
+                break
 
         if best_candidate is not None:
-            candidate_path, output_size, codec_label, is_hardware_encoder, encoder = best_candidate
+            candidate_path, output_size, codec_label, is_hardware_encoder, encoder, quality = best_candidate
             final_output = unique_path(output.with_suffix(output_extension_for_encoder(encoder)))
             final_output.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(candidate_path, final_output)
@@ -270,10 +276,10 @@ def compress_video(source: Path, output: Path, target_bytes: int) -> tuple[bool,
                 f"{human_size(source_size)} -> {human_size(output_size)}"
             )
             if encoder == "libvpx-vp9":
-                lines.append(f"Selected {codec_label}; preserved original dimensions/frame rate and encoded audio as Opus for WebM.")
+                lines.append(f"Selected {codec_label} quality {quality}; preserved original dimensions/frame rate and encoded audio as Opus for WebM.")
             else:
-                lines.append(f"Selected {codec_label} {speed_note}; preserved original dimensions, frame rate, and audio stream.")
-            lines.append("Quality 18 candidate picker saved the smallest high-quality result.")
+                lines.append(f"Selected {codec_label} quality {quality} {speed_note}; preserved original dimensions, frame rate, and audio stream.")
+            lines.append("Saved the smallest result from the first quality level that compressed the video.")
             return True, lines
 
         final_output = unique_path(output.with_suffix(source.suffix or ".mp4"))
@@ -283,7 +289,7 @@ def compress_video(source: Path, output: Path, target_bytes: int) -> tuple[bool,
             f"[OK] {source.name} -> {final_output.name} | "
             f"{human_size(source_size)} -> {human_size(source_size)}"
         )
-        lines.append("Original file kept because no quality 18 format produced a smaller file.")
+        lines.append("Original file kept because qualities 18, 20, and 21 did not produce a smaller file.")
         return True, lines
 
 

@@ -585,7 +585,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let videoFileField = StyledTextField(value: "No video selected")
     private let videoTargetField = StyledTextField(value: "auto")
     private let videoStatusLabel = makeWrappingLabel(
-        "Choose a video around 10 MB or less. High-quality 18 mode picks the smallest good format.",
+        "Choose a video around 10 MB or less. Quality 18 tries first, then 20/21 if needed.",
         size: 12,
         weight: .regular,
         color: Palette.muted
@@ -1166,7 +1166,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func buildVideoCompressionCard() -> NSView {
         let (card, stack) = makeSectionCard(
             title: "Compress video",
-            subtitle: "Compress videos at high quality 18 and save the smallest high-quality format.",
+            subtitle: "Compress videos at quality 18 first, then 20 or 21 only if needed.",
             symbol: "video.badge.waveform"
         )
 
@@ -1189,7 +1189,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let qualityTile = makeVideoCompressionTile(
             title: "Quality",
             value: "High",
-            detail: "18"
+            detail: "18 -> 20 -> 21"
         )
 
         summaryRow.addArrangedSubview(sourceTile)
