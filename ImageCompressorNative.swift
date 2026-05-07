@@ -1,28 +1,37 @@
 import AppKit
+import UserNotifications
+
+private func L(_ key: String) -> String { NSLocalizedString(key, comment: "") }
 
 private enum Palette {
-    static let window = NSColor(calibratedRed: 0.07, green: 0.10, blue: 0.15, alpha: 1.0)
-    static let windowTop = NSColor(calibratedRed: 0.12, green: 0.17, blue: 0.25, alpha: 1.0)
-    static let card = NSColor(calibratedRed: 0.95, green: 0.98, blue: 1.00, alpha: 0.14)
-    static let cardAlt = NSColor(calibratedRed: 0.86, green: 0.93, blue: 1.00, alpha: 0.11)
-    static let border = NSColor(calibratedRed: 0.92, green: 0.97, blue: 1.00, alpha: 0.28)
-    static let accent = NSColor(calibratedRed: 0.48, green: 0.80, blue: 1.00, alpha: 1.0)
-    static let accentSoft = NSColor(calibratedRed: 0.40, green: 0.62, blue: 0.88, alpha: 0.78)
-    static let accentBright = NSColor(calibratedRed: 0.72, green: 0.91, blue: 1.00, alpha: 1.0)
-    static let heroStart = NSColor(calibratedRed: 0.34, green: 0.58, blue: 0.82, alpha: 0.62)
-    static let heroEnd = NSColor(calibratedRed: 0.28, green: 0.34, blue: 0.68, alpha: 0.52)
-    static let text = NSColor(calibratedRed: 0.98, green: 0.99, blue: 1.00, alpha: 1.0)
-    static let muted = NSColor(calibratedRed: 0.80, green: 0.87, blue: 0.94, alpha: 1.0)
-    static let subtle = NSColor(calibratedRed: 0.64, green: 0.72, blue: 0.82, alpha: 1.0)
-    static let warning = NSColor(calibratedRed: 0.98, green: 0.78, blue: 0.25, alpha: 1.0)
-    static let success = NSColor(calibratedRed: 0.25, green: 0.85, blue: 0.63, alpha: 1.0)
-    static let danger = NSColor(calibratedRed: 0.98, green: 0.64, blue: 0.64, alpha: 1.0)
-    static let log = NSColor(calibratedRed: 0.05, green: 0.07, blue: 0.10, alpha: 0.72)
-    static let pill = NSColor(calibratedRed: 0.96, green: 0.99, blue: 1.00, alpha: 0.16)
-    static let overlay = NSColor(calibratedRed: 0.94, green: 0.98, blue: 1.00, alpha: 0.10)
-    static let rose = NSColor(calibratedRed: 0.96, green: 0.42, blue: 0.63, alpha: 1.0)
-    static let cyan = NSColor(calibratedRed: 0.29, green: 0.84, blue: 0.95, alpha: 1.0)
-    static let mint = NSColor(calibratedRed: 0.33, green: 0.90, blue: 0.73, alpha: 1.0)
+    static let window = NSColor(calibratedRed: 0.015, green: 0.019, blue: 0.027, alpha: 1.0)
+    static let windowTop = NSColor(calibratedRed: 0.055, green: 0.076, blue: 0.098, alpha: 1.0)
+    static let card = NSColor(calibratedRed: 0.98, green: 0.99, blue: 1.00, alpha: 0.115)
+    static let cardAlt = NSColor(calibratedRed: 0.93, green: 0.97, blue: 1.00, alpha: 0.085)
+    static let border = NSColor(calibratedRed: 0.95, green: 0.98, blue: 1.00, alpha: 0.22)
+    static let accent = NSColor(calibratedRed: 0.74, green: 0.90, blue: 1.00, alpha: 1.0)
+    static let accentSoft = NSColor(calibratedRed: 0.28, green: 0.62, blue: 0.92, alpha: 0.70)
+    static let accentBright = NSColor(calibratedRed: 0.83, green: 0.96, blue: 1.00, alpha: 1.0)
+    static let primaryButton = NSColor(calibratedRed: 0.16, green: 0.71, blue: 0.98, alpha: 1.0)
+    static let primaryButtonPressed = NSColor(calibratedRed: 0.11, green: 0.62, blue: 0.92, alpha: 1.0)
+    static let secondaryButton = NSColor(calibratedRed: 0.93, green: 0.97, blue: 1.00, alpha: 0.20)
+    static let secondaryButtonText = NSColor(calibratedRed: 0.97, green: 0.99, blue: 1.00, alpha: 1.0)
+    static let dangerButton = NSColor(calibratedRed: 0.93, green: 0.30, blue: 0.36, alpha: 1.0)
+    static let heroStart = NSColor(calibratedRed: 0.20, green: 0.52, blue: 0.72, alpha: 0.52)
+    static let heroEnd = NSColor(calibratedRed: 0.52, green: 0.42, blue: 0.78, alpha: 0.42)
+    static let text = NSColor(calibratedRed: 0.985, green: 0.992, blue: 1.00, alpha: 1.0)
+    static let muted = NSColor(calibratedRed: 0.84, green: 0.89, blue: 0.96, alpha: 1.0)
+    static let subtle = NSColor(calibratedRed: 0.69, green: 0.77, blue: 0.87, alpha: 1.0)
+    static let warning = NSColor(calibratedRed: 0.98, green: 0.78, blue: 0.32, alpha: 1.0)
+    static let success = NSColor(calibratedRed: 0.37, green: 0.94, blue: 0.73, alpha: 1.0)
+    static let danger = NSColor(calibratedRed: 1.00, green: 0.54, blue: 0.58, alpha: 1.0)
+    static let log = NSColor(calibratedRed: 0.018, green: 0.024, blue: 0.034, alpha: 0.84)
+    static let pill = NSColor(calibratedRed: 0.96, green: 0.99, blue: 1.00, alpha: 0.13)
+    static let overlay = NSColor(calibratedRed: 0.94, green: 0.98, blue: 1.00, alpha: 0.075)
+    static let rose = NSColor(calibratedRed: 1.00, green: 0.47, blue: 0.68, alpha: 1.0)
+    static let cyan = NSColor(calibratedRed: 0.38, green: 0.91, blue: 1.00, alpha: 1.0)
+    static let mint = NSColor(calibratedRed: 0.44, green: 0.95, blue: 0.78, alpha: 1.0)
+    static let champagne = NSColor(calibratedRed: 0.98, green: 0.84, blue: 0.56, alpha: 1.0)
 }
 
 private final class AppLogger {
@@ -40,6 +49,7 @@ private final class AppLogger {
         if !FileManager.default.fileExists(atPath: logURL.path) {
             FileManager.default.createFile(atPath: logURL.path, contents: nil)
         }
+        cleanupOldLogs(in: logsDir, keepDays: 30)
 
         guard let handle = try? FileHandle(forWritingTo: logURL) else {
             return
@@ -52,6 +62,9 @@ private final class AppLogger {
 }
 
 private class CardView: NSVisualEffectView {
+    private let innerHighlightLayer = CALayer()
+    private let topSheenLayer = CAGradientLayer()
+
     init(background: NSColor = Palette.card) {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
@@ -62,16 +75,41 @@ private class CardView: NSVisualEffectView {
         layer?.backgroundColor = background.cgColor
         layer?.cornerRadius = 28
         layer?.cornerCurve = .continuous
-        layer?.borderWidth = 1
+        layer?.borderWidth = 1.2
         layer?.borderColor = Palette.border.cgColor
-        layer?.shadowColor = NSColor.black.withAlphaComponent(0.34).cgColor
-        layer?.shadowOffset = CGSize(width: 0, height: -14)
-        layer?.shadowOpacity = 0.82
-        layer?.shadowRadius = 30
+        layer?.shadowColor = NSColor.black.withAlphaComponent(0.55).cgColor
+        layer?.shadowOffset = CGSize(width: 0, height: -18)
+        layer?.shadowOpacity = 0.72
+        layer?.shadowRadius = 34
+
+        innerHighlightLayer.borderWidth = 1
+        innerHighlightLayer.borderColor = NSColor.white.withAlphaComponent(0.12).cgColor
+        innerHighlightLayer.cornerCurve = .continuous
+        layer?.addSublayer(innerHighlightLayer)
+
+        topSheenLayer.colors = [
+            NSColor.white.withAlphaComponent(0.13).cgColor,
+            NSColor.white.withAlphaComponent(0.025).cgColor,
+            NSColor.clear.cgColor,
+        ]
+        topSheenLayer.locations = [0, 0.34, 1]
+        topSheenLayer.startPoint = CGPoint(x: 0.15, y: 1)
+        topSheenLayer.endPoint = CGPoint(x: 1, y: 0)
+        topSheenLayer.cornerCurve = .continuous
+        layer?.addSublayer(topSheenLayer)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layout() {
+        super.layout()
+        let radius = layer?.cornerRadius ?? 28
+        innerHighlightLayer.frame = bounds.insetBy(dx: 2, dy: 2)
+        innerHighlightLayer.cornerRadius = max(radius - 2, 0)
+        topSheenLayer.frame = bounds
+        topSheenLayer.cornerRadius = radius
     }
 }
 
@@ -87,7 +125,7 @@ private final class GradientBackgroundView: NSView {
 
         gradientLayer.colors = [
             Palette.windowTop.cgColor,
-            NSColor(calibratedRed: 0.10, green: 0.18, blue: 0.22, alpha: 1.0).cgColor,
+            NSColor(calibratedRed: 0.025, green: 0.050, blue: 0.060, alpha: 1.0).cgColor,
             Palette.window.cgColor,
         ]
         gradientLayer.startPoint = CGPoint(x: 0.05, y: 1.0)
@@ -103,13 +141,13 @@ private final class GradientBackgroundView: NSView {
             layer?.addSublayer(glow)
         }
 
-        glowTopRight.backgroundColor = Palette.accent.withAlphaComponent(0.30).cgColor
+        glowTopRight.backgroundColor = Palette.accent.withAlphaComponent(0.22).cgColor
         glowTopRight.shadowColor = Palette.accentBright.withAlphaComponent(0.8).cgColor
 
-        glowBottomLeft.backgroundColor = Palette.rose.withAlphaComponent(0.16).cgColor
+        glowBottomLeft.backgroundColor = Palette.rose.withAlphaComponent(0.12).cgColor
         glowBottomLeft.shadowColor = Palette.rose.withAlphaComponent(0.65).cgColor
 
-        glowCenter.backgroundColor = Palette.cyan.withAlphaComponent(0.14).cgColor
+        glowCenter.backgroundColor = Palette.champagne.withAlphaComponent(0.11).cgColor
         glowCenter.shadowColor = Palette.cyan.withAlphaComponent(0.45).cgColor
     }
 
@@ -174,15 +212,19 @@ private final class StyledTextField: NSTextField {
         drawsBackground = true
         backgroundColor = Palette.pill
         textColor = Palette.text
-        font = NSFont.systemFont(ofSize: 14, weight: .semibold)
+        font = premiumFont(size: 14, weight: .semibold)
         focusRingType = .none
         wantsLayer = true
-        layer?.cornerRadius = 18
+        layer?.cornerRadius = 20
         layer?.cornerCurve = .continuous
         layer?.borderWidth = 1
-        layer?.borderColor = Palette.border.cgColor
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.18).cgColor
+        layer?.shadowColor = NSColor.black.withAlphaComponent(0.22).cgColor
+        layer?.shadowOpacity = 1
+        layer?.shadowOffset = CGSize(width: 0, height: -6)
+        layer?.shadowRadius = 12
         cell?.backgroundStyle = .emphasized
-        heightAnchor.constraint(equalToConstant: 44).isActive = true
+        heightAnchor.constraint(equalToConstant: 46).isActive = true
     }
 }
 
@@ -197,7 +239,7 @@ private final class DropZoneView: NSView {
     private let titleLabel = makeLabel(
         "Drop images here",
         size: 24,
-        weight: .bold,
+        weight: .semibold,
         color: Palette.text
     )
     private let subtitleLabel = makeWrappingLabel(
@@ -217,6 +259,8 @@ private final class DropZoneView: NSView {
         layer?.borderWidth = 2
         layer?.borderColor = Palette.accentBright.withAlphaComponent(0.34).cgColor
         registerForDraggedTypes([.fileURL])
+        setAccessibilityLabel("Image drop zone")
+        setAccessibilityHelp("Drop image files or folders here to add them to the compression queue.")
 
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -277,7 +321,7 @@ private final class ExtensionDropZoneView: NSView {
     private let titleLabel = makeLabel(
         "Drop files here to change extensions",
         size: 16,
-        weight: .bold,
+        weight: .semibold,
         color: Palette.text
     )
     private let subtitleLabel = makeWrappingLabel(
@@ -297,6 +341,8 @@ private final class ExtensionDropZoneView: NSView {
         layer?.borderWidth = 1.5
         layer?.borderColor = Palette.border.cgColor
         registerForDraggedTypes([.fileURL])
+        setAccessibilityLabel("File extension drop zone")
+        setAccessibilityHelp("Drop files here to choose them for extension changes.")
 
         let row = NSStackView()
         row.translatesAutoresizingMaskIntoConstraints = false
@@ -359,7 +405,7 @@ private final class VideoDropZoneView: NSView {
     private let titleLabel = makeLabel(
         "Drop videos here",
         size: 16,
-        weight: .bold,
+        weight: .semibold,
         color: Palette.text
     )
     private let subtitleLabel = makeWrappingLabel(
@@ -379,6 +425,8 @@ private final class VideoDropZoneView: NSView {
         layer?.borderWidth = 1.5
         layer?.borderColor = Palette.border.cgColor
         registerForDraggedTypes([.fileURL])
+        setAccessibilityLabel("Video drop zone")
+        setAccessibilityHelp("Drop one or more videos here to choose them for compression.")
 
         let row = NSStackView()
         row.translatesAutoresizingMaskIntoConstraints = false
@@ -448,6 +496,25 @@ private struct CompressionRunResult {
     let bestEffort: Bool
 }
 
+private enum QueueFileStatus: String {
+    case queued = "Queued"
+    case processing = "Processing"
+    case done = "Done"
+    case bestEffort = "Best Effort"
+    case skipped = "Skipped"
+    case failed = "Failed"
+}
+
+private struct QueueFileState {
+    var status: QueueFileStatus = .queued
+}
+
+private struct PreviewCacheEntry {
+    let imageData: Data
+    let outputText: String
+    let status: String
+}
+
 final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow!
     private var controller: AppViewController!
@@ -486,6 +553,10 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
 
         AppLogger.shared.write("Native app launched successfully.")
+        if let report = controller.startupDiagnosticsReport() {
+            AppLogger.shared.write(report)
+            controller.setStartupStatus(report)
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -573,9 +644,13 @@ enum ImageCompressorMain {
 
 private final class AppViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
     private let logger = AppLogger.shared
+    private let sessionStateKey = "image_compressor_session_v1"
     private let supportedExtensions: Set<String> = ["jpg", "jpeg", "png", "webp", "bmp", "tif", "tiff"]
 
     private var selectedFiles: [URL] = []
+    private var fileStates: [String: QueueFileState] = [:]
+    private var previewCache: [String: PreviewCacheEntry] = [:]
+    private var compressionRunStartedAt: Date?
     private var lastOutputFolder: URL?
     private var isRunning = false
     private var previewWorkItem: DispatchWorkItem?
@@ -591,11 +666,11 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private var activeCompressionProcesses: [Process] = []
     private var stopRequested = false
 
-    private let queuedValueLabel = makeLabel("0 files", size: 24, weight: .bold, color: Palette.text)
+    private let queuedValueLabel = makeLabel("0 files", size: 24, weight: .semibold, color: Palette.text)
     private let queuedDetailLabel = makeLabel("0 B total", size: 12, weight: .regular, color: Palette.muted)
-    private let targetValueLabel = makeLabel("150 KB max", size: 24, weight: .bold, color: Palette.text)
+    private let targetValueLabel = makeLabel("150 KB max", size: 24, weight: .semibold, color: Palette.text)
     private let targetDetailLabel = makeLabel("Fast WebP target", size: 12, weight: .regular, color: Palette.muted)
-    private let outputValueLabel = makeLabel("Same Name", size: 24, weight: .bold, color: Palette.text)
+    private let outputValueLabel = makeLabel("Same Name", size: 24, weight: .semibold, color: Palette.text)
     private let outputDetailLabel = makeLabel("best extension", size: 12, weight: .regular, color: Palette.muted)
 
     private let queueHintLabel = makeWrappingLabel(
@@ -621,16 +696,16 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let logTextView = NSTextView()
     private let progressIndicator = NSProgressIndicator()
     private let batchProgressIndicator = NSProgressIndicator()
-    private let batchProgressLabel = makeLabel("0 complete / 0 left", size: 12, weight: .bold, color: Palette.muted)
+    private let batchProgressLabel = makeLabel("0 complete / 0 left", size: 12, weight: .medium, color: Palette.muted)
 
     private let maxSizeField = StyledTextField(value: "150kb")
     private let qualitySlider = NSSlider(value: 85, minValue: 0, maxValue: 100, target: nil, action: nil)
-    private let qualityValueLabel = makeLabel("85%", size: 14, weight: .bold, color: Palette.text)
+    private let qualityValueLabel = makeLabel("85%", size: 14, weight: .medium, color: Palette.text)
     private let previewToggleButton = NSButton(title: "Show Live Preview", target: nil, action: nil)
     private let formatPopup = NSPopUpButton()
     private let saveModePopup = NSPopUpButton()
     private let outputFolderField = StyledTextField(value: "")
-    private let targetPresetControl = NSSegmentedControl(labels: ["150KB", "300KB", "500KB"], trackingMode: .selectOne, target: nil, action: nil)
+    private let targetPresetControl = NSSegmentedControl(labels: ["WhatsApp", "Email", "Web", "Archive"], trackingMode: .selectOne, target: nil, action: nil)
     private let previewOriginalImageView = NSImageView()
     private let previewOutputImageView = NSImageView()
     private let previewOriginalLabel = makeLabel("Original", size: 12, weight: .semibold, color: Palette.muted)
@@ -773,6 +848,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         configureControls()
         refreshQueue()
         appendLog("Ready. Add files or folders to begin.")
+        restoreSessionState()
     }
 
     override func viewDidAppear() {
@@ -827,6 +903,44 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         chooseVideoButton.action = #selector(chooseVideoFile)
         compressVideoButton.target = self
         compressVideoButton.action = #selector(startVideoCompression)
+
+        addFilesButton.setAccessibilityLabel("Add image files")
+        addFilesButton.setAccessibilityHelp("Choose one or more image files to add to the compression queue.")
+        addFolderButton.setAccessibilityLabel("Add image folder")
+        addFolderButton.setAccessibilityHelp("Choose a folder and add supported images from it.")
+        removeSelectedButton.setAccessibilityLabel("Remove selected files")
+        removeSelectedButton.setAccessibilityHelp("Remove the selected items from the image queue.")
+        clearAllButton.setAccessibilityLabel("Clear image queue")
+        clearAllButton.setAccessibilityHelp("Remove every image from the queue.")
+        chooseOutputButton.setAccessibilityLabel("Choose output folder")
+        chooseOutputButton.setAccessibilityHelp("Choose where completed image or video outputs should be stored.")
+        clearOutputButton.setAccessibilityLabel("Clear output folder")
+        clearOutputButton.setAccessibilityHelp("Return to saving outputs beside the source files.")
+        openOutputButton.setAccessibilityLabel("Open output folder")
+        openOutputButton.setAccessibilityHelp("Open the folder for the most recent completed image, video, or extension action.")
+        stopButton.setAccessibilityLabel("Stop compression")
+        stopButton.setAccessibilityHelp("Stop the current compression run.")
+        compressButton.setAccessibilityLabel("Compress images now")
+        compressButton.setAccessibilityHelp("Start compressing the images currently in the queue.")
+        chooseExtensionFileButton.setAccessibilityLabel("Choose files for extension change")
+        chooseExtensionFileButton.setAccessibilityHelp("Choose one or more files for the extension rename tool.")
+        applyExtensionButton.setAccessibilityLabel("Change selected file extensions")
+        applyExtensionButton.setAccessibilityHelp("Apply the selected extension to the chosen files.")
+        chooseVideoButton.setAccessibilityLabel("Choose videos")
+        chooseVideoButton.setAccessibilityHelp("Choose one or more videos to compress.")
+        compressVideoButton.setAccessibilityLabel("Compress selected videos")
+        compressVideoButton.setAccessibilityHelp("Compress the selected videos using the high-quality video settings.")
+        previewToggleButton.setAccessibilityLabel("Toggle live image preview")
+        previewToggleButton.setAccessibilityHelp("Show or hide the local image quality preview.")
+        maxSizeField.setAccessibilityLabel("Image target size")
+        outputFolderField.setAccessibilityLabel("Output folder path")
+        extensionFileField.setAccessibilityLabel("Selected files for extension change")
+        extensionPopup.setAccessibilityLabel("New file extension")
+        videoFileField.setAccessibilityLabel("Selected video files")
+        videoTargetField.setAccessibilityLabel("Video compression target")
+        targetPresetControl.setAccessibilityLabel("Image target size presets")
+        formatPopup.setAccessibilityLabel("Image output format")
+        saveModePopup.setAccessibilityLabel("Image save mode")
 
         openOutputButton.isEnabled = false
         stopButton.isEnabled = false
@@ -968,9 +1082,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let badge = makeBadgeLabel("Private on-device compression")
         let title = makeLabel(
-            "Compress large images into lightweight files you can actually share",
-            size: 32,
-            weight: .heavy,
+            "Compress images and videos into lightweight files you can actually share",
+            size: 30,
+            weight: .semibold,
             color: Palette.text
         )
         title.maximumNumberOfLines = 2
@@ -984,8 +1098,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let highlights = NSStackView(views: [
             makeHighlightPill(symbol: "lock.shield.fill", text: "100% local"),
+            makeHighlightPill(symbol: "video.fill", text: "Video batch"),
             makeHighlightPill(symbol: "text.badge.checkmark", text: "Same-name save"),
-            makeHighlightPill(symbol: "sparkles", text: "Best-effort quality"),
         ])
         highlights.orientation = .horizontal
         highlights.spacing = 10
@@ -1002,10 +1116,10 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         previewStack.spacing = 8
         previewCard.addSubview(previewStack)
 
-        let previewTitle = makeLabel("Compression Preview", size: 12, weight: .semibold, color: Palette.accentBright)
-        let previewValue = makeLabel("12MB -> 150KB", size: 28, weight: .black, color: Palette.text)
+        let previewTitle = makeLabel("Local Compression Suite", size: 12, weight: .semibold, color: Palette.champagne)
+        let previewValue = makeLabel("Images + Video", size: 27, weight: .semibold, color: Palette.text)
         let previewBody = makeWrappingLabel(
-            "The app starts with format and quality optimization, then scales dimensions only when the target is too aggressive to reach cleanly.",
+            "Images target tiny shareable output, while videos use a quality fallback ladder and pick the smallest high-quality format.",
             size: 12,
             weight: .regular,
             color: Palette.muted
@@ -1048,7 +1162,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let titleStack = NSStackView()
         titleStack.orientation = .vertical
         titleStack.spacing = 4
-        titleStack.addArrangedSubview(makeLabel("Image Compressor", size: 21, weight: .black, color: Palette.text))
+        titleStack.addArrangedSubview(makeLabel("Image & Video Compressor", size: 21, weight: .semibold, color: Palette.text))
         titleStack.addArrangedSubview(
             makeWrappingLabel(
                 "Everything stays local. Scroll through the queue and settings below, then run compression from here.",
@@ -1063,7 +1177,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         actionGroup.alignment = .trailing
         actionGroup.spacing = 5
         actionGroup.addArrangedSubview(compressButton)
-        actionGroup.addArrangedSubview(makeLabel("Primary action", size: 11, weight: .bold, color: Palette.subtle))
+        actionGroup.addArrangedSubview(makeLabel("Primary action", size: 11, weight: .medium, color: Palette.subtle))
 
         row.addArrangedSubview(titleStack)
         row.addArrangedSubview(NSView())
@@ -1100,7 +1214,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         topRow.spacing = 10
 
         topRow.addArrangedSubview(makeSymbolBadge(symbol: symbol, tint: tint))
-        topRow.addArrangedSubview(makeLabel(title.uppercased(), size: 11, weight: .bold, color: Palette.subtle))
+        topRow.addArrangedSubview(makeLabel(title.uppercased(), size: 11, weight: .medium, color: Palette.subtle))
         topRow.addArrangedSubview(NSView())
 
         stack.addArrangedSubview(topRow)
@@ -1327,7 +1441,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         tile.addSubview(stack)
 
         stack.addArrangedSubview(makeLabel(title, size: 11, weight: .semibold, color: Palette.muted))
-        stack.addArrangedSubview(makeLabel(value, size: 20, weight: .bold, color: Palette.text))
+        stack.addArrangedSubview(makeLabel(value, size: 20, weight: .semibold, color: Palette.text))
         stack.addArrangedSubview(makeLabel(detail, size: 11, weight: .regular, color: Palette.muted))
 
         NSLayoutConstraint.activate([
@@ -1471,7 +1585,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         titleRow.alignment = .centerY
         titleRow.spacing = 10
         titleRow.addArrangedSubview(makeSymbolBadge(symbol: symbol, tint: Palette.accent))
-        titleRow.addArrangedSubview(makeLabel(title, size: 19, weight: .bold, color: Palette.text))
+        titleRow.addArrangedSubview(makeLabel(title, size: 19, weight: .semibold, color: Palette.text))
         titleRow.addArrangedSubview(NSView())
 
         stack.addArrangedSubview(titleRow)
@@ -1491,7 +1605,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let group = NSStackView()
         group.orientation = .vertical
         group.spacing = 8
-        group.addArrangedSubview(makeLabel(label.uppercased(), size: 11, weight: .bold, color: Palette.subtle))
+        group.addArrangedSubview(makeLabel(label.uppercased(), size: 11, weight: .medium, color: Palette.subtle))
         group.addArrangedSubview(control)
         return group
     }
@@ -1558,13 +1672,39 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         selectedFiles = selectedFiles.enumerated().filter { !indexes.contains($0.offset) }.map(\.element)
         refreshQueue()
         statusLabel.stringValue = "Removed the selected item(s) from the queue."
+        saveSessionState()
     }
 
     @objc func clearAll() {
         selectedFiles.removeAll()
         refreshQueue()
         resetBatchProgress()
+        saveSessionState()
         statusLabel.stringValue = "Queue cleared. Add new files whenever you are ready."
+    }
+
+
+    private func saveSessionState() {
+        let payload: [String: Any] = [
+            "files": selectedFiles.map { $0.path },
+            "maxSize": maxSizeField.stringValue,
+            "mode": saveModePopup.titleOfSelectedItem ?? "same-name",
+            "output": outputFolderField.stringValue
+        ]
+        UserDefaults.standard.set(payload, forKey: sessionStateKey)
+    }
+
+    private func restoreSessionState() {
+        guard let payload = UserDefaults.standard.dictionary(forKey: sessionStateKey) else { return }
+        if let files = payload["files"] as? [String] {
+            let urls = files.map { URL(fileURLWithPath: $0) }.filter { FileManager.default.fileExists(atPath: $0.path) }
+            addInputURLs(urls)
+        }
+        if let max = payload["maxSize"] as? String { maxSizeField.stringValue = max }
+        if let mode = payload["mode"] as? String { saveModePopup.selectItem(withTitle: mode) }
+        if let out = payload["output"] as? String { outputFolderField.stringValue = out }
+        updateSaveModeUI()
+        updateDashboard()
     }
 
     @objc func reloadSession() {
@@ -1917,6 +2057,39 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         NSWorkspace.shared.activateFileViewerSelecting([selectedFiles[row]])
     }
 
+
+    private func recommendedWorkerCount(for files: [URL]) -> Int {
+        guard !files.isEmpty else { return 1 }
+        let sizes = files.compactMap { try? $0.resourceValues(forKeys: [.fileSizeKey]).fileSize }.map(Int64.init)
+        guard !sizes.isEmpty else { return max(1, min(files.count, 8)) }
+        let total = sizes.reduce(0, +)
+        let avgMB = Double(total) / Double(sizes.count) / (1024 * 1024)
+        let cpu = ProcessInfo.processInfo.activeProcessorCount
+        let cap: Int
+        if avgMB >= 40 { cap = 2 }
+        else if avgMB >= 25 { cap = 3 }
+        else if avgMB >= 12 { cap = 4 }
+        else if avgMB >= 6 { cap = 6 }
+        else { cap = 8 }
+        return max(1, min(files.count, min(cpu, cap)))
+    }
+
+    private func queueStatusKey(_ url: URL) -> String {
+        url.standardizedFileURL.path
+    }
+
+    private func setFileStatus(_ url: URL, _ status: QueueFileStatus) {
+        fileStates[queueStatusKey(url), default: QueueFileState()].status = status
+        DispatchQueue.main.async { [weak self] in self?.tableView.reloadData() }
+    }
+
+    private func parseStatusFromLines(_ lines: [String]) -> QueueFileStatus {
+        if lines.contains(where: { $0.contains("[ERROR]") }) { return .failed }
+        if lines.contains(where: { $0.contains("[BEST EFFORT]") }) { return .bestEffort }
+        if lines.contains(where: { $0.contains("[UNCHANGED]") }) { return .skipped }
+        return .done
+    }
+
     @objc private func saveModeChanged() {
         updateSaveModeUI()
         updateDashboard()
@@ -1953,6 +2126,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         statusLabel.stringValue = "Compressing your images in ultra-fast batch mode..."
 
         let files = selectedFiles
+        compressionRunStartedAt = Date()
+        for f in files { setFileStatus(f, .queued) }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
 
@@ -1962,7 +2137,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             var outputFolder = resolvedSettings.outputFolder
             let lock = NSLock()
             let group = DispatchGroup()
-            let workerCount = max(1, min(files.count, 50))
+            let workerCount = self.recommendedWorkerCount(for: files)
             let semaphore = DispatchSemaphore(value: workerCount)
 
             for fileURL in files {
@@ -1974,7 +2149,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                 group.enter()
 
                 DispatchQueue.global(qos: .userInitiated).async {
+                    self.setFileStatus(fileURL, .processing)
                     let result = self.runCompression(fileURL: fileURL, settings: resolvedSettings)
+                    self.setFileStatus(fileURL, self.parseStatusFromLines(result.lines))
 
                     lock.lock()
                     warningCount += result.bestEffort ? 1 : 0
@@ -1985,6 +2162,16 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                         outputFolder = fileURL.deletingLastPathComponent()
                     }
                     self.queueBatchUIUpdate(lines: result.lines, completed: completed, total: files.count)
+                    if let started = self.compressionRunStartedAt {
+                        let elapsed = max(Date().timeIntervalSince(started), 0.001)
+                        let rate = Double(completed) / elapsed
+                        let remaining = max(files.count - completed, 0)
+                        let eta = rate > 0 ? Double(remaining) / rate : 0
+                        let etaText = String(format: "%.0fs", eta)
+                        DispatchQueue.main.async { [weak self] in
+                            self?.statusLabel.stringValue = "Compressing: \(completed)/\(files.count) done | \(String(format: "%.2f", rate)) files/s | ETA \(etaText)"
+                        }
+                    }
                     lock.unlock()
 
                     semaphore.signal()
@@ -2019,6 +2206,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                 if let folder = outputFolder {
                     self.appendLog("Output folder: \(folder.path)")
                 }
+                self.sendCompletionNotification(summary)
             }
         }
     }
@@ -2099,6 +2287,26 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         ])
         process.arguments = arguments
 
+        if settings.nameMode == "same-name",
+           let outputFolder = settings.outputFolder,
+           let srcDate = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
+           let srcDate {
+            let base = fileURL.deletingPathExtension().lastPathComponent
+            let candidates = ["webp", "jpg", "jpeg", "png"].map { outputFolder.appendingPathComponent(base).appendingPathExtension($0) }
+            let newestExisting = candidates
+                .filter { FileManager.default.fileExists(atPath: $0.path) }
+                .compactMap { url in
+                    (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate).map { (url, $0) }
+                }
+                .max { $0.1 < $1.1 }
+
+            if let (existingURL, outDate) = newestExisting, outDate >= srcDate {
+                let line = "[UNCHANGED] \(fileURL.lastPathComponent) already has a newer output (\(existingURL.lastPathComponent)). Skipped."
+                logger.write(line)
+                return CompressionRunResult(lines: [line], hadError: false, bestEffort: false)
+            }
+        }
+
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         process.standardOutput = outputPipe
@@ -2112,13 +2320,24 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             )
         }
 
-        do {
-            try process.run()
-            registerCompressionProcess(process)
-            process.waitUntilExit()
-            unregisterCompressionProcess(process)
-        } catch {
-            unregisterCompressionProcess(process)
+        var launchError: Error?
+        for attempt in 1...2 {
+            do {
+                try process.run()
+                registerCompressionProcess(process)
+                process.waitUntilExit()
+                unregisterCompressionProcess(process)
+                launchError = nil
+                break
+            } catch {
+                unregisterCompressionProcess(process)
+                launchError = error
+                if attempt == 1 {
+                    Thread.sleep(forTimeInterval: 0.15)
+                }
+            }
+        }
+        if let error = launchError {
             let line = "[ERROR] \(fileURL.lastPathComponent) | \(error.localizedDescription)"
             logger.write(line)
             return CompressionRunResult(lines: [line], hadError: true, bestEffort: false)
@@ -2190,10 +2409,15 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         }
 
         previewWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55, execute: workItem)
     }
 
     private func renderPreview(fileURL: URL, maxSize: String, quality: Int, requestID: UUID) {
+        let cacheKey = "\(fileURL.path)|\(maxSize)|\(quality)"
+        if let cached = previewCache[cacheKey] {
+            updatePreviewIfCurrent(requestID: requestID, image: NSImage(data: cached.imageData), outputText: cached.outputText, status: cached.status)
+            return
+        }
         guard
             let resourceURL = Bundle.main.resourceURL,
             FileManager.default.fileExists(atPath: resourceURL.appendingPathComponent("runtime/compress_image.py").path)
@@ -2267,9 +2491,12 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let outputImage = outputData.flatMap(NSImage.init(data:))
         let originalSize = fileSizeText(fileURL)
         let outputSize = outputURL.map(fileSizeText) ?? "n/a"
-        let outputText = "\(quality)% -> \(outputSize)"
+        let outputText = "Split preview | \(quality)% -> \(outputSize)"
         let status = "\(fileURL.lastPathComponent): \(originalSize) -> \(outputSize). \(statusLine)"
 
+        if let data = outputData {
+            previewCache[cacheKey] = PreviewCacheEntry(imageData: data, outputText: outputText, status: status)
+        }
         updatePreviewIfCurrent(requestID: requestID, image: outputImage, outputText: outputText, status: status)
     }
 
@@ -2311,6 +2538,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                 if !seen.contains(key) {
                     selectedFiles.append(file)
                     seen.insert(key)
+                    fileStates[key] = QueueFileState(status: .queued)
                     added += 1
                 }
             }
@@ -2319,6 +2547,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         refreshQueue()
         if added > 0 {
             statusLabel.stringValue = "Added \(added) file(s) to the queue."
+            saveSessionState()
         } else {
             statusLabel.stringValue = "No supported image files were found in that selection."
         }
@@ -2358,6 +2587,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     private func refreshQueue() {
         selectedFiles.sort { $0.lastPathComponent.localizedCaseInsensitiveCompare($1.lastPathComponent) == .orderedAscending }
+        let live = Set(selectedFiles.map { queueStatusKey($0) })
+        fileStates = fileStates.filter { live.contains($0.key) }
         tableView.reloadData()
         updateDashboard()
         schedulePreviewUpdate()
@@ -2389,14 +2620,11 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         outputDetailLabel.stringValue = "best extension"
 
         switch maxSizeField.stringValue.lowercased() {
-        case "150kb":
-            targetPresetControl.selectedSegment = 0
-        case "300kb":
-            targetPresetControl.selectedSegment = 1
-        case "500kb":
-            targetPresetControl.selectedSegment = 2
-        default:
-            targetPresetControl.selectedSegment = -1
+        case "150kb": targetPresetControl.selectedSegment = 0
+        case "300kb": targetPresetControl.selectedSegment = 1
+        case "500kb": targetPresetControl.selectedSegment = 2
+        case "2mb": targetPresetControl.selectedSegment = 3
+        default: targetPresetControl.selectedSegment = -1
         }
     }
 
@@ -2556,6 +2784,41 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         }
     }
 
+
+    func startupDiagnosticsReport() -> String? {
+        guard let resourceURL = Bundle.main.resourceURL else {
+            return "[DIAG] Missing bundle resource URL."
+        }
+        let runtimeURL = resourceURL.appendingPathComponent("runtime", isDirectory: true)
+        let imageScript = runtimeURL.appendingPathComponent("compress_image.py").path
+        let videoScript = runtimeURL.appendingPathComponent("compress_video.py").path
+        let py3 = runtimeURL.appendingPathComponent(".venv/bin/python3").path
+        let python = runtimeURL.appendingPathComponent(".venv/bin/python").path
+        let checks = [
+            ("runtime folder", FileManager.default.fileExists(atPath: runtimeURL.path)),
+            ("compress_image.py", FileManager.default.fileExists(atPath: imageScript)),
+            ("compress_video.py", FileManager.default.fileExists(atPath: videoScript)),
+            ("venv python3", FileManager.default.fileExists(atPath: py3) || FileManager.default.fileExists(atPath: python)),
+        ]
+        let parts = checks.map { "\($0.0): \($0.1 ? "OK" : "MISSING")" }
+        return "[DIAG] " + parts.joined(separator: " | ") + " | log: \(logger.currentLogPath)"
+    }
+
+    func setStartupStatus(_ message: String) {
+        statusLabel.stringValue = message
+        appendLog(message)
+    }
+
+    private func sendCompletionNotification(_ message: String) {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        let content = UNMutableNotificationContent()
+        content.title = "Image Compressor"
+        content.body = message
+        let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        center.add(req, withCompletionHandler: nil)
+    }
+
     private func showAlert(title: String, message: String) {
         let alert = NSAlert()
         alert.alertStyle = .warning
@@ -2599,7 +2862,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let url = selectedFiles[row]
         let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
-        label.stringValue = "\(url.lastPathComponent) | \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file)) | \(url.deletingLastPathComponent().path)"
+        let status = fileStates[queueStatusKey(url)]?.status.rawValue ?? QueueFileStatus.queued.rawValue
+        label.stringValue = "[\(status)] \(url.lastPathComponent) | \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file)) | \(url.deletingLastPathComponent().path)"
         return label.superview
     }
 }
@@ -2607,13 +2871,17 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 private func makeLabel(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor) -> NSTextField {
     let label = NSTextField(labelWithString: text)
     label.translatesAutoresizingMaskIntoConstraints = false
-    label.font = NSFont.systemFont(ofSize: size, weight: weight)
+    label.font = premiumFont(size: size, weight: weight)
     label.textColor = color
     label.backgroundColor = .clear
     label.isBezeled = false
     label.drawsBackground = false
     label.lineBreakMode = .byTruncatingTail
     return label
+}
+
+private func premiumFont(size: CGFloat, weight: NSFont.Weight) -> NSFont {
+    NSFont.systemFont(ofSize: size, weight: weight)
 }
 
 private func makeSymbolImage(_ symbolName: String, pointSize: CGFloat) -> NSImage? {
@@ -2629,11 +2897,15 @@ private func makeSymbolBadge(symbol: String, tint: NSColor) -> NSView {
     badge.blendingMode = .withinWindow
     badge.state = .active
     badge.wantsLayer = true
-    badge.layer?.backgroundColor = tint.withAlphaComponent(0.14).cgColor
-    badge.layer?.cornerRadius = 18
+    badge.layer?.backgroundColor = tint.withAlphaComponent(0.12).cgColor
+    badge.layer?.cornerRadius = 19
     badge.layer?.cornerCurve = .continuous
     badge.layer?.borderWidth = 1
-    badge.layer?.borderColor = NSColor.white.withAlphaComponent(0.24).cgColor
+    badge.layer?.borderColor = NSColor.white.withAlphaComponent(0.20).cgColor
+    badge.layer?.shadowColor = tint.withAlphaComponent(0.36).cgColor
+    badge.layer?.shadowOpacity = 1
+    badge.layer?.shadowOffset = .zero
+    badge.layer?.shadowRadius = 10
 
     let icon = NSImageView()
     icon.translatesAutoresizingMaskIntoConstraints = false
@@ -2642,8 +2914,8 @@ private func makeSymbolBadge(symbol: String, tint: NSColor) -> NSView {
     badge.addSubview(icon)
 
     NSLayoutConstraint.activate([
-        badge.widthAnchor.constraint(equalToConstant: 36),
-        badge.heightAnchor.constraint(equalToConstant: 36),
+        badge.widthAnchor.constraint(equalToConstant: 38),
+        badge.heightAnchor.constraint(equalToConstant: 38),
         icon.centerXAnchor.constraint(equalTo: badge.centerXAnchor),
         icon.centerYAnchor.constraint(equalTo: badge.centerYAnchor),
     ])
@@ -2670,7 +2942,7 @@ private func makeHighlightPill(symbol: String, text: String) -> NSView {
 private func makeWrappingLabel(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor) -> NSTextField {
     let label = NSTextField(wrappingLabelWithString: text)
     label.translatesAutoresizingMaskIntoConstraints = false
-    label.font = NSFont.systemFont(ofSize: size, weight: weight)
+    label.font = premiumFont(size: size, weight: weight)
     label.textColor = color
     label.maximumNumberOfLines = 0
     return label
@@ -2679,13 +2951,13 @@ private func makeWrappingLabel(_ text: String, size: CGFloat, weight: NSFont.Wei
 private func makeBadgeLabel(_ text: String) -> NSTextField {
     let label = NSTextField(labelWithString: text)
     label.translatesAutoresizingMaskIntoConstraints = false
-    label.font = NSFont.systemFont(ofSize: 11, weight: .bold)
-    label.textColor = Palette.accentBright
+    label.font = premiumFont(size: 11, weight: .medium)
+    label.textColor = Palette.champagne
     label.wantsLayer = true
-    label.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.10).cgColor
+    label.layer?.backgroundColor = Palette.champagne.withAlphaComponent(0.10).cgColor
     label.layer?.cornerRadius = 999
     label.layer?.borderWidth = 1
-    label.layer?.borderColor = NSColor.white.withAlphaComponent(0.22).cgColor
+    label.layer?.borderColor = Palette.champagne.withAlphaComponent(0.25).cgColor
     label.alignment = .center
     label.cell?.usesSingleLineMode = true
     label.setContentHuggingPriority(.required, for: .horizontal)
@@ -2698,14 +2970,18 @@ private func styleSecondaryButton(_ button: NSButton) {
     button.translatesAutoresizingMaskIntoConstraints = false
     button.isBordered = false
     button.bezelStyle = .regularSquare
-    button.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+    button.font = premiumFont(size: 13, weight: .semibold)
     button.wantsLayer = true
-    button.layer?.backgroundColor = Palette.pill.cgColor
-    button.layer?.cornerRadius = 18
+    button.layer?.backgroundColor = Palette.secondaryButton.cgColor
+    button.layer?.cornerRadius = 20
     button.layer?.cornerCurve = .continuous
-    button.layer?.borderWidth = 1
-    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.24).cgColor
-    button.contentTintColor = Palette.text
+    button.layer?.borderWidth = 1.15
+    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.26).cgColor
+    button.layer?.shadowColor = NSColor.black.withAlphaComponent(0.22).cgColor
+    button.layer?.shadowOpacity = 1
+    button.layer?.shadowOffset = CGSize(width: 0, height: -8)
+    button.layer?.shadowRadius = 14
+    button.contentTintColor = Palette.secondaryButtonText
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
     button.heightAnchor.constraint(equalToConstant: 42).isActive = true
@@ -2715,35 +2991,39 @@ private func stylePrimaryButton(_ button: NSButton) {
     button.translatesAutoresizingMaskIntoConstraints = false
     button.isBordered = false
     button.bezelStyle = .regularSquare
-    button.font = NSFont.systemFont(ofSize: 13, weight: .bold)
+    button.font = premiumFont(size: 13, weight: .semibold)
     button.wantsLayer = true
-    button.layer?.backgroundColor = Palette.accent.withAlphaComponent(0.78).cgColor
-    button.layer?.cornerRadius = 20
+    button.layer?.backgroundColor = Palette.primaryButton.cgColor
+    button.layer?.cornerRadius = 24
     button.layer?.cornerCurve = .continuous
-    button.layer?.borderWidth = 1
-    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.30).cgColor
-    button.layer?.shadowColor = Palette.accentBright.withAlphaComponent(0.48).cgColor
+    button.layer?.borderWidth = 1.2
+    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.40).cgColor
+    button.layer?.shadowColor = Palette.primaryButtonPressed.withAlphaComponent(0.58).cgColor
     button.layer?.shadowOpacity = 1
     button.layer?.shadowOffset = .zero
-    button.layer?.shadowRadius = 18
+    button.layer?.shadowRadius = 24
     button.contentTintColor = NSColor.white
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
-    button.heightAnchor.constraint(equalToConstant: 46).isActive = true
+    button.heightAnchor.constraint(equalToConstant: 50).isActive = true
 }
 
 private func styleDangerButton(_ button: NSButton) {
     button.translatesAutoresizingMaskIntoConstraints = false
     button.isBordered = false
     button.bezelStyle = .regularSquare
-    button.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+    button.font = premiumFont(size: 13, weight: .semibold)
     button.wantsLayer = true
-    button.layer?.backgroundColor = Palette.danger.withAlphaComponent(0.16).cgColor
-    button.layer?.cornerRadius = 18
+    button.layer?.backgroundColor = Palette.dangerButton.cgColor
+    button.layer?.cornerRadius = 20
     button.layer?.cornerCurve = .continuous
-    button.layer?.borderWidth = 1
-    button.layer?.borderColor = Palette.danger.withAlphaComponent(0.25).cgColor
-    button.contentTintColor = Palette.danger
+    button.layer?.borderWidth = 1.1
+    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.28).cgColor
+    button.layer?.shadowColor = Palette.dangerButton.withAlphaComponent(0.52).cgColor
+    button.layer?.shadowOpacity = 1
+    button.layer?.shadowOffset = CGSize(width: 0, height: -6)
+    button.layer?.shadowRadius = 14
+    button.contentTintColor = NSColor.white
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
     button.heightAnchor.constraint(equalToConstant: 42).isActive = true
@@ -2751,11 +3031,11 @@ private func styleDangerButton(_ button: NSButton) {
 
 private func stylePopup(_ popup: NSPopUpButton) {
     popup.translatesAutoresizingMaskIntoConstraints = false
-    popup.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+    popup.font = premiumFont(size: 13, weight: .semibold)
     popup.contentTintColor = Palette.text
     popup.wantsLayer = true
     popup.layer?.backgroundColor = Palette.pill.cgColor
-    popup.layer?.cornerRadius = 18
+    popup.layer?.cornerRadius = 20
     popup.layer?.cornerCurve = .continuous
     popup.layer?.borderWidth = 1
     popup.layer?.borderColor = Palette.border.cgColor
