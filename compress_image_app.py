@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import threading
 import tkinter as tk
+from datetime import datetime, timedelta
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from urllib.parse import unquote, urlparse
@@ -48,6 +50,9 @@ PALETTE = {
 }
 
 FONT_FAMILY = "Helvetica Neue"
+APP_SESSION_PATH = Path.home() / "Library" / "Application Support" / "ImageCompressor" / "session.json"
+APP_LOG_DIR = Path.home() / "Library" / "Logs" / "ImageCompressorTk"
+PRESET_MAP = {"WhatsApp": "150kb", "Email": "300kb", "Web": "500kb", "Archive": "2mb"}
 
 
 class CompressorApp:
@@ -74,6 +79,7 @@ class CompressorApp:
         self.mode_card_var = tk.StringVar()
         self.file_hint_var = tk.StringVar()
         self.is_running = False
+        self.current_log_file = self._prepare_log_file()
 
         self.style = ttk.Style(self.root)
         self._configure_style()
@@ -86,7 +92,21 @@ class CompressorApp:
         self._update_save_mode_ui()
         self._refresh_file_list()
         self._append_log("Ready. Add files or folders to begin.")
+        self._restore_session_prompted()
         self._schedule_window_activation()
+
+    def _prepare_log_file(self) -> Path:
+        APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        cutoff = datetime.now() - timedelta(days=30)
+        for p in APP_LOG_DIR.glob("run-*.log"):
+            try:
+                if datetime.fromtimestamp(p.stat().st_mtime) < cutoff:
+                    p.unlink(missing_ok=True)
+            except OSError:
+                pass
+        path = APP_LOG_DIR / f"run-{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+        path.touch(exist_ok=True)
+        return path
 
     def _configure_style(self) -> None:
         try:
@@ -357,10 +377,10 @@ class CompressorApp:
 
         preset_row = tk.Frame(card, bg=PALETTE["card"])
         preset_row.grid(row=3, column=1, sticky="w", pady=(0, 10))
-        for index, value in enumerate(("150kb", "300kb", "500kb")):
+        for index, (label, value) in enumerate(PRESET_MAP.items()):
             self._make_button(
                 preset_row,
-                value.upper(),
+                label,
                 command=lambda chosen=value: self.max_size_var.set(chosen),
                 kind="subtle",
             ).grid(row=0, column=index, padx=(0, 8))
@@ -911,6 +931,11 @@ class CompressorApp:
         self.log_text.insert(tk.END, text + "\n")
         self.log_text.see(tk.END)
         self.log_text.configure(state="disabled")
+        try:
+            with self.current_log_file.open("a", encoding="utf-8") as handle:
+                handle.write(f"{datetime.now().isoformat()} {text}\n")
+        except OSError:
+            pass
 
     def _schedule_window_activation(self) -> None:
         self.root.after(50, self._activate_window)
@@ -1001,6 +1026,7 @@ class CompressorApp:
 
         self.last_output_folder = None
         self.open_output_button.config(state="disabled")
+        self._save_session()
         self._append_log("")
         self._append_log(f"Starting compression for {len(files)} file(s)...")
         self.status_var.set("Compressing your images now...")
@@ -1067,6 +1093,7 @@ class CompressorApp:
             self.last_output_folder = folder_to_open
             self.open_output_button.config(state="normal")
             self._append_log(f"Output folder: {folder_to_open}")
+        self._notify_completion(summary)
 
     def _open_output_folder(self) -> None:
         if self.last_output_folder is None:
@@ -1075,6 +1102,46 @@ class CompressorApp:
             subprocess.Popen(["open", str(self.last_output_folder)])
         except Exception as error:
             self._append_log(f"[ERROR] Could not open output folder: {error}")
+
+    def _notify_completion(self, summary: str) -> None:
+        try:
+            subprocess.Popen(
+                ["osascript", "-e", f'display notification "{summary}" with title "Image Compressor"'],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            pass
+
+    def _save_session(self) -> None:
+        APP_SESSION_PATH.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "inputs": [str(path) for path in self.selected_inputs],
+            "max_size": self.max_size_var.get(),
+            "format": self.format_var.get(),
+            "name_mode": self.name_mode_var.get(),
+            "suffix": self.suffix_var.get(),
+            "output_dir": self.output_dir_var.get(),
+        }
+        APP_SESSION_PATH.write_text(json.dumps(payload), encoding="utf-8")
+
+    def _restore_session_prompted(self) -> None:
+        if not APP_SESSION_PATH.exists():
+            return
+        if not messagebox.askyesno("Restore Session", "Restore your previous queue and settings?"):
+            return
+        try:
+            payload = json.loads(APP_SESSION_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            return
+        self.selected_inputs = [Path(p) for p in payload.get("inputs", []) if Path(p).exists()]
+        self.max_size_var.set(payload.get("max_size", "150kb"))
+        self.format_var.set(payload.get("format", "auto"))
+        self.name_mode_var.set(payload.get("name_mode", "suffix"))
+        self.suffix_var.set(payload.get("suffix", "-compressed"))
+        self.output_dir_var.set(payload.get("output_dir", ""))
+        self._update_save_mode_ui()
+        self._refresh_file_list()
 
     def run(self) -> None:
         self.root.mainloop()
