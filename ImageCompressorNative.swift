@@ -49,7 +49,6 @@ private final class AppLogger {
         if !FileManager.default.fileExists(atPath: logURL.path) {
             FileManager.default.createFile(atPath: logURL.path, contents: nil)
         }
-        cleanupOldLogs(in: logsDir, keepDays: 30)
 
         guard let handle = try? FileHandle(forWritingTo: logURL) else {
             return
@@ -2289,8 +2288,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         if settings.nameMode == "same-name",
            let outputFolder = settings.outputFolder,
-           let srcDate = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
-           let srcDate {
+           let srcDate = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate {
             let base = fileURL.deletingPathExtension().lastPathComponent
             let candidates = ["webp", "jpg", "jpeg", "png"].map { outputFolder.appendingPathComponent(base).appendingPathExtension($0) }
             let newestExisting = candidates
@@ -2801,7 +2799,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             ("venv python3", FileManager.default.fileExists(atPath: py3) || FileManager.default.fileExists(atPath: python)),
         ]
         let parts = checks.map { "\($0.0): \($0.1 ? "OK" : "MISSING")" }
-        return "[DIAG] " + parts.joined(separator: " | ") + " | log: \(logger.currentLogPath)"
+        return "[DIAG] " + parts.joined(separator: " | ") + " | log: \(Path.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Image Compressor.log").path)"
     }
 
     func setStartupStatus(_ message: String) {
