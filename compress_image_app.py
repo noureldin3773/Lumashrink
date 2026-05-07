@@ -31,25 +31,25 @@ except ModuleNotFoundError:
 
 
 PALETTE = {
-    "bg": "#2B3038",
-    "card": "#313741",
-    "soft": "#243244",
-    "soft_alt": "#39414D",
-    "accent": "#65B8FF",
-    "accent_dark": "#3F95F0",
-    "text": "#F8FAFC",
-    "muted": "#CBD5E1",
-    "line": "#475062",
-    "success": "#34D399",
-    "warning": "#FBBF24",
-    "danger": "#FCA5A5",
-    "log_bg": "#141A23",
-    "log_fg": "#D8F3FF",
-    "hint_bg": "#4C3F16",
-    "note_bg": "#1D2634",
+    "bg": "#F7F6F3",
+    "card": "#FFFFFF",
+    "soft": "#F1EFEA",
+    "soft_alt": "#FBFBFA",
+    "accent": "#111111",
+    "accent_dark": "#2F3437",
+    "text": "#111111",
+    "muted": "#787774",
+    "line": "#EAEAEA",
+    "success": "#346538",
+    "warning": "#956400",
+    "danger": "#9F2F2D",
+    "log_bg": "#FBFBFA",
+    "log_fg": "#2F3437",
+    "hint_bg": "#FBF3DB",
+    "note_bg": "#EDF3EC",
 }
 
-FONT_FAMILY = "Helvetica Neue"
+FONT_FAMILY = "SF Pro Display"
 APP_SESSION_PATH = Path.home() / "Library" / "Application Support" / "ImageCompressor" / "session.json"
 APP_LOG_DIR = Path.home() / "Library" / "Logs" / "ImageCompressorTk"
 PRESET_MAP = {"WhatsApp": "150kb", "Email": "300kb", "Web": "500kb", "Archive": "2mb"}
@@ -181,21 +181,15 @@ class CompressorApp:
         self._build_footer(shell)
 
     def _build_hero(self, parent: tk.Frame) -> None:
-        hero = tk.Frame(
-            parent,
-            bg=PALETTE["accent"],
-            padx=24,
-            pady=22,
-            highlightthickness=0,
-        )
+        hero = tk.Frame(parent, bg=PALETTE["card"], padx=24, pady=22, highlightthickness=1, highlightbackground=PALETTE["line"])
         hero.grid(row=0, column=0, sticky="ew", pady=(0, 14))
         hero.columnconfigure(0, weight=1)
 
         badge = tk.Label(
             hero,
             text="Local app | Best quality under target",
-            bg=PALETTE["soft"],
-            fg=PALETTE["accent"],
+            bg="#E1F3FE",
+            fg="#1F6C9F",
             font=(FONT_FAMILY, 10, "bold"),
             padx=12,
             pady=6,
@@ -204,9 +198,9 @@ class CompressorApp:
 
         title = tk.Label(
             hero,
-            text="Compress big images into lightweight files you can actually share",
-            bg=PALETTE["accent"],
-            fg="white",
+            text="Image Compression Workspace",
+            bg=PALETTE["card"],
+            fg=PALETTE["text"],
             font=(FONT_FAMILY, 22, "bold"),
             anchor="w",
             justify="left",
@@ -220,8 +214,8 @@ class CompressorApp:
                 "A target like 150kb is aggressive, so this aims for the best visual result "
                 "under the limit while keeping the whole workflow local."
             ),
-            bg=PALETTE["accent"],
-            fg="#E0F2FE",
+            bg=PALETTE["card"],
+            fg=PALETTE["muted"],
             font=(FONT_FAMILY, 11),
             wraplength=1080,
             justify="left",
@@ -513,8 +507,8 @@ class CompressorApp:
             height=12,
             bg=PALETTE["log_bg"],
             fg=PALETTE["text"],
-            selectbackground=PALETTE["accent"],
-            selectforeground="white",
+            selectbackground="#E1F3FE",
+            selectforeground=PALETTE["text"],
             borderwidth=0,
             highlightthickness=0,
             activestyle="none",
@@ -550,7 +544,7 @@ class CompressorApp:
             state="disabled",
             bg=PALETTE["log_bg"],
             fg=PALETTE["log_fg"],
-            insertbackground="white",
+            insertbackground=PALETTE["text"],
             relief="flat",
             borderwidth=0,
             highlightthickness=0,
@@ -713,21 +707,21 @@ class CompressorApp:
                 "activeforeground": "white",
             },
             "secondary": {
-                "bg": "#3D4552",
+                "bg": "#F1EFEA",
                 "fg": PALETTE["text"],
-                "activebackground": "#475164",
+                "activebackground": "#EAE7DF",
                 "activeforeground": PALETTE["text"],
             },
             "subtle": {
-                "bg": "#404754",
+                "bg": "#FBFBFA",
                 "fg": PALETTE["text"],
-                "activebackground": "#4B5464",
+                "activebackground": "#F1EFEA",
                 "activeforeground": PALETTE["text"],
             },
             "danger": {
-                "bg": "#5B3840",
+                "bg": "#FDEBEC",
                 "fg": PALETTE["danger"],
-                "activebackground": "#6A3E48",
+                "activebackground": "#F7DADC",
                 "activeforeground": PALETTE["danger"],
             },
         }
@@ -746,7 +740,9 @@ class CompressorApp:
             pady=pady,
             **colors,
         )
-
+        button.bind("<Return>", lambda _event: command())
+        button.bind("<space>", lambda _event: command())
+        return button
     def _choose_output_folder(self) -> None:
         selected = filedialog.askdirectory()
         if selected:
