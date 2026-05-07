@@ -38,17 +38,23 @@ private final class AppLogger {
     static let shared = AppLogger()
 
     private let logURL: URL = {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Logs/Image Compressor.log")
+        let logDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Logs/ImageCompressor", isDirectory: true)
+        try? FileManager.default.createDirectory(at: logDir, withIntermediateDirectories: true)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dated = logDir.appendingPathComponent("run-\(formatter.string(from: Date())).log")
+        if !FileManager.default.fileExists(atPath: dated.path) {
+            FileManager.default.createFile(atPath: dated.path, contents: nil)
+        }
+        return dated
     }()
 
     func write(_ message: String) {
         let timestamp = ISO8601DateFormatter().string(from: Date())
         let line = "[\(timestamp)] \(message)\n"
 
-        if !FileManager.default.fileExists(atPath: logURL.path) {
-            FileManager.default.createFile(atPath: logURL.path, contents: nil)
-        }
+        cleanupOldLogs(keepDays: 30)
 
         guard let handle = try? FileHandle(forWritingTo: logURL) else {
             return
@@ -57,6 +63,22 @@ private final class AppLogger {
         defer { try? handle.close() }
         _ = try? handle.seekToEnd()
         try? handle.write(contentsOf: Data(line.utf8))
+    }
+
+    private func cleanupOldLogs(keepDays: Int) {
+        guard let logDir = logURL.deletingLastPathComponent() as URL? else { return }
+        guard let urls = try? FileManager.default.contentsOfDirectory(
+            at: logDir,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else { return }
+        let cutoff = Date().addingTimeInterval(TimeInterval(-keepDays * 24 * 60 * 60))
+        for url in urls where url.pathExtension == "log" {
+            let mtime = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantFuture
+            if mtime < cutoff {
+                try? FileManager.default.removeItem(at: url)
+            }
+        }
     }
 }
 
@@ -847,7 +869,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         configureControls()
         refreshQueue()
         appendLog("Ready. Add files or folders to begin.")
-        restoreSessionState()
+        promptAndRestoreSessionState()
     }
 
     override func viewDidAppear() {
@@ -1704,6 +1726,19 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         if let out = payload["output"] as? String { outputFolderField.stringValue = out }
         updateSaveModeUI()
         updateDashboard()
+    }
+
+    private func promptAndRestoreSessionState() {
+        guard UserDefaults.standard.dictionary(forKey: sessionStateKey) != nil else { return }
+        let alert = NSAlert()
+        alert.alertStyle = .informational
+        alert.messageText = "Restore previous session?"
+        alert.informativeText = "Restore your previous queue and settings."
+        alert.addButton(withTitle: "Restore")
+        alert.addButton(withTitle: "Start Fresh")
+        if alert.runModal() == .alertFirstButtonReturn {
+            restoreSessionState()
+        }
     }
 
     @objc func reloadSession() {
