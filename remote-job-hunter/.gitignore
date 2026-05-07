@@ -1,7 +1,0 @@
-.env
-credentials.json
-__pycache__/
-*.pyc
-outputs/
-.DS_Store
-venv/
