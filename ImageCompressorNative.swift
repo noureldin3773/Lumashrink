@@ -2799,7 +2799,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             ("venv python3", FileManager.default.fileExists(atPath: py3) || FileManager.default.fileExists(atPath: python)),
         ]
         let parts = checks.map { "\($0.0): \($0.1 ? "OK" : "MISSING")" }
-        return "[DIAG] " + parts.joined(separator: " | ") + " | log: \(Path.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Image Compressor.log").path)"
+        return "[DIAG] " + parts.joined(separator: " | ") + " | log: \(FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Image Compressor.log").path)"
     }
 
     func setStartupStatus(_ message: String) {
