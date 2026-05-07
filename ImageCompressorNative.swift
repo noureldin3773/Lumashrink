@@ -353,6 +353,88 @@ private final class ExtensionDropZoneView: NSView {
     }
 }
 
+private final class VideoDropZoneView: NSView {
+    var onDrop: (([URL]) -> Void)?
+
+    private let titleLabel = makeLabel(
+        "Drop videos here",
+        size: 16,
+        weight: .bold,
+        color: Palette.text
+    )
+    private let subtitleLabel = makeWrappingLabel(
+        "Drop one or many videos, then compress them from the video block.",
+        size: 12,
+        weight: .regular,
+        color: Palette.muted
+    )
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+        wantsLayer = true
+        layer?.backgroundColor = Palette.overlay.cgColor
+        layer?.cornerRadius = 22
+        layer?.cornerCurve = .continuous
+        layer?.borderWidth = 1.5
+        layer?.borderColor = Palette.border.cgColor
+        registerForDraggedTypes([.fileURL])
+
+        let row = NSStackView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 12
+        addSubview(row)
+
+        row.addArrangedSubview(makeSymbolBadge(symbol: "video.fill.badge.plus", tint: Palette.rose))
+
+        let textStack = NSStackView()
+        textStack.orientation = .vertical
+        textStack.spacing = 4
+        textStack.addArrangedSubview(titleLabel)
+        textStack.addArrangedSubview(subtitleLabel)
+        row.addArrangedSubview(textStack)
+        row.addArrangedSubview(NSView())
+
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            row.topAnchor.constraint(equalTo: topAnchor, constant: 14),
+            row.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14),
+            heightAnchor.constraint(equalToConstant: 84)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        layer?.borderColor = Palette.rose.cgColor
+        layer?.backgroundColor = Palette.rose.withAlphaComponent(0.18).cgColor
+        return .copy
+    }
+
+    override func draggingExited(_ sender: NSDraggingInfo?) {
+        layer?.borderColor = Palette.border.cgColor
+        layer?.backgroundColor = Palette.overlay.cgColor
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        draggingExited(nil)
+        guard
+            let items = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self]),
+            let urls = items as? [URL]
+        else {
+            return false
+        }
+
+        onDrop?(urls)
+        return !urls.isEmpty
+    }
+}
+
 private struct CompressionSettings {
     let maxSize: String
     let outputFormat: String
@@ -579,7 +661,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         weight: .regular,
         color: Palette.muted
     )
-    private var videoFileURL: URL?
+    private var videoFileURLs: [URL] = []
     private let chooseVideoButton = NSButton(title: "Choose Video", target: nil, action: nil)
     private let compressVideoButton = NSButton(title: "Compress Video", target: nil, action: nil)
     private let videoFileField = StyledTextField(value: "No video selected")
@@ -664,7 +746,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         root.addArrangedSubview(extensionToolCard)
 
         let videoCompressionCard = buildVideoCompressionCard()
-        videoCompressionCard.heightAnchor.constraint(equalToConstant: 310).isActive = true
+        videoCompressionCard.heightAnchor.constraint(equalToConstant: 400).isActive = true
         root.addArrangedSubview(videoCompressionCard)
 
         let previewCard = buildPreviewCard()
@@ -1207,6 +1289,11 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let targetGroup = makeFormGroup(label: "Target size", control: videoTargetField)
         targetGroup.widthAnchor.constraint(equalToConstant: 150).isActive = true
 
+        let videoDropZone = VideoDropZoneView()
+        videoDropZone.onDrop = { [weak self] urls in
+            self?.setVideoFiles(urls)
+        }
+
         videoFileField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         chooseVideoButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         compressVideoButton.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -1216,6 +1303,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         controlRow.addArrangedSubview(targetGroup)
         controlRow.addArrangedSubview(compressVideoButton)
 
+        stack.addArrangedSubview(videoDropZone)
         stack.addArrangedSubview(controlRow)
         stack.addArrangedSubview(videoStatusLabel)
 
@@ -1646,13 +1734,30 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
+        panel.allowsMultipleSelection = true
         panel.allowedContentTypes = []
-        if panel.runModal() == .OK, let url = panel.url {
-            videoFileURL = url
-            videoFileField.stringValue = url.path
-            compressVideoButton.isEnabled = true
+        if panel.runModal() == .OK {
+            setVideoFiles(panel.urls)
+        }
+    }
 
+    private func setVideoFiles(_ urls: [URL]) {
+        let videoExtensions: Set<String> = ["mp4", "mov", "m4v", "webm", "avi", "mkv", "hevc", "h265"]
+        let fileURLs = urls.filter { url in
+            !url.hasDirectoryPath && videoExtensions.contains(url.pathExtension.lowercased())
+        }
+
+        guard !fileURLs.isEmpty else {
+            videoStatusLabel.stringValue = "Drop or choose video files only."
+            appendLog("Video block ignored a selection with no video files.")
+            return
+        }
+
+        videoFileURLs = fileURLs
+        compressVideoButton.isEnabled = true
+
+        if fileURLs.count == 1, let url = fileURLs.first {
+            videoFileField.stringValue = url.path
             let sizeText: String
             if let values = try? url.resourceValues(forKeys: [.fileSizeKey]), let size = values.fileSize {
                 sizeText = ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
@@ -1660,13 +1765,17 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                 sizeText = "selected"
             }
             videoStatusLabel.stringValue = "Ready to compress \(url.lastPathComponent) (\(sizeText)) to \(videoTargetField.stringValue)."
-            appendLog("Video block selected: \(url.lastPathComponent)")
+        } else {
+            videoFileField.stringValue = "\(fileURLs.count) videos selected"
+            videoStatusLabel.stringValue = "Ready to compress \(fileURLs.count) videos to \(videoTargetField.stringValue)."
         }
+
+        appendLog("Video block selected \(fileURLs.count) video file(s).")
     }
 
     @objc func startVideoCompression() {
-        guard let videoURL = videoFileURL else {
-            showAlert(title: "No video selected", message: "Choose a video before compressing.")
+        guard !videoFileURLs.isEmpty else {
+            showAlert(title: "No video selected", message: "Choose one or more videos before compressing.")
             return
         }
 
@@ -1701,58 +1810,81 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         compressVideoButton.isEnabled = false
         lastOutputFolder = nil
         openOutputButton.isEnabled = false
-        videoStatusLabel.stringValue = "Compressing video to \(targetSize)..."
+        let files = videoFileURLs
+        videoStatusLabel.stringValue = "Compressing \(files.count) video(s) to \(targetSize)..."
         appendLog("")
-        appendLog("Video block starting: \(videoURL.lastPathComponent)")
+        appendLog("Video block starting \(files.count) video file(s)...")
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: pythonPath)
-            process.currentDirectoryURL = runtimeURL
-            process.arguments = [scriptURL.path, videoURL.path, "-s", targetSize]
+            var succeededCount = 0
+            var failedCount = 0
+            var lastFolder: URL?
 
-            let outputPipe = Pipe()
-            let errorPipe = Pipe()
-            process.standardOutput = outputPipe
-            process.standardError = errorPipe
-
-            do {
-                try process.run()
-                process.waitUntilExit()
-            } catch {
+            for (index, videoURL) in files.enumerated() {
                 DispatchQueue.main.async {
-                    self?.chooseVideoButton.isEnabled = true
-                    self?.compressVideoButton.isEnabled = true
-                    self?.videoStatusLabel.stringValue = "Video compression could not start."
-                    self?.appendLog("[ERROR] Video block failed to start: \(error.localizedDescription)")
+                    self?.videoStatusLabel.stringValue = "Compressing video \(index + 1) of \(files.count): \(videoURL.lastPathComponent)"
+                    self?.appendLog("")
+                    self?.appendLog("Video block starting: \(videoURL.lastPathComponent)")
                 }
-                return
-            }
 
-            let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            let errorOutput = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-            let lines = (output + "\n" + errorOutput)
-                .split(separator: "\n")
-                .map(String.init)
-                .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-            let succeeded = process.terminationStatus == 0
+                let process = Process()
+                process.executableURL = URL(fileURLWithPath: pythonPath)
+                process.currentDirectoryURL = runtimeURL
+                process.arguments = [scriptURL.path, videoURL.path, "-s", targetSize]
+
+                let outputPipe = Pipe()
+                let errorPipe = Pipe()
+                process.standardOutput = outputPipe
+                process.standardError = errorPipe
+
+                do {
+                    try process.run()
+                    process.waitUntilExit()
+                } catch {
+                    failedCount += 1
+                    DispatchQueue.main.async {
+                        self?.appendLog("[ERROR] Video block failed to start for \(videoURL.lastPathComponent): \(error.localizedDescription)")
+                    }
+                    continue
+                }
+
+                let output = String(data: outputPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                let errorOutput = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+                let lines = (output + "\n" + errorOutput)
+                    .split(separator: "\n")
+                    .map(String.init)
+                    .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+                let succeeded = process.terminationStatus == 0
+
+                if succeeded {
+                    succeededCount += 1
+                    lastFolder = videoURL.deletingLastPathComponent()
+                } else {
+                    failedCount += 1
+                }
+
+                DispatchQueue.main.async {
+                    for line in lines {
+                        self?.appendLog(line)
+                    }
+                }
+            }
 
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.chooseVideoButton.isEnabled = true
                 self.compressVideoButton.isEnabled = true
-                for line in lines {
-                    self.appendLog(line)
+                if failedCount == 0 {
+                    self.videoStatusLabel.stringValue = "Video compression finished for \(succeededCount) video(s)."
+                } else {
+                    self.videoStatusLabel.stringValue = "Finished \(succeededCount) video(s), \(failedCount) failed. Review the log."
                 }
-                self.videoStatusLabel.stringValue = succeeded
-                    ? "Video compression finished. Check the same folder for the compressed video."
-                    : "Video compression failed. Review the log for details."
-                if succeeded {
-                    self.lastOutputFolder = videoURL.deletingLastPathComponent()
+                if let lastFolder {
+                    self.lastOutputFolder = lastFolder
                     self.openOutputButton.isEnabled = true
                 }
-                if !succeeded {
-                    self.showAlert(title: "Video compression failed", message: lines.last ?? "Review the log for details.")
+                if failedCount > 0 {
+                    self.showAlert(title: "Some videos failed", message: "Finished \(succeededCount) video(s), \(failedCount) failed. Review the log for details.")
                 }
             }
         }
