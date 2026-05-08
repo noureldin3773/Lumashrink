@@ -766,6 +766,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         color: Palette.muted
     )
     private weak var contentScrollView: NSScrollView?
+    private weak var headerCardView: NSView?
+    private weak var topBarCardView: NSView?
+    private var stagedContentViews: [NSView] = []
     private var controlsRowStack: NSStackView?
     private var bottomRowStack: NSStackView?
 
@@ -788,6 +791,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let topBar = buildTopBarCard()
         topBar.heightAnchor.constraint(equalToConstant: 82).isActive = true
+        topBarCardView = topBar
         shell.addArrangedSubview(topBar)
 
         let scrollView = NSScrollView()
@@ -827,6 +831,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         statRow.spacing = 14
         statRow.distribution = .fillEqually
         statRow.heightAnchor.constraint(equalToConstant: 128).isActive = true
+        stagedContentViews.append(statRow)
         root.addArrangedSubview(statRow)
 
         let controlsRow = NSStackView(views: [buildSourcesCard(), buildSettingsCard()])
@@ -835,14 +840,17 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         controlsRow.distribution = .fillEqually
         controlsRow.heightAnchor.constraint(equalToConstant: 340).isActive = true
         controlsRowStack = controlsRow
+        stagedContentViews.append(controlsRow)
         root.addArrangedSubview(controlsRow)
 
         let extensionToolCard = buildExtensionToolCard()
         extensionToolCard.heightAnchor.constraint(equalToConstant: 310).isActive = true
+        stagedContentViews.append(extensionToolCard)
         root.addArrangedSubview(extensionToolCard)
 
         let videoCompressionCard = buildVideoCompressionCard()
         videoCompressionCard.heightAnchor.constraint(equalToConstant: 400).isActive = true
+        stagedContentViews.append(videoCompressionCard)
         root.addArrangedSubview(videoCompressionCard)
 
         let previewCard = buildPreviewCard()
@@ -850,6 +858,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         previewHeightConstraint.isActive = true
         self.previewCard = previewCard
         self.previewHeightConstraint = previewHeightConstraint
+        stagedContentViews.append(previewCard)
         root.addArrangedSubview(previewCard)
 
         let bottomRow = NSStackView(views: [buildQueueCard(), buildLogCard()])
@@ -858,10 +867,12 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         bottomRow.distribution = .fillEqually
         bottomRow.setHuggingPriority(.defaultLow, for: .vertical)
         bottomRowStack = bottomRow
+        stagedContentViews.append(bottomRow)
         root.addArrangedSubview(bottomRow)
 
         let footer = buildFooterCard()
         footer.heightAnchor.constraint(equalToConstant: 72).isActive = true
+        stagedContentViews.append(footer)
         shell.addArrangedSubview(footer)
     }
 
@@ -875,10 +886,26 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     override func viewDidAppear() {
         super.viewDidAppear()
+        animateInitialEntrance()
         DispatchQueue.main.async { [weak self] in
             if let scrollView = self?.contentScrollView {
                 scrollView.contentView.scroll(to: .zero)
                 scrollView.reflectScrolledClipView(scrollView.contentView)
+            }
+        }
+    }
+
+    private func animateInitialEntrance() {
+        let ordered = stagedContentViews
+        for (index, view) in ordered.enumerated() {
+            view.alphaValue = 0
+            view.animator().alphaValue = 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + (Double(index) * 0.045)) {
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = 0.42
+                    context.timingFunction = CAMediaTimingFunction(controlPoints: 0.16, 1.0, 0.3, 1.0)
+                    view.animator().alphaValue = 1
+                }
             }
         }
     }
@@ -1104,6 +1131,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     private func buildHeaderCard() -> NSView {
         let card = GradientCardView(colors: [Palette.heroStart, Palette.heroEnd])
+        headerCardView = card
 
         let root = NSStackView()
         root.translatesAutoresizingMaskIntoConstraints = false
@@ -3032,6 +3060,8 @@ private func styleSecondaryButton(_ button: NSButton) {
     button.contentTintColor = Palette.secondaryButtonText
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
+    button.contentTintColor = Palette.secondaryButtonText
+    button.setButtonType(.momentaryPushIn)
     button.heightAnchor.constraint(equalToConstant: 46).isActive = true
 }
 
@@ -3053,6 +3083,7 @@ private func stylePrimaryButton(_ button: NSButton) {
     button.contentTintColor = NSColor.white
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
+    button.setButtonType(.momentaryPushIn)
     button.heightAnchor.constraint(equalToConstant: 52).isActive = true
 }
 
@@ -3074,6 +3105,7 @@ private func styleDangerButton(_ button: NSButton) {
     button.contentTintColor = NSColor.white
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
+    button.setButtonType(.momentaryPushIn)
     button.heightAnchor.constraint(equalToConstant: 46).isActive = true
 }
 
