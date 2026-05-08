@@ -769,6 +769,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private weak var contentScrollView: NSScrollView?
     private weak var headerCardView: NSView?
     private weak var topBarCardView: NSView?
+    private weak var imageWorkbenchView: NSView?
+    private weak var extensionSectionView: NSView?
+    private weak var videoSectionView: NSView?
     private var stagedContentViews: [NSView] = []
     private var controlsRowStack: NSStackView?
     private var bottomRowStack: NSStackView?
@@ -861,13 +864,21 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         workbenchRow.orientation = .horizontal
         workbenchRow.spacing = 18
         workbenchRow.distribution = .fillEqually
+        imageWorkbenchView = workbenchRow
         controlsRowStack = workbenchRow
         stagedContentViews.append(workbenchRow)
         root.addArrangedSubview(workbenchRow)
 
         let extensionCard = buildExtensionToolCard()
+        extensionSectionView = extensionCard
         stagedContentViews.append(extensionCard)
         root.addArrangedSubview(extensionCard)
+
+        let videoCard = buildVideoCompressionCard()
+        videoSectionView = videoCard
+        videoCard.isHidden = true
+        stagedContentViews.append(videoCard)
+        root.addArrangedSubview(videoCard)
 
         let bottomRow = NSStackView(views: [buildQueueCard(), buildLogCard()])
         bottomRow.orientation = .horizontal
@@ -1278,6 +1289,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         card.addSubview(row)
         mediaModeControl.segmentStyle = .capsule
         mediaModeControl.selectedSegment = 0
+        mediaModeControl.target = self
+        mediaModeControl.action = #selector(mediaModeChanged(_:))
         row.addArrangedSubview(makeLabel("Mode", size: 11, weight: .medium, color: Palette.subtle))
         row.addArrangedSubview(mediaModeControl)
         row.addArrangedSubview(NSView())
@@ -1288,6 +1301,13 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
         ])
         return card
+    }
+
+    @objc private func mediaModeChanged(_ sender: NSSegmentedControl) {
+        let videosMode = sender.selectedSegment == 1
+        imageWorkbenchView?.isHidden = videosMode
+        extensionSectionView?.isHidden = videosMode
+        videoSectionView?.isHidden = !videosMode
     }
 
     private func buildActionCard() -> NSView {
