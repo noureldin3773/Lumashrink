@@ -2363,25 +2363,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         ])
         process.arguments = arguments
 
-        if settings.nameMode == "same-name",
-           let outputFolder = settings.outputFolder,
-           let srcDate = try? fileURL.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate {
-            let base = fileURL.deletingPathExtension().lastPathComponent
-            let candidates = ["webp", "jpg", "jpeg", "png"].map { outputFolder.appendingPathComponent(base).appendingPathExtension($0) }
-            let newestExisting = candidates
-                .filter { FileManager.default.fileExists(atPath: $0.path) }
-                .compactMap { url in
-                    (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate).map { (url, $0) }
-                }
-                .max { $0.1 < $1.1 }
-
-            if let (existingURL, outDate) = newestExisting, outDate >= srcDate {
-                let line = "[UNCHANGED] \(fileURL.lastPathComponent) already has a newer output (\(existingURL.lastPathComponent)). Skipped."
-                logger.write(line)
-                return CompressionRunResult(lines: [line], hadError: false, bestEffort: false)
-            }
-        }
-
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         process.standardOutput = outputPipe
