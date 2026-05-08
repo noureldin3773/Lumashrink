@@ -89,7 +89,7 @@ private class CardView: NSVisualEffectView {
     init(background: NSColor = Palette.card) {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
-        material = .hudWindow
+        material = .underWindowBackground
         blendingMode = .withinWindow
         state = .active
         wantsLayer = true
@@ -191,6 +191,7 @@ private final class GradientCardView: CardView {
 
     init(colors: [NSColor]) {
         super.init(background: .clear)
+        material = .sidebar
         gradientLayer.colors = colors.map(\.cgColor)
         gradientLayer.startPoint = CGPoint(x: 0, y: 1)
         gradientLayer.endPoint = CGPoint(x: 1, y: 0)
@@ -3020,7 +3021,7 @@ private func styleSecondaryButton(_ button: NSButton) {
     button.font = premiumFont(size: 13, weight: .semibold)
     button.wantsLayer = true
     button.layer?.backgroundColor = Palette.secondaryButton.cgColor
-    button.layer?.cornerRadius = 20
+    button.layer?.cornerRadius = 10
     button.layer?.cornerCurve = .continuous
     button.layer?.borderWidth = 1.15
     button.layer?.borderColor = NSColor.white.withAlphaComponent(0.26).cgColor
@@ -3031,7 +3032,7 @@ private func styleSecondaryButton(_ button: NSButton) {
     button.contentTintColor = Palette.secondaryButtonText
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
-    button.heightAnchor.constraint(equalToConstant: 42).isActive = true
+    button.heightAnchor.constraint(equalToConstant: 46).isActive = true
 }
 
 private func stylePrimaryButton(_ button: NSButton) {
@@ -3041,7 +3042,7 @@ private func stylePrimaryButton(_ button: NSButton) {
     button.font = premiumFont(size: 13, weight: .semibold)
     button.wantsLayer = true
     button.layer?.backgroundColor = Palette.primaryButton.cgColor
-    button.layer?.cornerRadius = 24
+    button.layer?.cornerRadius = 10
     button.layer?.cornerCurve = .continuous
     button.layer?.borderWidth = 1.2
     button.layer?.borderColor = NSColor.white.withAlphaComponent(0.40).cgColor
@@ -3052,7 +3053,7 @@ private func stylePrimaryButton(_ button: NSButton) {
     button.contentTintColor = NSColor.white
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
-    button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+    button.heightAnchor.constraint(equalToConstant: 52).isActive = true
 }
 
 private func styleDangerButton(_ button: NSButton) {
@@ -3062,7 +3063,7 @@ private func styleDangerButton(_ button: NSButton) {
     button.font = premiumFont(size: 13, weight: .semibold)
     button.wantsLayer = true
     button.layer?.backgroundColor = Palette.dangerButton.cgColor
-    button.layer?.cornerRadius = 20
+    button.layer?.cornerRadius = 10
     button.layer?.cornerCurve = .continuous
     button.layer?.borderWidth = 1.1
     button.layer?.borderColor = NSColor.white.withAlphaComponent(0.28).cgColor
@@ -3073,7 +3074,7 @@ private func styleDangerButton(_ button: NSButton) {
     button.contentTintColor = NSColor.white
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
-    button.heightAnchor.constraint(equalToConstant: 42).isActive = true
+    button.heightAnchor.constraint(equalToConstant: 46).isActive = true
 }
 
 private func stylePopup(_ popup: NSPopUpButton) {
@@ -3082,11 +3083,11 @@ private func stylePopup(_ popup: NSPopUpButton) {
     popup.contentTintColor = Palette.text
     popup.wantsLayer = true
     popup.layer?.backgroundColor = Palette.pill.cgColor
-    popup.layer?.cornerRadius = 20
+    popup.layer?.cornerRadius = 10
     popup.layer?.cornerCurve = .continuous
     popup.layer?.borderWidth = 1
     popup.layer?.borderColor = Palette.border.cgColor
-    popup.heightAnchor.constraint(equalToConstant: 44).isActive = true
+    popup.heightAnchor.constraint(equalToConstant: 46).isActive = true
 }
 
 private func configureButtonImage(_ button: NSButton, symbolName: String) {
