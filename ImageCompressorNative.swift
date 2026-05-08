@@ -834,46 +834,45 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         stagedContentViews.append(statRow)
         root.addArrangedSubview(statRow)
 
-        let controlsRow = NSStackView(views: [buildSourcesCard(), buildSettingsCard()])
-        controlsRow.orientation = .horizontal
-        controlsRow.spacing = 18
-        controlsRow.distribution = .fillEqually
-        controlsRow.heightAnchor.constraint(equalToConstant: 340).isActive = true
-        controlsRowStack = controlsRow
-        stagedContentViews.append(controlsRow)
-        root.addArrangedSubview(controlsRow)
-
-        let extensionToolCard = buildExtensionToolCard()
-        extensionToolCard.heightAnchor.constraint(equalToConstant: 310).isActive = true
-        stagedContentViews.append(extensionToolCard)
-        root.addArrangedSubview(extensionToolCard)
-
-        let videoCompressionCard = buildVideoCompressionCard()
-        videoCompressionCard.heightAnchor.constraint(equalToConstant: 400).isActive = true
-        stagedContentViews.append(videoCompressionCard)
-        root.addArrangedSubview(videoCompressionCard)
+        let workbenchLeft = NSStackView(views: [buildSourcesCard(), buildSettingsCard()])
+        workbenchLeft.orientation = .vertical
+        workbenchLeft.spacing = 18
+        workbenchLeft.distribution = .fill
 
         let previewCard = buildPreviewCard()
-        let previewHeightConstraint = previewCard.heightAnchor.constraint(equalToConstant: 330)
+        let previewHeightConstraint = previewCard.heightAnchor.constraint(equalToConstant: 250)
         previewHeightConstraint.isActive = true
         self.previewCard = previewCard
         self.previewHeightConstraint = previewHeightConstraint
-        stagedContentViews.append(previewCard)
-        root.addArrangedSubview(previewCard)
 
-        let bottomRow = NSStackView(views: [buildQueueCard(), buildLogCard()])
+        let workbenchRight = NSStackView(views: [previewCard, buildQueueCard(), buildLogCard()])
+        workbenchRight.orientation = .vertical
+        workbenchRight.spacing = 18
+        workbenchRight.distribution = .fill
+
+        let workbenchRow = NSStackView(views: [workbenchLeft, workbenchRight])
+        workbenchRow.orientation = .horizontal
+        workbenchRow.spacing = 18
+        workbenchRow.distribution = .fillEqually
+        controlsRowStack = workbenchRow
+        stagedContentViews.append(workbenchRow)
+        root.addArrangedSubview(workbenchRow)
+
+        let toolsRow = NSStackView(views: [buildExtensionToolCard(), buildVideoCompressionCard()])
+        toolsRow.orientation = .horizontal
+        toolsRow.spacing = 18
+        toolsRow.distribution = .fillEqually
+        bottomRowStack = toolsRow
+        stagedContentViews.append(toolsRow)
+        root.addArrangedSubview(toolsRow)
+
+        let bottomRow = NSStackView(views: [buildFooterCard()])
         bottomRow.orientation = .horizontal
-        bottomRow.spacing = 18
-        bottomRow.distribution = .fillEqually
-        bottomRow.setHuggingPriority(.defaultLow, for: .vertical)
-        bottomRowStack = bottomRow
+        bottomRow.spacing = 0
+        bottomRow.distribution = .fill
+        bottomRow.setHuggingPriority(.required, for: .vertical)
         stagedContentViews.append(bottomRow)
         root.addArrangedSubview(bottomRow)
-
-        let footer = buildFooterCard()
-        footer.heightAnchor.constraint(equalToConstant: 72).isActive = true
-        stagedContentViews.append(footer)
-        shell.addArrangedSubview(footer)
     }
 
     override func viewDidLoad() {
@@ -1122,7 +1121,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func updateResponsiveLayout(for width: CGFloat) {
-        let compact = width < 1220
+        let compact = width < 1320
         controlsRowStack?.orientation = compact ? .vertical : .horizontal
         controlsRowStack?.distribution = compact ? .fill : .fillEqually
         bottomRowStack?.orientation = compact ? .vertical : .horizontal
