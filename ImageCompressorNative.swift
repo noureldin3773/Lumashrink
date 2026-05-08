@@ -94,14 +94,14 @@ private class CardView: NSVisualEffectView {
         state = .active
         wantsLayer = true
         layer?.backgroundColor = background.cgColor
-        layer?.cornerRadius = 28
+        layer?.cornerRadius = 14
         layer?.cornerCurve = .continuous
-        layer?.borderWidth = 1.2
+        layer?.borderWidth = 1
         layer?.borderColor = Palette.border.cgColor
-        layer?.shadowColor = NSColor.black.withAlphaComponent(0.55).cgColor
-        layer?.shadowOffset = CGSize(width: 0, height: -18)
-        layer?.shadowOpacity = 0.72
-        layer?.shadowRadius = 34
+        layer?.shadowColor = NSColor.black.withAlphaComponent(0.05).cgColor
+        layer?.shadowOffset = CGSize(width: 0, height: -2)
+        layer?.shadowOpacity = 1
+        layer?.shadowRadius = 8
 
         innerHighlightLayer.borderWidth = 1
         innerHighlightLayer.borderColor = NSColor.white.withAlphaComponent(0.12).cgColor
@@ -109,8 +109,8 @@ private class CardView: NSVisualEffectView {
         layer?.addSublayer(innerHighlightLayer)
 
         topSheenLayer.colors = [
-            NSColor.white.withAlphaComponent(0.13).cgColor,
-            NSColor.white.withAlphaComponent(0.025).cgColor,
+            NSColor.white.withAlphaComponent(0.06).cgColor,
+            NSColor.white.withAlphaComponent(0.01).cgColor,
             NSColor.clear.cgColor,
         ]
         topSheenLayer.locations = [0, 0.34, 1]
@@ -144,11 +144,7 @@ private final class GradientBackgroundView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
 
-        gradientLayer.colors = [
-            Palette.windowTop.cgColor,
-            NSColor(calibratedRed: 0.025, green: 0.050, blue: 0.060, alpha: 1.0).cgColor,
-            Palette.window.cgColor,
-        ]
+        gradientLayer.colors = [Palette.windowTop.cgColor, Palette.window.cgColor]
         gradientLayer.startPoint = CGPoint(x: 0.05, y: 1.0)
         gradientLayer.endPoint = CGPoint(x: 0.95, y: 0.0)
 
@@ -157,19 +153,19 @@ private final class GradientBackgroundView: NSView {
         [glowTopRight, glowBottomLeft, glowCenter].forEach { glow in
             glow.opacity = 1
             glow.shadowOpacity = 1
-            glow.shadowRadius = 120
+            glow.shadowRadius = 60
             glow.shadowOffset = .zero
             layer?.addSublayer(glow)
         }
 
-        glowTopRight.backgroundColor = Palette.accent.withAlphaComponent(0.22).cgColor
-        glowTopRight.shadowColor = Palette.accentBright.withAlphaComponent(0.8).cgColor
+        glowTopRight.backgroundColor = Palette.accentSoft.withAlphaComponent(0.12).cgColor
+        glowTopRight.shadowColor = Palette.accentSoft.withAlphaComponent(0.2).cgColor
 
-        glowBottomLeft.backgroundColor = Palette.rose.withAlphaComponent(0.12).cgColor
-        glowBottomLeft.shadowColor = Palette.rose.withAlphaComponent(0.65).cgColor
+        glowBottomLeft.backgroundColor = Palette.mint.withAlphaComponent(0.10).cgColor
+        glowBottomLeft.shadowColor = Palette.mint.withAlphaComponent(0.2).cgColor
 
-        glowCenter.backgroundColor = Palette.champagne.withAlphaComponent(0.11).cgColor
-        glowCenter.shadowColor = Palette.cyan.withAlphaComponent(0.45).cgColor
+        glowCenter.backgroundColor = Palette.cyan.withAlphaComponent(0.08).cgColor
+        glowCenter.shadowColor = Palette.cyan.withAlphaComponent(0.2).cgColor
     }
 
     required init?(coder: NSCoder) {
@@ -180,9 +176,9 @@ private final class GradientBackgroundView: NSView {
         super.layout()
         gradientLayer.frame = bounds
 
-        glowTopRight.frame = CGRect(x: bounds.maxX - 460, y: bounds.maxY - 360, width: 300, height: 300)
-        glowBottomLeft.frame = CGRect(x: 44, y: 100, width: 240, height: 240)
-        glowCenter.frame = CGRect(x: bounds.midX - 115, y: bounds.midY - 135, width: 230, height: 230)
+        glowTopRight.frame = CGRect(x: bounds.maxX - 380, y: bounds.maxY - 320, width: 220, height: 220)
+        glowBottomLeft.frame = CGRect(x: 64, y: 120, width: 180, height: 180)
+        glowCenter.frame = CGRect(x: bounds.midX - 80, y: bounds.midY - 90, width: 160, height: 160)
 
         [glowTopRight, glowBottomLeft, glowCenter].forEach { glow in
             glow.cornerRadius = glow.bounds.width / 2
@@ -777,7 +773,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let shell = NSStackView()
         shell.translatesAutoresizingMaskIntoConstraints = false
         shell.orientation = .vertical
-        shell.spacing = 16
+        shell.spacing = 20
         view.addSubview(shell)
 
         NSLayoutConstraint.activate([
@@ -807,7 +803,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let root = NSStackView()
         root.translatesAutoresizingMaskIntoConstraints = false
         root.orientation = .vertical
-        root.spacing = 18
+        root.spacing = 22
         documentView.addSubview(root)
 
         NSLayoutConstraint.activate([
@@ -832,7 +828,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let controlsRow = NSStackView(views: [buildSourcesCard(), buildSettingsCard()])
         controlsRow.orientation = .horizontal
-        controlsRow.spacing = 14
+        controlsRow.spacing = 18
         controlsRow.distribution = .fillEqually
         controlsRow.heightAnchor.constraint(equalToConstant: 340).isActive = true
         root.addArrangedSubview(controlsRow)
@@ -854,7 +850,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let bottomRow = NSStackView(views: [buildQueueCard(), buildLogCard()])
         bottomRow.orientation = .horizontal
-        bottomRow.spacing = 14
+        bottomRow.spacing = 18
         bottomRow.distribution = .fillEqually
         bottomRow.setHuggingPriority(.defaultLow, for: .vertical)
         root.addArrangedSubview(bottomRow)
