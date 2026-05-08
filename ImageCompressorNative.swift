@@ -4,34 +4,34 @@ import UserNotifications
 private func L(_ key: String) -> String { NSLocalizedString(key, comment: "") }
 
 private enum Palette {
-    static let window = NSColor(calibratedRed: 0.968, green: 0.964, blue: 0.952, alpha: 1.0)
-    static let windowTop = NSColor(calibratedRed: 0.984, green: 0.980, blue: 0.968, alpha: 1.0)
-    static let card = NSColor(calibratedRed: 1.0, green: 1.0, blue: 1.0, alpha: 0.96)
-    static let cardAlt = NSColor(calibratedRed: 0.976, green: 0.972, blue: 0.962, alpha: 0.95)
-    static let border = NSColor(calibratedRed: 0.918, green: 0.918, blue: 0.918, alpha: 1.0)
-    static let accent = NSColor(calibratedRed: 0.067, green: 0.067, blue: 0.067, alpha: 1.0)
-    static let accentSoft = NSColor(calibratedRed: 0.882, green: 0.953, blue: 0.996, alpha: 1.0)
-    static let accentBright = NSColor(calibratedRed: 0.122, green: 0.424, blue: 0.624, alpha: 1.0)
-    static let primaryButton = NSColor(calibratedRed: 0.067, green: 0.067, blue: 0.067, alpha: 1.0)
-    static let primaryButtonPressed = NSColor(calibratedRed: 0.184, green: 0.204, blue: 0.216, alpha: 1.0)
-    static let secondaryButton = NSColor(calibratedRed: 0.949, green: 0.941, blue: 0.918, alpha: 1.0)
-    static let secondaryButtonText = NSColor(calibratedRed: 0.184, green: 0.204, blue: 0.216, alpha: 1.0)
-    static let dangerButton = NSColor(calibratedRed: 0.992, green: 0.921, blue: 0.925, alpha: 1.0)
-    static let heroStart = NSColor(calibratedRed: 0.992, green: 0.988, blue: 0.976, alpha: 1.0)
-    static let heroEnd = NSColor(calibratedRed: 0.941, green: 0.953, blue: 0.925, alpha: 1.0)
-    static let text = NSColor(calibratedRed: 0.067, green: 0.067, blue: 0.067, alpha: 1.0)
-    static let muted = NSColor(calibratedRed: 0.471, green: 0.467, blue: 0.455, alpha: 1.0)
-    static let subtle = NSColor(calibratedRed: 0.588, green: 0.553, blue: 0.420, alpha: 1.0)
-    static let warning = NSColor(calibratedRed: 0.584, green: 0.392, blue: 0.0, alpha: 1.0)
-    static let success = NSColor(calibratedRed: 0.204, green: 0.396, blue: 0.220, alpha: 1.0)
-    static let danger = NSColor(calibratedRed: 0.624, green: 0.184, blue: 0.176, alpha: 1.0)
-    static let log = NSColor(calibratedRed: 0.984, green: 0.984, blue: 0.980, alpha: 1.0)
-    static let pill = NSColor(calibratedRed: 0.941, green: 0.953, blue: 0.925, alpha: 1.0)
-    static let overlay = NSColor(calibratedRed: 0.992, green: 0.992, blue: 0.988, alpha: 1.0)
-    static let rose = NSColor(calibratedRed: 0.992, green: 0.921, blue: 0.925, alpha: 1.0)
-    static let cyan = NSColor(calibratedRed: 0.882, green: 0.953, blue: 0.996, alpha: 1.0)
-    static let mint = NSColor(calibratedRed: 0.929, green: 0.953, blue: 0.925, alpha: 1.0)
-    static let champagne = NSColor(calibratedRed: 0.584, green: 0.392, blue: 0.0, alpha: 1.0)
+    static let window = NSColor(calibratedRed: 0.07, green: 0.07, blue: 0.08, alpha: 1.0)
+    static let windowTop = NSColor(calibratedRed: 0.11, green: 0.11, blue: 0.13, alpha: 1.0)
+    static let card = NSColor(calibratedRed: 0.13, green: 0.14, blue: 0.16, alpha: 0.9)
+    static let cardAlt = NSColor(calibratedRed: 0.16, green: 0.17, blue: 0.20, alpha: 0.92)
+    static let border = NSColor.white.withAlphaComponent(0.12)
+    static let accent = NSColor(calibratedRed: 0.43, green: 0.79, blue: 0.98, alpha: 1.0)
+    static let accentSoft = NSColor(calibratedRed: 0.19, green: 0.30, blue: 0.40, alpha: 1.0)
+    static let accentBright = NSColor(calibratedRed: 0.62, green: 0.87, blue: 1.00, alpha: 1.0)
+    static let primaryButton = NSColor(calibratedRed: 0.33, green: 0.67, blue: 0.90, alpha: 1.0)
+    static let primaryButtonPressed = NSColor(calibratedRed: 0.25, green: 0.56, blue: 0.78, alpha: 1.0)
+    static let secondaryButton = NSColor(calibratedRed: 0.20, green: 0.22, blue: 0.25, alpha: 1.0)
+    static let secondaryButtonText = NSColor(calibratedRed: 0.93, green: 0.95, blue: 0.98, alpha: 1.0)
+    static let dangerButton = NSColor(calibratedRed: 0.42, green: 0.19, blue: 0.22, alpha: 1.0)
+    static let heroStart = NSColor(calibratedRed: 0.16, green: 0.22, blue: 0.30, alpha: 1.0)
+    static let heroEnd = NSColor(calibratedRed: 0.14, green: 0.18, blue: 0.24, alpha: 1.0)
+    static let text = NSColor(calibratedRed: 0.92, green: 0.94, blue: 0.97, alpha: 1.0)
+    static let muted = NSColor(calibratedRed: 0.72, green: 0.76, blue: 0.82, alpha: 1.0)
+    static let subtle = NSColor(calibratedRed: 0.75, green: 0.69, blue: 0.52, alpha: 1.0)
+    static let warning = NSColor(calibratedRed: 0.93, green: 0.72, blue: 0.34, alpha: 1.0)
+    static let success = NSColor(calibratedRed: 0.43, green: 0.84, blue: 0.62, alpha: 1.0)
+    static let danger = NSColor(calibratedRed: 0.95, green: 0.55, blue: 0.58, alpha: 1.0)
+    static let log = NSColor(calibratedRed: 0.11, green: 0.12, blue: 0.14, alpha: 1.0)
+    static let pill = NSColor(calibratedRed: 0.20, green: 0.22, blue: 0.25, alpha: 1.0)
+    static let overlay = NSColor(calibratedRed: 0.15, green: 0.16, blue: 0.19, alpha: 1.0)
+    static let rose = NSColor(calibratedRed: 0.66, green: 0.32, blue: 0.41, alpha: 1.0)
+    static let cyan = NSColor(calibratedRed: 0.38, green: 0.75, blue: 0.90, alpha: 1.0)
+    static let mint = NSColor(calibratedRed: 0.40, green: 0.78, blue: 0.66, alpha: 1.0)
+    static let champagne = NSColor(calibratedRed: 0.93, green: 0.72, blue: 0.34, alpha: 1.0)
 }
 
 private final class AppLogger {
@@ -562,7 +562,7 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         window.toolbarStyle = .unifiedCompact
         window.backgroundColor = .clear
         window.isOpaque = false
-        window.appearance = NSAppearance(named: .aqua)
+        window.appearance = NSAppearance(named: .darkAqua)
         window.center()
         window.isReleasedWhenClosed = false
         window.contentViewController = controller
@@ -771,7 +771,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     override func loadView() {
         view = GradientBackgroundView()
-        view.appearance = NSAppearance(named: .aqua)
+        view.appearance = NSAppearance(named: .darkAqua)
 
         let shell = NSStackView()
         shell.translatesAutoresizingMaskIntoConstraints = false
