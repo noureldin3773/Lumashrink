@@ -551,7 +551,7 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
         window.title = "Image Compressor"
-        window.contentMinSize = NSSize(width: 860, height: 640)
+        window.contentMinSize = NSSize(width: 980, height: 700)
         window.contentMaxSize = NSSize(width: 1440, height: 900)
         window.minSize = NSSize(width: 860, height: 640)
         window.maxSize = NSSize(width: min(1440, screenFrame.width), height: min(900, screenFrame.height))
@@ -765,6 +765,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         color: Palette.muted
     )
     private weak var contentScrollView: NSScrollView?
+    private var controlsRowStack: NSStackView?
+    private var bottomRowStack: NSStackView?
 
     override func loadView() {
         view = GradientBackgroundView()
@@ -831,6 +833,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         controlsRow.spacing = 18
         controlsRow.distribution = .fillEqually
         controlsRow.heightAnchor.constraint(equalToConstant: 340).isActive = true
+        controlsRowStack = controlsRow
         root.addArrangedSubview(controlsRow)
 
         let extensionToolCard = buildExtensionToolCard()
@@ -853,6 +856,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         bottomRow.spacing = 18
         bottomRow.distribution = .fillEqually
         bottomRow.setHuggingPriority(.defaultLow, for: .vertical)
+        bottomRowStack = bottomRow
         root.addArrangedSubview(bottomRow)
 
         let footer = buildFooterCard()
@@ -1081,6 +1085,20 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         updateSaveModeUI()
         previewCard?.isHidden = true
         previewHeightConstraint?.constant = 0
+        updateResponsiveLayout(for: view.bounds.width)
+    }
+
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        updateResponsiveLayout(for: view.bounds.width)
+    }
+
+    private func updateResponsiveLayout(for width: CGFloat) {
+        let compact = width < 1220
+        controlsRowStack?.orientation = compact ? .vertical : .horizontal
+        controlsRowStack?.distribution = compact ? .fill : .fillEqually
+        bottomRowStack?.orientation = compact ? .vertical : .horizontal
+        bottomRowStack?.distribution = compact ? .fill : .fillEqually
     }
 
     private func buildHeaderCard() -> NSView {
