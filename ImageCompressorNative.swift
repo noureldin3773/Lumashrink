@@ -820,9 +820,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         ])
 
         let statRow = NSStackView(views: [
-            buildStatCard(title: "Queued", valueLabel: queuedValueLabel, detailLabel: queuedDetailLabel, symbol: "shippingbox.fill", tint: Palette.cyan),
-            buildStatCard(title: "Target", valueLabel: targetValueLabel, detailLabel: targetDetailLabel, symbol: "scope", tint: Palette.warning),
-            buildStatCard(title: "Output", valueLabel: outputValueLabel, detailLabel: outputDetailLabel, symbol: "folder.fill.badge.plus", tint: Palette.mint),
+            buildStatCard(title: "Queued", valueLabel: queuedValueLabel, detailLabel: queuedDetailLabel, symbol: "tray", tint: Palette.cyan),
+            buildStatCard(title: "Target", valueLabel: targetValueLabel, detailLabel: targetDetailLabel, symbol: "target", tint: Palette.warning),
+            buildStatCard(title: "Output", valueLabel: outputValueLabel, detailLabel: outputDetailLabel, symbol: "folder", tint: Palette.mint),
         ])
         statRow.orientation = .horizontal
         statRow.spacing = 14
@@ -1033,20 +1033,20 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             imageView.heightAnchor.constraint(equalToConstant: 92).isActive = true
         }
 
-        configureButtonImage(addFilesButton, symbolName: "doc.badge.plus")
+        configureButtonImage(addFilesButton, symbolName: "plus.square")
         configureButtonImage(addFolderButton, symbolName: "folder.badge.plus")
-        configureButtonImage(removeSelectedButton, symbolName: "minus.circle")
+        configureButtonImage(removeSelectedButton, symbolName: "minus.square")
         configureButtonImage(clearAllButton, symbolName: "trash")
         configureButtonImage(chooseOutputButton, symbolName: "folder")
         configureButtonImage(clearOutputButton, symbolName: "xmark.circle")
-        configureButtonImage(openOutputButton, symbolName: "folder.badge.gearshape")
-        configureButtonImage(stopButton, symbolName: "stop.fill")
+        configureButtonImage(openOutputButton, symbolName: "folder")
+        configureButtonImage(stopButton, symbolName: "stop.circle")
         configureButtonImage(previewToggleButton, symbolName: "eye")
-        configureButtonImage(compressButton, symbolName: "sparkles")
+        configureButtonImage(compressButton, symbolName: "arrow.down.circle")
         configureButtonImage(chooseExtensionFileButton, symbolName: "doc")
-        configureButtonImage(applyExtensionButton, symbolName: "arrow.triangle.2.circlepath")
+        configureButtonImage(applyExtensionButton, symbolName: "arrow.clockwise")
         configureButtonImage(chooseVideoButton, symbolName: "video")
-        configureButtonImage(compressVideoButton, symbolName: "film.stack")
+        configureButtonImage(compressVideoButton, symbolName: "film")
 
         tableView.headerView = nil
         tableView.usesAlternatingRowBackgroundColors = false
@@ -1118,9 +1118,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         )
 
         let highlights = NSStackView(views: [
-            makeHighlightPill(symbol: "lock.shield.fill", text: "100% local"),
-            makeHighlightPill(symbol: "video.fill", text: "Video batch"),
-            makeHighlightPill(symbol: "text.badge.checkmark", text: "Same-name save"),
+            makeHighlightPill(symbol: "lock.shield", text: "100% local"),
+            makeHighlightPill(symbol: "video", text: "Video batch"),
+            makeHighlightPill(symbol: "checkmark.square", text: "Same-name save"),
         ])
         highlights.orientation = .horizontal
         highlights.spacing = 10
@@ -2918,7 +2918,7 @@ private func premiumFont(size: CGFloat, weight: NSFont.Weight) -> NSFont {
 }
 
 private func makeSymbolImage(_ symbolName: String, pointSize: CGFloat) -> NSImage? {
-    let configuration = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .semibold)
+    let configuration = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .light)
     return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?
         .withSymbolConfiguration(configuration)
 }
