@@ -724,6 +724,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let saveModePopup = NSPopUpButton()
     private let outputFolderField = StyledTextField(value: "")
     private let targetPresetControl = NSSegmentedControl(labels: ["WhatsApp", "Email", "Web", "Archive"], trackingMode: .selectOne, target: nil, action: nil)
+    private let mediaModeControl = NSSegmentedControl(labels: ["Images", "Videos"], trackingMode: .selectOne, target: nil, action: nil)
     private let previewOriginalImageView = NSImageView()
     private let previewOutputImageView = NSImageView()
     private let previewOriginalLabel = makeLabel("Original", size: 12, weight: .semibold, color: Palette.muted)
@@ -790,7 +791,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         ])
 
         let topBar = buildTopBarCard()
-        topBar.heightAnchor.constraint(equalToConstant: 82).isActive = true
+        topBar.heightAnchor.constraint(equalToConstant: 62).isActive = true
         topBarCardView = topBar
         shell.addArrangedSubview(topBar)
 
@@ -822,15 +823,21 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             root.widthAnchor.constraint(equalTo: documentView.widthAnchor),
         ])
 
+        let modeBar = buildModeBarCard()
+        modeBar.heightAnchor.constraint(equalToConstant: 64).isActive = true
+        stagedContentViews.append(modeBar)
+        root.addArrangedSubview(modeBar)
+
         let statRow = NSStackView(views: [
             buildStatCard(title: "Queued", valueLabel: queuedValueLabel, detailLabel: queuedDetailLabel, symbol: "tray", tint: Palette.cyan),
             buildStatCard(title: "Target", valueLabel: targetValueLabel, detailLabel: targetDetailLabel, symbol: "target", tint: Palette.warning),
             buildStatCard(title: "Output", valueLabel: outputValueLabel, detailLabel: outputDetailLabel, symbol: "folder", tint: Palette.mint),
+            buildActionCard(),
         ])
         statRow.orientation = .horizontal
         statRow.spacing = 14
         statRow.distribution = .fillEqually
-        statRow.heightAnchor.constraint(equalToConstant: 128).isActive = true
+        statRow.heightAnchor.constraint(equalToConstant: 134).isActive = true
         stagedContentViews.append(statRow)
         root.addArrangedSubview(statRow)
 
@@ -845,7 +852,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         self.previewCard = previewCard
         self.previewHeightConstraint = previewHeightConstraint
 
-        let workbenchRight = NSStackView(views: [previewCard, buildQueueCard(), buildLogCard()])
+        let workbenchRight = NSStackView(views: [previewCard])
         workbenchRight.orientation = .vertical
         workbenchRight.spacing = 18
         workbenchRight.distribution = .fill
@@ -858,21 +865,23 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         stagedContentViews.append(workbenchRow)
         root.addArrangedSubview(workbenchRow)
 
-        let toolsRow = NSStackView(views: [buildExtensionToolCard(), buildVideoCompressionCard()])
-        toolsRow.orientation = .horizontal
-        toolsRow.spacing = 18
-        toolsRow.distribution = .fillEqually
-        bottomRowStack = toolsRow
-        stagedContentViews.append(toolsRow)
-        root.addArrangedSubview(toolsRow)
+        let extensionCard = buildExtensionToolCard()
+        stagedContentViews.append(extensionCard)
+        root.addArrangedSubview(extensionCard)
 
-        let bottomRow = NSStackView(views: [buildFooterCard()])
+        let bottomRow = NSStackView(views: [buildQueueCard(), buildLogCard()])
         bottomRow.orientation = .horizontal
-        bottomRow.spacing = 0
-        bottomRow.distribution = .fill
-        bottomRow.setHuggingPriority(.required, for: .vertical)
+        bottomRow.spacing = 18
+        bottomRow.distribution = .fillEqually
+        bottomRow.setHuggingPriority(.defaultLow, for: .vertical)
+        bottomRowStack = bottomRow
         stagedContentViews.append(bottomRow)
         root.addArrangedSubview(bottomRow)
+
+        let footer = buildFooterCard()
+        footer.heightAnchor.constraint(equalToConstant: 72).isActive = true
+        stagedContentViews.append(footer)
+        shell.addArrangedSubview(footer)
     }
 
     override func viewDidLoad() {
@@ -1222,38 +1231,78 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         row.spacing = 14
         card.addSubview(row)
 
-        let titleStack = NSStackView()
-        titleStack.orientation = .vertical
-        titleStack.spacing = 4
-        titleStack.addArrangedSubview(makeLabel("Image & Video Compressor", size: 21, weight: .semibold, color: Palette.text))
-        titleStack.addArrangedSubview(
-            makeWrappingLabel(
-                "Everything stays local. Scroll through the queue and settings below, then run compression from here.",
-                size: 12,
-                weight: .regular,
-                color: Palette.muted
-            )
-        )
+        let dots = NSStackView()
+        dots.orientation = .horizontal
+        dots.spacing = 6
+        for color in [NSColor.systemRed, NSColor.systemYellow, NSColor.systemGreen] {
+            let dot = NSView()
+            dot.translatesAutoresizingMaskIntoConstraints = false
+            dot.wantsLayer = true
+            dot.layer?.backgroundColor = color.withAlphaComponent(0.9).cgColor
+            dot.layer?.cornerRadius = 5
+            NSLayoutConstraint.activate([
+                dot.widthAnchor.constraint(equalToConstant: 10),
+                dot.heightAnchor.constraint(equalToConstant: 10)
+            ])
+            dots.addArrangedSubview(dot)
+        }
 
-        let actionGroup = NSStackView()
-        actionGroup.orientation = .vertical
-        actionGroup.alignment = .trailing
-        actionGroup.spacing = 5
-        actionGroup.addArrangedSubview(compressButton)
-        actionGroup.addArrangedSubview(makeLabel("Primary action", size: 11, weight: .medium, color: Palette.subtle))
+        let titleStack = NSStackView()
+        titleStack.orientation = .horizontal
+        titleStack.spacing = 10
+        titleStack.alignment = .centerY
+        titleStack.addArrangedSubview(dots)
+        titleStack.addArrangedSubview(makeLabel("Image Compressor", size: 14, weight: .semibold, color: Palette.text))
 
         row.addArrangedSubview(titleStack)
         row.addArrangedSubview(NSView())
-        row.addArrangedSubview(actionGroup)
+        row.addArrangedSubview(NSView())
 
         NSLayoutConstraint.activate([
             row.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
             row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -18),
-            row.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
-            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16),
-            compressButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 180),
+            row.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
         ])
 
+        return card
+    }
+
+    private func buildModeBarCard() -> NSView {
+        let card = CardView(background: Palette.card)
+        let row = NSStackView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 12
+        card.addSubview(row)
+        mediaModeControl.segmentStyle = .capsule
+        mediaModeControl.selectedSegment = 0
+        row.addArrangedSubview(makeLabel("Mode", size: 11, weight: .medium, color: Palette.subtle))
+        row.addArrangedSubview(mediaModeControl)
+        row.addArrangedSubview(NSView())
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            row.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
+        ])
+        return card
+    }
+
+    private func buildActionCard() -> NSView {
+        let card = CardView(background: Palette.card)
+        let stack = NSStackView(views: [compressButton, stopButton, openOutputButton])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 8
+        card.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
+        ])
         return card
     }
 
@@ -1616,14 +1665,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         left.addArrangedSubview(statusLabel)
         left.setContentHuggingPriority(.defaultLow, for: .horizontal)
 
-        let right = NSStackView(views: [stopButton, openOutputButton])
-        right.orientation = .horizontal
-        right.spacing = 10
-        right.setContentHuggingPriority(.required, for: .horizontal)
-
         container.addArrangedSubview(left)
         container.addArrangedSubview(NSView())
-        container.addArrangedSubview(right)
 
         NSLayoutConstraint.activate([
             container.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
