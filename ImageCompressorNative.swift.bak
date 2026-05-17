@@ -4,28 +4,30 @@ import UserNotifications
 private func L(_ key: String) -> String { NSLocalizedString(key, comment: "") }
 
 private enum Palette {
-    static let window = NSColor(calibratedWhite: 0.97, alpha: 1)
-    static let windowTop = NSColor(calibratedWhite: 0.98, alpha: 1)
-    static let card = NSColor(calibratedWhite: 0.995, alpha: 1)
-    static let cardAlt = NSColor(calibratedWhite: 0.975, alpha: 1)
-    static let border = NSColor(calibratedWhite: 0.86, alpha: 1)
-    static let accent = NSColor(calibratedRed: 0.08, green: 0.40, blue: 0.92, alpha: 1.0)
+    static let window = NSColor(calibratedWhite: 0.95, alpha: 1)
+    static let windowTop = NSColor(calibratedWhite: 0.96, alpha: 1)
+    static let card = NSColor(calibratedWhite: 0.91, alpha: 1)
+    static let cardAlt = NSColor(calibratedWhite: 0.93, alpha: 1)
+    static let border = NSColor(calibratedWhite: 0.85, alpha: 1)
+    static let accent = NSColor(calibratedRed: 0.09, green: 0.49, blue: 0.92, alpha: 1.0)
     static let accentSoft = NSColor(calibratedRed: 0.58, green: 0.72, blue: 0.95, alpha: 1.0)
-    static let accentBright = NSColor(calibratedRed: 0.18, green: 0.46, blue: 0.93, alpha: 1.0)
-    static let primaryButton = NSColor(calibratedRed: 0.08, green: 0.40, blue: 0.92, alpha: 1.0)
-    static let primaryButtonPressed = NSColor(calibratedRed: 0.07, green: 0.31, blue: 0.74, alpha: 1.0)
-    static let secondaryButton = NSColor(calibratedWhite: 0.95, alpha: 1)
+    static let accentBright = NSColor(calibratedRed: 0.20, green: 0.51, blue: 0.97, alpha: 1.0)
+    static let primaryButton = NSColor(calibratedRed: 0.10, green: 0.43, blue: 0.92, alpha: 1.0)
+    static let primaryButtonPressed = NSColor(calibratedRed: 0.08, green: 0.33, blue: 0.74, alpha: 1.0)
+    static let secondaryButton = NSColor(calibratedWhite: 0.96, alpha: 1)
     static let secondaryButtonText = NSColor(calibratedRed: 0.10, green: 0.14, blue: 0.20, alpha: 1.0)
     static let dangerButton = NSColor(calibratedRed: 0.41, green: 0.17, blue: 0.22, alpha: 1.0)
+    static let heroStart = NSColor(calibratedRed: 0.96, green: 0.98, blue: 1.00, alpha: 1.0)
+    static let heroEnd = NSColor(calibratedRed: 0.92, green: 0.95, blue: 0.99, alpha: 1.0)
     static let text = NSColor(calibratedWhite: 0.16, alpha: 1)
-    static let muted = NSColor(calibratedWhite: 0.38, alpha: 1)
-    static let subtle = NSColor(calibratedRed: 0.36, green: 0.32, blue: 0.24, alpha: 1.0)
+    static let muted = NSColor(calibratedWhite: 0.50, alpha: 1)
+    static let subtle = NSColor(calibratedRed: 0.75, green: 0.69, blue: 0.52, alpha: 1.0)
     static let warning = NSColor(calibratedRed: 0.45, green: 0.33, blue: 0.08, alpha: 1.0)
     static let success = NSColor(calibratedRed: 0.10, green: 0.40, blue: 0.25, alpha: 1.0)
     static let danger = NSColor(calibratedRed: 0.62, green: 0.18, blue: 0.20, alpha: 1.0)
-    static let log = NSColor(calibratedWhite: 0.975, alpha: 1)
-    static let pill = NSColor(calibratedWhite: 0.985, alpha: 1)
-    static let overlay = NSColor(calibratedWhite: 0.965, alpha: 1)
+    static let log = NSColor(calibratedWhite: 0.96, alpha: 1)
+    static let pill = NSColor(calibratedWhite: 0.97, alpha: 1)
+    static let overlay = NSColor(calibratedWhite: 0.94, alpha: 1)
     static let rose = NSColor(calibratedRed: 0.66, green: 0.32, blue: 0.41, alpha: 1.0)
     static let cyan = NSColor(calibratedRed: 0.38, green: 0.75, blue: 0.90, alpha: 1.0)
     static let mint = NSColor(calibratedRed: 0.40, green: 0.78, blue: 0.66, alpha: 1.0)
@@ -86,22 +88,22 @@ private class CardView: NSVisualEffectView {
     init(background: NSColor = Palette.card) {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
-        material = .contentBackground
+        material = .sidebar
         blendingMode = .withinWindow
         state = .active
         wantsLayer = true
         layer?.backgroundColor = background.cgColor
-        layer?.cornerRadius = 18
+        layer?.cornerRadius = 22
         layer?.cornerCurve = .continuous
-        layer?.borderWidth = 0.7
-        layer?.borderColor = Palette.border.withAlphaComponent(0.7).cgColor
-        layer?.shadowColor = NSColor.black.withAlphaComponent(0.02).cgColor
-        layer?.shadowOffset = CGSize(width: 0, height: -1)
+        layer?.borderWidth = 1
+        layer?.borderColor = Palette.border.cgColor
+        layer?.shadowColor = NSColor.black.withAlphaComponent(0.04).cgColor
+        layer?.shadowOffset = CGSize(width: 0, height: -2)
         layer?.shadowOpacity = 1
-        layer?.shadowRadius = 4
+        layer?.shadowRadius = 8
 
         innerHighlightLayer.borderWidth = 1
-        innerHighlightLayer.borderColor = NSColor.white.withAlphaComponent(0.06).cgColor
+        innerHighlightLayer.borderColor = NSColor.white.withAlphaComponent(0.12).cgColor
         innerHighlightLayer.cornerCurve = .continuous
         layer?.addSublayer(innerHighlightLayer)
 
@@ -120,20 +122,29 @@ private class CardView: NSVisualEffectView {
 }
 
 private final class GradientBackgroundView: NSView {
-    private let gradientLayer = CAGradientLayer()
-
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
-        gradientLayer.colors = [
-            NSColor(calibratedWhite: 0.985, alpha: 1).cgColor,
-            Palette.window.cgColor,
-            NSColor(calibratedWhite: 0.94, alpha: 1).cgColor
-        ]
-        gradientLayer.locations = [0, 0.58, 1]
-        gradientLayer.startPoint = CGPoint(x: 0.04, y: 1)
-        gradientLayer.endPoint = CGPoint(x: 0.96, y: 0)
-        layer?.addSublayer(gradientLayer)
+        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layout() { super.layout() }
+}
+
+private final class GradientCardView: CardView {
+    private let gradientLayer = CAGradientLayer()
+
+    init(colors: [NSColor]) {
+        super.init(background: .clear)
+        material = .sidebar
+        gradientLayer.colors = colors.map(\.cgColor)
+        gradientLayer.startPoint = CGPoint(x: 0, y: 1)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 0)
+        layer?.insertSublayer(gradientLayer, at: 0)
     }
 
     required init?(coder: NSCoder) {
@@ -143,6 +154,7 @@ private final class GradientBackgroundView: NSView {
     override func layout() {
         super.layout()
         gradientLayer.frame = bounds
+        gradientLayer.cornerRadius = layer?.cornerRadius ?? 22
     }
 }
 
@@ -187,12 +199,10 @@ private final class FlippedView: NSView {
 private final class DropZoneView: NSView {
     var onDrop: (([URL]) -> Void)?
 
-    private let materialLayer = CAGradientLayer()
-    private let innerRingLayer = CALayer()
     private let iconView = NSImageView()
     private let titleLabel = makeLabel(
         "Drop images here",
-        size: 32,
+        size: 24,
         weight: .semibold,
         color: Palette.text
     )
@@ -207,28 +217,11 @@ private final class DropZoneView: NSView {
         super.init(frame: frameRect)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        materialLayer.colors = [
-            NSColor.white.withAlphaComponent(0.88).cgColor,
-            NSColor(calibratedWhite: 0.97, alpha: 0.78).cgColor,
-            Palette.accentSoft.withAlphaComponent(0.10).cgColor
-        ]
-        materialLayer.locations = [0, 0.72, 1]
-        materialLayer.startPoint = CGPoint(x: 0.08, y: 1)
-        materialLayer.endPoint = CGPoint(x: 1, y: 0)
-        layer?.addSublayer(materialLayer)
-        layer?.backgroundColor = NSColor.white.withAlphaComponent(0.62).cgColor
-        layer?.cornerRadius = 32
+        layer?.backgroundColor = Palette.cardAlt.cgColor
+        layer?.cornerRadius = 26
         layer?.cornerCurve = .continuous
-        layer?.borderWidth = 1
-        layer?.borderColor = Palette.border.withAlphaComponent(0.55).cgColor
-        layer?.shadowColor = NSColor.black.withAlphaComponent(0.05).cgColor
-        layer?.shadowOffset = CGSize(width: 0, height: 10)
-        layer?.shadowOpacity = 1
-        layer?.shadowRadius = 26
-        innerRingLayer.borderWidth = 1
-        innerRingLayer.borderColor = NSColor.white.withAlphaComponent(0.45).cgColor
-        innerRingLayer.cornerCurve = .continuous
-        layer?.addSublayer(innerRingLayer)
+        layer?.borderWidth = 2
+        layer?.borderColor = Palette.accentBright.withAlphaComponent(0.34).cgColor
         registerForDraggedTypes([.fileURL])
         setAccessibilityLabel("Image drop zone")
         setAccessibilityHelp("Drop image files or folders here to add them to the compression queue.")
@@ -241,8 +234,8 @@ private final class DropZoneView: NSView {
         addSubview(stack)
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.image = makeSymbolImage("square.and.arrow.down.on.square", pointSize: 46)
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 46, weight: .regular)
+        iconView.image = makeSymbolImage("square.and.arrow.down.on.square.fill", pointSize: 38)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 38, weight: .semibold)
         iconView.contentTintColor = Palette.accentBright
         stack.addArrangedSubview(iconView)
         stack.addArrangedSubview(titleLabel)
@@ -253,15 +246,8 @@ private final class DropZoneView: NSView {
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
             stack.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 24),
             stack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -24),
-            heightAnchor.constraint(greaterThanOrEqualToConstant: 520)
+            heightAnchor.constraint(equalToConstant: 154)
         ])
-
-        addTrackingArea(NSTrackingArea(
-            rect: bounds,
-            options: [.mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
-            owner: self,
-            userInfo: nil
-        ))
     }
 
     required init?(coder: NSCoder) {
@@ -269,65 +255,18 @@ private final class DropZoneView: NSView {
     }
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        setActiveMaterial(true)
+        layer?.borderColor = Palette.accentBright.cgColor
+        layer?.backgroundColor = Palette.accentSoft.withAlphaComponent(0.44).cgColor
         return .copy
     }
 
     override func draggingExited(_ sender: NSDraggingInfo?) {
-        setActiveMaterial(false)
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        setHoverMaterial(true)
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        setHoverMaterial(false)
-    }
-
-    override func layout() {
-        super.layout()
-        materialLayer.frame = bounds
-        materialLayer.cornerRadius = layer?.cornerRadius ?? 32
-        innerRingLayer.frame = bounds.insetBy(dx: 2, dy: 2)
-        innerRingLayer.cornerRadius = max((layer?.cornerRadius ?? 32) - 2, 0)
-    }
-
-    private func setHoverMaterial(_ hovering: Bool) {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.16
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            animator().alphaValue = hovering ? 0.985 : 1
-        }
-        layer?.borderColor = hovering
-            ? Palette.accentBright.withAlphaComponent(0.32).cgColor
-            : Palette.border.withAlphaComponent(0.55).cgColor
-    }
-
-    private func setActiveMaterial(_ active: Bool) {
-        layer?.borderColor = active
-            ? Palette.accentBright.withAlphaComponent(0.55).cgColor
-            : Palette.border.withAlphaComponent(0.55).cgColor
-        materialLayer.colors = active
-            ? [
-                NSColor.white.withAlphaComponent(0.94).cgColor,
-                Palette.accentSoft.withAlphaComponent(0.22).cgColor,
-                Palette.accentBright.withAlphaComponent(0.12).cgColor
-            ]
-            : [
-                NSColor.white.withAlphaComponent(0.88).cgColor,
-                NSColor(calibratedWhite: 0.97, alpha: 0.78).cgColor,
-                Palette.accentSoft.withAlphaComponent(0.10).cgColor
-            ]
-    }
-
-    private func resetMaterial() {
-        layer?.borderColor = Palette.border.withAlphaComponent(0.55).cgColor
-        setActiveMaterial(false)
+        layer?.borderColor = Palette.accentBright.withAlphaComponent(0.34).cgColor
+        layer?.backgroundColor = Palette.cardAlt.cgColor
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        resetMaterial()
+        draggingExited(nil)
         guard
             let items = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self]),
             let urls = items as? [URL]
@@ -569,7 +508,7 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         window.toolbarStyle = .unifiedCompact
         window.backgroundColor = .clear
         window.isOpaque = false
-        window.appearance = NSAppearance(named: .aqua)
+        window.appearance = NSAppearance(named: .darkAqua)
         window.center()
         window.isReleasedWhenClosed = false
         window.contentViewController = controller
@@ -672,6 +611,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         case images = "Compress Images"
         case videos = "Compress Videos"
         case rename = "Rename Extensions"
+        case queue = "Queue"
+        case activity = "Activity"
+        case settings = "Settings"
     }
     private let logger = AppLogger.shared
     private let sessionStateKey = "image_compressor_session_v1"
@@ -723,13 +665,11 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     )
 
     private let tableView = NSTableView()
-    private let queueRouteTableView = NSTableView()
     private let logTextView = NSTextView()
     private let progressIndicator = NSProgressIndicator()
     private let batchProgressIndicator = NSProgressIndicator()
     private let batchProgressLabel = makeLabel("0 complete / 0 left", size: 12, weight: .medium, color: Palette.muted)
     private let queueStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
-    private let queueRouteStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
 
     private let maxSizeField = StyledTextField(value: "150kb")
     private let qualitySlider = NSSlider(value: 85, minValue: 0, maxValue: 100, target: nil, action: nil)
@@ -738,7 +678,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let formatPopup = NSPopUpButton()
     private let saveModePopup = NSPopUpButton()
     private let outputFolderField = StyledTextField(value: "")
-    private let targetPresetControl = NSSegmentedControl(labels: ["Small", "Email", "Web", "Archive"], trackingMode: .selectOne, target: nil, action: nil)
+    private let targetPresetControl = NSSegmentedControl(labels: ["Web Optimized", "150KB Target", "High Quality", "Custom"], trackingMode: .selectOne, target: nil, action: nil)
     private let mediaModeControl = NSSegmentedControl(labels: ["Images", "Videos"], trackingMode: .selectOne, target: nil, action: nil)
     private let previewOriginalImageView = NSImageView()
     private let previewOutputImageView = NSImageView()
@@ -761,8 +701,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let clearCompletedButton = NSButton(title: "Clear Completed", target: nil, action: nil)
     private let compressAgainButton = NSButton(title: "Compress Again", target: nil, action: nil)
     private let settingsButton = NSButton(title: "Settings", target: nil, action: nil)
-    private let advancedSettingsToggleButton = NSButton(title: "Show Settings", target: nil, action: nil)
-    private let queueToggleButton = NSButton(title: "Queue", target: nil, action: nil)
     private let stopButton = NSButton(title: "Stop", target: nil, action: nil)
     private let compressButton = NSButton(title: "Compress Now", target: nil, action: nil)
     private let chooseExtensionFileButton = NSButton(title: "Choose Files", target: nil, action: nil)
@@ -795,11 +733,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private var stagedContentViews: [NSView] = []
     private var controlsRowStack: NSStackView?
     private var bottomRowStack: NSStackView?
-    private weak var advancedSettingsPanel: NSView?
-    private weak var imageSupportPanel: NSView?
-    private weak var queuePanel: NSView?
-    private weak var imageStatusPanel: NSView?
-    private weak var activityPanel: NSView?
     private var screenButtons: [Screen: NSButton] = [:]
     private var screenRoots: [Screen: NSView] = [:]
     private var currentScreen: Screen = .images
@@ -810,22 +743,24 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let shell = NSStackView()
         shell.translatesAutoresizingMaskIntoConstraints = false
-        shell.orientation = .vertical
-        shell.spacing = 14
+        shell.orientation = .horizontal
+        shell.spacing = 18
         view.addSubview(shell)
 
         NSLayoutConstraint.activate([
-            shell.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 28),
-            shell.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -28),
-            shell.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+            shell.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 26),
+            shell.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -26),
+            shell.topAnchor.constraint(equalTo: view.topAnchor, constant: 22),
             shell.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -22)
         ])
 
-        shell.addArrangedSubview(buildTopNavigationBar())
+        let sidebar = buildSidebar()
+        sidebar.widthAnchor.constraint(equalToConstant: 228).isActive = true
+        shell.addArrangedSubview(sidebar)
 
         let contentStack = NSStackView()
         contentStack.orientation = .vertical
-        contentStack.spacing = 0
+        contentStack.spacing = 14
         shell.addArrangedSubview(contentStack)
 
         let scrollView = NSScrollView()
@@ -844,7 +779,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let root = NSStackView()
         root.translatesAutoresizingMaskIntoConstraints = false
         root.orientation = .vertical
-        root.spacing = 34
+        root.spacing = 22
         documentView.addSubview(root)
 
         NSLayoutConstraint.activate([
@@ -858,7 +793,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let imagesRoot = NSStackView()
         imagesRoot.orientation = .vertical
-        imagesRoot.spacing = 34
+        imagesRoot.spacing = 22
+        imagesRoot.addArrangedSubview(buildTopBarCard())
         imagesRoot.addArrangedSubview(buildMainWorkspaceCard())
 
         let extensionCard = buildExtensionToolCard()
@@ -867,7 +803,11 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let videoCard = buildVideoCompressionCard()
         videoSectionView = videoCard
 
-        [imagesRoot, videoCard, extensionCard].forEach {
+        let queueOnly = buildQueueCard()
+        let activityOnly = buildLogCard()
+        let settingsOnly = buildSettingsCard()
+
+        [imagesRoot, videoCard, extensionCard, queueOnly, activityOnly, settingsOnly].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             root.addArrangedSubview($0)
             stagedContentViews.append($0)
@@ -875,200 +815,97 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         screenRoots[.images] = imagesRoot
         screenRoots[.videos] = videoCard
         screenRoots[.rename] = extensionCard
+        screenRoots[.queue] = queueOnly
+        screenRoots[.activity] = activityOnly
+        screenRoots[.settings] = settingsOnly
+
+        let footer = buildFooterCard()
+        footer.heightAnchor.constraint(equalToConstant: 72).isActive = true
+        stagedContentViews.append(footer)
+        contentStack.addArrangedSubview(footer)
         switchScreen(.images)
     }
 
-    private func buildTopNavigationBar() -> NSView {
-        let bar = NSVisualEffectView()
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        bar.material = .headerView
-        bar.blendingMode = .withinWindow
-        bar.state = .active
-        bar.wantsLayer = true
-        bar.layer?.cornerRadius = 14
-        bar.layer?.cornerCurve = .continuous
-        bar.layer?.borderWidth = 0.6
-        bar.layer?.borderColor = Palette.border.withAlphaComponent(0.55).cgColor
-
-        let row = NSStackView()
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.orientation = .horizontal
-        row.alignment = .centerY
-        row.spacing = 10
-        bar.addSubview(row)
-
-        let title = makeLabel("Image Compressor", size: 14, weight: .semibold, color: Palette.text)
-        title.setContentHuggingPriority(.required, for: .horizontal)
-        row.addArrangedSubview(title)
-        row.addArrangedSubview(NSView())
-
+    private func buildSidebar() -> NSView {
+        let card = CardView(background: Palette.cardAlt)
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 12
+        card.addSubview(stack)
+        stack.addArrangedSubview(makeLabel(" ", size: 6, weight: .regular, color: Palette.text))
         for screen in Screen.allCases {
-            let button = NSButton(title: screen.rawValue, target: self, action: #selector(topNavigationSelect(_:)))
+            let button = NSButton(title: screen.rawValue, target: self, action: #selector(sidebarSelect(_:)))
             button.identifier = NSUserInterfaceItemIdentifier(screen.rawValue)
-            styleTopNavigationButton(button)
-            row.addArrangedSubview(button)
+            styleSecondaryButton(button)
+            button.alignment = .left
+            stack.addArrangedSubview(button)
             screenButtons[screen] = button
         }
-
-        let activityButton = NSButton(title: "Activity", target: self, action: #selector(toggleActivityLog))
-        styleTopNavigationButton(activityButton)
-        row.addArrangedSubview(activityButton)
-
+        stack.addArrangedSubview(NSView())
+        let gear = NSButton(title: "", target: self, action: #selector(scrollToSettings))
+        configureButtonImage(gear, symbolName: "gearshape")
+        styleSecondaryButton(gear)
+        stack.addArrangedSubview(gear)
         NSLayoutConstraint.activate([
-            row.leadingAnchor.constraint(equalTo: bar.leadingAnchor, constant: 14),
-            row.trailingAnchor.constraint(equalTo: bar.trailingAnchor, constant: -14),
-            row.topAnchor.constraint(equalTo: bar.topAnchor, constant: 8),
-            row.bottomAnchor.constraint(equalTo: bar.bottomAnchor, constant: -8)
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
         ])
-
-        return bar
-    }
-
-    @objc private func toggleActivityLog() {
-        if imageStatusPanel?.isHidden == true {
-            imageStatusPanel?.isHidden = false
-        }
-        guard let panel = activityPanel else { return }
-        setPanel(panel, hidden: !panel.isHidden)
-        view.layoutSubtreeIfNeeded()
-    }
-
-    @objc private func toggleQueuePanel() {
-        guard let panel = queuePanel else { return }
-        imageSupportPanel?.isHidden = false
-        let willHide = !panel.isHidden
-        setPanel(panel, hidden: willHide)
-        queueToggleButton.title = willHide ? "Queue" : "Hide Queue"
-        view.layoutSubtreeIfNeeded()
-    }
-
-    private func setPanel(_ panel: NSView, hidden: Bool) {
-        if hidden {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.14
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                panel.animator().alphaValue = 0
-            } completionHandler: {
-                panel.isHidden = true
-            }
-        } else {
-            panel.alphaValue = 0
-            panel.isHidden = false
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.18
-                context.timingFunction = CAMediaTimingFunction(controlPoints: 0.16, 1.0, 0.3, 1.0)
-                panel.animator().alphaValue = 1
-            }
-        }
+        return card
     }
 
     private func buildMainWorkspaceCard() -> NSView {
-        let workbench = CardView(background: NSColor.white.withAlphaComponent(0.82))
+        let card = CardView(background: NSColor(calibratedWhite: 0.95, alpha: 1))
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 18
+        card.addSubview(stack)
 
-        let layout = NSStackView()
-        layout.translatesAutoresizingMaskIntoConstraints = false
-        layout.orientation = .horizontal
-        layout.alignment = .top
-        layout.spacing = 28
-        workbench.addSubview(layout)
+        let topIcons = NSStackView()
+        topIcons.orientation = .horizontal
+        topIcons.spacing = 10
+        topIcons.addArrangedSubview(NSView())
+        let clearBtn = NSButton(title: "", target: self, action: #selector(clearAll))
+        let hintBtn = NSButton(title: "", target: self, action: nil)
+        let focusBtn = NSButton(title: "", target: self, action: nil)
+        configureButtonImage(clearBtn, symbolName: "trash")
+        configureButtonImage(hintBtn, symbolName: "lightbulb")
+        configureButtonImage(focusBtn, symbolName: "arrow.up.left.and.arrow.down.right")
+        [clearBtn, hintBtn, focusBtn].forEach { b in
+            b.isBordered = false
+            b.contentTintColor = Palette.accent
+            b.font = premiumFont(size: 16, weight: .medium)
+            topIcons.addArrangedSubview(b)
+        }
 
-        let canvas = NSStackView()
-        canvas.orientation = .vertical
-        canvas.spacing = 22
-        canvas.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        let dropZone = DropZoneView()
+        dropZone.onDrop = { [weak self] urls in
+            self?.addInputURLs(urls)
+        }
+        dropZone.heightAnchor.constraint(greaterThanOrEqualToConstant: 260).isActive = true
 
-        let titleStack = NSStackView()
-        titleStack.orientation = .vertical
-        titleStack.spacing = 7
-        titleStack.addArrangedSubview(makeLabel("Compress Images", size: 38, weight: .semibold, color: Palette.text))
-        titleStack.addArrangedSubview(makeWrappingLabel(
-            "A focused workspace for turning large image sets into export-ready files.",
-            size: 15,
-            weight: .regular,
-            color: Palette.muted
-        ))
+        let controls = NSStackView(views: [buildSettingsCard(), buildActionCard(), buildQueueCard()])
+        controls.orientation = .vertical
+        controls.spacing = 12
 
-        let uploadWorkspace = buildSourcesCard()
-        canvas.addArrangedSubview(titleStack)
-        canvas.addArrangedSubview(uploadWorkspace)
-
-        let commandRail = NSStackView()
-        commandRail.orientation = .vertical
-        commandRail.alignment = .width
-        commandRail.spacing = 18
-        commandRail.edgeInsets = NSEdgeInsets(top: 6, left: 0, bottom: 0, right: 0)
-        commandRail.setContentHuggingPriority(.required, for: .horizontal)
-
-        let primaryCluster = NSStackView()
-        primaryCluster.orientation = .vertical
-        primaryCluster.alignment = .width
-        primaryCluster.spacing = 9
-        primaryCluster.addArrangedSubview(compressButton)
-        primaryCluster.addArrangedSubview(queueToggleButton)
-        primaryCluster.addArrangedSubview(advancedSettingsToggleButton)
-
-        let statusRow = buildImageStatusRow()
-        statusRow.isHidden = true
-        imageStatusPanel = statusRow
-
-        let advancedPanel = buildSettingsCard()
-        advancedPanel.isHidden = true
-        advancedSettingsPanel = advancedPanel
-
-        let queuePanel = buildQueueCard()
-        queuePanel.isHidden = true
-        self.queuePanel = queuePanel
-
-        let previewPanel = buildPreviewCard()
-        previewPanel.isHidden = true
-
-        let supportStack = NSStackView()
-        supportStack.orientation = .vertical
-        supportStack.alignment = .width
-        supportStack.spacing = 14
-        supportStack.addArrangedSubview(queuePanel)
-        supportStack.addArrangedSubview(previewPanel)
-        supportStack.isHidden = true
-        imageSupportPanel = supportStack
-
-        let activity = buildLogCard()
-        activity.isHidden = true
-        activityPanel = activity
-
-        commandRail.addArrangedSubview(primaryCluster)
-        commandRail.addArrangedSubview(statusRow)
-        commandRail.addArrangedSubview(advancedPanel)
-        commandRail.addArrangedSubview(supportStack)
-        commandRail.addArrangedSubview(activity)
-
-        layout.addArrangedSubview(canvas)
-        layout.addArrangedSubview(commandRail)
+        stack.addArrangedSubview(topIcons)
+        stack.addArrangedSubview(dropZone)
+        stack.addArrangedSubview(controls)
+        stack.addArrangedSubview(buildPreviewCard())
 
         NSLayoutConstraint.activate([
-            layout.leadingAnchor.constraint(equalTo: workbench.leadingAnchor, constant: 28),
-            layout.trailingAnchor.constraint(equalTo: workbench.trailingAnchor, constant: -24),
-            layout.topAnchor.constraint(equalTo: workbench.topAnchor, constant: 26),
-            layout.bottomAnchor.constraint(equalTo: workbench.bottomAnchor, constant: -24),
-            canvas.widthAnchor.constraint(greaterThanOrEqualToConstant: 430),
-            commandRail.widthAnchor.constraint(equalToConstant: 292)
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -20),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 18),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -18),
         ])
-
-        return workbench
+        return card
     }
 
-    @objc private func showImageCompressionScreen() {
-        switchScreen(.images)
-    }
-
-    @objc private func toggleAdvancedSettings() {
-        guard let panel = advancedSettingsPanel else { return }
-        let willHide = !panel.isHidden
-        setPanel(panel, hidden: willHide)
-        advancedSettingsToggleButton.title = willHide ? "Show Settings" : "Hide Settings"
-        view.layoutSubtreeIfNeeded()
-    }
-
-    @objc private func topNavigationSelect(_ sender: NSButton) {
+    @objc private func sidebarSelect(_ sender: NSButton) {
         guard let raw = sender.identifier?.rawValue,
               let screen = Screen(rawValue: raw) else { return }
         switchScreen(screen)
@@ -1081,7 +918,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         }
         for (key, button) in screenButtons {
             button.alphaValue = key == screen ? 1.0 : 0.78
-            button.contentTintColor = key == screen ? Palette.text : Palette.muted
         }
     }
 
@@ -1130,8 +966,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         styleSecondaryButton(settingsButton)
         stylePrimaryButton(compressAgainButton)
         styleSecondaryButton(previewToggleButton)
-        styleSecondaryButton(advancedSettingsToggleButton)
-        styleTopNavigationButton(queueToggleButton)
         styleSecondaryButton(chooseExtensionFileButton)
         styleSecondaryButton(chooseVideoButton)
         stylePrimaryButton(applyExtensionButton)
@@ -1160,10 +994,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         compressAgainButton.action = #selector(compressAgain)
         settingsButton.target = self
         settingsButton.action = #selector(scrollToSettings)
-        advancedSettingsToggleButton.target = self
-        advancedSettingsToggleButton.action = #selector(toggleAdvancedSettings)
-        queueToggleButton.target = self
-        queueToggleButton.action = #selector(toggleQueuePanel)
         stopButton.target = self
         stopButton.action = #selector(stopCompression)
         compressButton.target = self
@@ -1306,15 +1136,26 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         configureButtonImage(chooseVideoButton, symbolName: "video")
         configureButtonImage(compressVideoButton, symbolName: "film")
 
-        configureQueueTable(tableView)
-        configureQueueTable(queueRouteTableView)
+        tableView.headerView = nil
+        tableView.usesAlternatingRowBackgroundColors = false
+        tableView.backgroundColor = .clear
+        tableView.rowHeight = 38
+        tableView.selectionHighlightStyle = .regular
+        tableView.intercellSpacing = NSSize(width: 0, height: 8)
+        tableView.target = self
+        tableView.doubleAction = #selector(revealSelectedFile)
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("files"))
+        column.title = "Files"
+        tableView.addTableColumn(column)
+        tableView.delegate = self
+        tableView.dataSource = self
 
         logTextView.isEditable = false
         logTextView.drawsBackground = true
         logTextView.backgroundColor = Palette.log
         logTextView.textColor = Palette.text
         logTextView.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
-        logTextView.textContainerInset = NSSize(width: 18, height: 14)
+        logTextView.textContainerInset = NSSize(width: 16, height: 16)
 
         progressIndicator.style = .spinning
         progressIndicator.controlSize = .large
@@ -1335,24 +1176,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         updateResponsiveLayout(for: view.bounds.width)
     }
 
-    private func configureQueueTable(_ queueTable: NSTableView) {
-        queueTable.headerView = nil
-        queueTable.usesAlternatingRowBackgroundColors = false
-        queueTable.backgroundColor = .clear
-        queueTable.rowHeight = 42
-        queueTable.selectionHighlightStyle = .regular
-        queueTable.intercellSpacing = NSSize(width: 0, height: 8)
-        queueTable.target = self
-        queueTable.doubleAction = #selector(revealSelectedFile)
-        if queueTable.tableColumns.isEmpty {
-            let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("files"))
-            column.title = "Files"
-            queueTable.addTableColumn(column)
-        }
-        queueTable.delegate = self
-        queueTable.dataSource = self
-    }
-
     override func viewDidLayout() {
         super.viewDidLayout()
         updateResponsiveLayout(for: view.bounds.width)
@@ -1366,6 +1189,163 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         bottomRowStack?.distribution = compact ? .fill : .fillEqually
     }
 
+    private func buildHeaderCard() -> NSView {
+        let card = GradientCardView(colors: [Palette.heroStart, Palette.heroEnd])
+        headerCardView = card
+
+        let root = NSStackView()
+        root.translatesAutoresizingMaskIntoConstraints = false
+        root.orientation = .horizontal
+        root.spacing = 18
+        card.addSubview(root)
+
+        let left = NSStackView()
+        left.orientation = .vertical
+        left.spacing = 12
+        left.alignment = .leading
+
+        let badge = makeBadgeLabel("Private on-device compression")
+        let title = makeLabel(
+            "Image Compression Workspace",
+            size: 30,
+            weight: .semibold,
+            color: Palette.text
+        )
+        title.maximumNumberOfLines = 2
+
+        let subtitle = makeWrappingLabel(
+            "Queue image and video files, choose your output target, and run local compression with clear per-file results.",
+            size: 14,
+            weight: .regular,
+            color: Palette.muted
+        )
+
+        let highlights = NSStackView(views: [
+            makeHighlightPill(symbol: "lock.shield", text: "100% local"),
+            makeHighlightPill(symbol: "video", text: "Video batch"),
+            makeHighlightPill(symbol: "checkmark.square", text: "Same-name save"),
+        ])
+        highlights.orientation = .horizontal
+        highlights.spacing = 10
+
+        left.addArrangedSubview(badge)
+        left.addArrangedSubview(title)
+        left.addArrangedSubview(subtitle)
+        left.addArrangedSubview(highlights)
+
+        let previewCard = CardView(background: Palette.overlay)
+        let previewStack = NSStackView()
+        previewStack.translatesAutoresizingMaskIntoConstraints = false
+        previewStack.orientation = .vertical
+        previewStack.spacing = 8
+        previewCard.addSubview(previewStack)
+
+        let previewTitle = makeLabel("Local Compression Suite", size: 12, weight: .semibold, color: Palette.champagne)
+        let previewValue = makeLabel("Images + Video", size: 27, weight: .semibold, color: Palette.text)
+        let previewBody = makeWrappingLabel(
+            "Images target tiny shareable output, while videos use a quality fallback ladder and pick the smallest high-quality format.",
+            size: 12,
+            weight: .regular,
+            color: Palette.muted
+        )
+        previewStack.addArrangedSubview(previewTitle)
+        previewStack.addArrangedSubview(previewValue)
+        previewStack.addArrangedSubview(previewBody)
+
+        NSLayoutConstraint.activate([
+            previewStack.leadingAnchor.constraint(equalTo: previewCard.leadingAnchor, constant: 18),
+            previewStack.trailingAnchor.constraint(equalTo: previewCard.trailingAnchor, constant: -18),
+            previewStack.topAnchor.constraint(equalTo: previewCard.topAnchor, constant: 16),
+            previewStack.bottomAnchor.constraint(equalTo: previewCard.bottomAnchor, constant: -16),
+            previewCard.widthAnchor.constraint(equalToConstant: 280)
+        ])
+
+        root.addArrangedSubview(left)
+        root.addArrangedSubview(previewCard)
+
+        NSLayoutConstraint.activate([
+            root.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 24),
+            root.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -24),
+            root.topAnchor.constraint(equalTo: card.topAnchor, constant: 22),
+            root.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -22)
+        ])
+
+        return card
+    }
+
+    private func buildTopBarCard() -> NSView {
+        let card = CardView(background: Palette.cardAlt)
+
+        let row = NSStackView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 14
+        card.addSubview(row)
+
+        let dots = NSStackView()
+        dots.orientation = .horizontal
+        dots.spacing = 6
+        for color in [NSColor.systemRed, NSColor.systemYellow, NSColor.systemGreen] {
+            let dot = NSView()
+            dot.translatesAutoresizingMaskIntoConstraints = false
+            dot.wantsLayer = true
+            dot.layer?.backgroundColor = color.withAlphaComponent(0.9).cgColor
+            dot.layer?.cornerRadius = 5
+            NSLayoutConstraint.activate([
+                dot.widthAnchor.constraint(equalToConstant: 10),
+                dot.heightAnchor.constraint(equalToConstant: 10)
+            ])
+            dots.addArrangedSubview(dot)
+        }
+
+        let titleStack = NSStackView()
+        titleStack.orientation = .horizontal
+        titleStack.spacing = 10
+        titleStack.alignment = .centerY
+        titleStack.addArrangedSubview(dots)
+        titleStack.addArrangedSubview(makeLabel("Image Compressor", size: 14, weight: .semibold, color: Palette.text))
+
+        styleSecondaryButton(settingsButton)
+
+        row.addArrangedSubview(titleStack)
+        row.addArrangedSubview(NSView())
+        row.addArrangedSubview(settingsButton)
+
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
+            row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -18),
+            row.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -14),
+        ])
+
+        return card
+    }
+
+    private func buildModeBarCard() -> NSView {
+        let card = CardView(background: Palette.card)
+        let row = NSStackView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 12
+        card.addSubview(row)
+        mediaModeControl.segmentStyle = .capsule
+        mediaModeControl.selectedSegment = 0
+        mediaModeControl.target = self
+        mediaModeControl.action = #selector(mediaModeChanged(_:))
+        row.addArrangedSubview(makeLabel("Mode", size: 11, weight: .medium, color: Palette.subtle))
+        row.addArrangedSubview(mediaModeControl)
+        row.addArrangedSubview(NSView())
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            row.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            row.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -12),
+        ])
+        return card
+    }
+
     @objc private func mediaModeChanged(_ sender: NSSegmentedControl) {
         let videosMode = sender.selectedSegment == 1
         imageWorkbenchView?.isHidden = videosMode
@@ -1373,61 +1353,105 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         videoSectionView?.isHidden = !videosMode
     }
 
-    private func buildSourcesCard() -> NSView {
-        let card = NSView()
-        card.translatesAutoresizingMaskIntoConstraints = false
+    private func buildActionCard() -> NSView {
+        let card = CardView(background: Palette.card)
+        let stack = NSStackView(views: [compressButton, stopButton, openOutputButton])
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 8
+        card.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -12),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 12),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -12),
+        ])
+        return card
+    }
+
+    private func buildStatCard(
+        title: String,
+        valueLabel: NSTextField,
+        detailLabel: NSTextField,
+        symbol: String,
+        tint: NSColor
+    ) -> NSView {
+        let card = CardView(background: Palette.card)
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.orientation = .vertical
-        stack.spacing = 18
+        stack.spacing = 10
         card.addSubview(stack)
 
-        let dropZone = DropZoneView()
-        dropZone.onDrop = { [weak self] urls in
-            self?.addInputURLs(urls)
-        }
-        dropZone.heightAnchor.constraint(greaterThanOrEqualToConstant: 540).isActive = true
+        let topRow = NSStackView()
+        topRow.orientation = .horizontal
+        topRow.alignment = .centerY
+        topRow.spacing = 10
 
-        let actionRow = NSStackView(views: [addFilesButton, addFolderButton])
-        actionRow.orientation = .horizontal
-        actionRow.alignment = .centerY
-        actionRow.spacing = 10
-        actionRow.distribution = .gravityAreas
+        topRow.addArrangedSubview(makeSymbolBadge(symbol: symbol, tint: tint))
+        topRow.addArrangedSubview(makeLabel(title.uppercased(), size: 11, weight: .medium, color: Palette.subtle))
+        topRow.addArrangedSubview(NSView())
 
-        stack.addArrangedSubview(dropZone)
-        stack.addArrangedSubview(actionRow)
+        stack.addArrangedSubview(topRow)
+        stack.addArrangedSubview(valueLabel)
+        stack.addArrangedSubview(detailLabel)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: card.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -18),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: card.bottomAnchor, constant: -16)
         ])
 
         return card
     }
 
+    private func buildSourcesCard() -> NSView {
+        let (card, stack) = makeSectionCard(
+            title: "Drop images to start",
+            subtitle: "Compress locally. Your files never leave your device.",
+            symbol: "tray.and.arrow.down.fill"
+        )
+
+        let dropZone = DropZoneView()
+        dropZone.onDrop = { [weak self] urls in
+            self?.addInputURLs(urls)
+        }
+
+        let firstButtonRow = NSStackView(views: [addFilesButton, addFolderButton])
+        firstButtonRow.orientation = .horizontal
+        firstButtonRow.spacing = 10
+        firstButtonRow.distribution = .fillEqually
+
+        let secondButtonRow = NSStackView(views: [removeSelectedButton, clearAllButton])
+        secondButtonRow.orientation = .horizontal
+        secondButtonRow.spacing = 8
+        secondButtonRow.distribution = .fillEqually
+
+        stack.addArrangedSubview(dropZone)
+        stack.addArrangedSubview(firstButtonRow)
+        stack.addArrangedSubview(secondButtonRow)
+        stack.addArrangedSubview(queueHintLabel)
+
+        return card
+    }
+
     private func buildSettingsCard() -> NSView {
-        let card = NSView()
-        card.translatesAutoresizingMaskIntoConstraints = false
-        let stack = NSStackView()
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.orientation = .vertical
-        stack.spacing = 18
-        card.addSubview(stack)
+        let (card, stack) = makeSectionCard(
+            title: "Compression settings",
+            subtitle: "Target size and output behavior.",
+            symbol: "bolt.fill"
+        )
 
-        stack.addArrangedSubview(makeLabel("Options", size: 17, weight: .semibold, color: Palette.text))
-
-        stack.addArrangedSubview(targetPresetControl)
         stack.addArrangedSubview(makeFormGroup(label: "Target size", control: maxSizeField))
+        stack.addArrangedSubview(targetPresetControl)
 
         let qualityRow = NSStackView(views: [qualitySlider, qualityValueLabel])
         qualityRow.orientation = .horizontal
         qualityRow.alignment = .centerY
         qualityRow.spacing = 12
         qualityRow.distribution = .fill
-        stack.addArrangedSubview(makeFormGroup(label: "Quality preview", control: qualityRow))
-        stack.addArrangedSubview(previewToggleButton)
+        qualityRow.isHidden = true
 
         let formatRow = NSStackView(views: [
             makeFormGroup(label: "Format", control: formatPopup),
@@ -1443,23 +1467,39 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         outputRow.spacing = 8
         outputRow.addArrangedSubview(outputFolderField)
         outputRow.addArrangedSubview(chooseOutputButton)
+        outputRow.addArrangedSubview(clearOutputButton)
         stack.addArrangedSubview(makeFormGroup(label: "Output folder", control: outputRow))
 
-        stack.addArrangedSubview(saveModeHintLabel)
+        let hintCard = CardView(background: Palette.cardAlt)
+        let hintStack = NSStackView()
+        hintStack.translatesAutoresizingMaskIntoConstraints = false
+        hintStack.orientation = .vertical
+        hintStack.spacing = 8
+        hintCard.addSubview(hintStack)
+        hintStack.addArrangedSubview(saveModeHintLabel)
+        hintStack.addArrangedSubview(
+            makeWrappingLabel(
+                "A 12 MB image can need both higher compression and smaller dimensions to fit inside 150 KB. This tool always aims for the best visual result under the limit.",
+                size: 12,
+                weight: .regular,
+                color: Palette.muted
+            )
+        )
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: card.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            hintStack.leadingAnchor.constraint(equalTo: hintCard.leadingAnchor, constant: 14),
+            hintStack.trailingAnchor.constraint(equalTo: hintCard.trailingAnchor, constant: -14),
+            hintStack.topAnchor.constraint(equalTo: hintCard.topAnchor, constant: 12),
+            hintStack.bottomAnchor.constraint(equalTo: hintCard.bottomAnchor, constant: -12)
         ])
+        stack.addArrangedSubview(hintCard)
 
         return card
     }
 
     private func buildExtensionToolCard() -> NSView {
         let (card, stack) = makeSectionCard(
-            title: "Rename Extensions",
-            subtitle: "Drop files, preview the new extension, then apply the change.",
+            title: "Change a file extension",
+            subtitle: "A separate quick rename bar. It keeps every file in the same folder and changes only the extension.",
             symbol: "doc.badge.gearshape"
         )
 
@@ -1483,8 +1523,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         applyExtensionButton.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         renameRow.addArrangedSubview(fileGroup)
-        renameRow.addArrangedSubview(extensionGroup)
         renameRow.addArrangedSubview(chooseExtensionFileButton)
+        renameRow.addArrangedSubview(extensionGroup)
         renameRow.addArrangedSubview(applyExtensionButton)
 
         stack.addArrangedSubview(extensionDropZone)
@@ -1496,10 +1536,37 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     private func buildVideoCompressionCard() -> NSView {
         let (card, stack) = makeSectionCard(
-            title: "Compress Videos",
-            subtitle: "Drop videos, choose a target, then compress and export.",
+            title: "Compress video",
+            subtitle: "Compress videos at quality 18 first, then 20 or 21 only if needed.",
             symbol: "video.badge.waveform"
         )
+
+        let summaryRow = NSStackView()
+        summaryRow.orientation = .horizontal
+        summaryRow.alignment = .centerY
+        summaryRow.spacing = 12
+        summaryRow.distribution = .fillEqually
+
+        let sourceTile = makeVideoCompressionTile(
+            title: "Source",
+            value: "Up to 10 MB",
+            detail: "recommended input"
+        )
+        let targetTile = makeVideoCompressionTile(
+            title: "Format",
+            value: "Auto",
+            detail: "WebM or MP4"
+        )
+        let qualityTile = makeVideoCompressionTile(
+            title: "Quality",
+            value: "High",
+            detail: "18 -> 20 -> 21"
+        )
+
+        summaryRow.addArrangedSubview(sourceTile)
+        summaryRow.addArrangedSubview(targetTile)
+        summaryRow.addArrangedSubview(qualityTile)
+        stack.addArrangedSubview(summaryRow)
 
         let controlRow = NSStackView()
         controlRow.orientation = .horizontal
@@ -1521,8 +1588,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         compressVideoButton.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         controlRow.addArrangedSubview(videoGroup)
-        controlRow.addArrangedSubview(targetGroup)
         controlRow.addArrangedSubview(chooseVideoButton)
+        controlRow.addArrangedSubview(targetGroup)
         controlRow.addArrangedSubview(compressVideoButton)
 
         stack.addArrangedSubview(videoDropZone)
@@ -1532,15 +1599,43 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         return card
     }
 
+    private func makeVideoCompressionTile(title: String, value: String, detail: String) -> NSView {
+        let tile = NSView()
+        tile.translatesAutoresizingMaskIntoConstraints = false
+        tile.wantsLayer = true
+        tile.layer?.backgroundColor = Palette.cardAlt.cgColor
+        tile.layer?.cornerRadius = 14
+        tile.layer?.borderWidth = 1
+        tile.layer?.borderColor = Palette.border.cgColor
+
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 4
+        tile.addSubview(stack)
+
+        stack.addArrangedSubview(makeLabel(title, size: 11, weight: .semibold, color: Palette.muted))
+        stack.addArrangedSubview(makeLabel(value, size: 20, weight: .semibold, color: Palette.text))
+        stack.addArrangedSubview(makeLabel(detail, size: 11, weight: .regular, color: Palette.muted))
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: tile.leadingAnchor, constant: 14),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: tile.trailingAnchor, constant: -14),
+            stack.topAnchor.constraint(equalTo: tile.topAnchor, constant: 12),
+            stack.bottomAnchor.constraint(equalTo: tile.bottomAnchor, constant: -12),
+            tile.heightAnchor.constraint(greaterThanOrEqualToConstant: 86)
+        ])
+
+        return tile
+    }
+
     private func buildPreviewCard() -> NSView {
         let (card, stack) = makeSectionCard(
             title: "Live quality preview",
             subtitle: "The first queued image is recompressed locally after you move the slider.",
             symbol: "photo.on.rectangle.angled"
         )
-        previewCard = card
-        previewHeightConstraint = card.heightAnchor.constraint(equalToConstant: 0)
-        previewHeightConstraint?.isActive = true
 
         let imageRow = NSStackView()
         imageRow.orientation = .vertical
@@ -1565,57 +1660,32 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         return stack
     }
 
-    private func buildImageStatusRow() -> NSView {
-        let row = NSStackView()
-        row.translatesAutoresizingMaskIntoConstraints = false
-        row.orientation = .horizontal
-        row.alignment = .centerY
-        row.spacing = 14
-        row.addArrangedSubview(progressIndicator)
-        row.addArrangedSubview(statusLabel)
-        row.addArrangedSubview(NSView())
-        row.addArrangedSubview(clearCompletedButton)
-        row.addArrangedSubview(compressAgainButton)
-        row.addArrangedSubview(openOutputButton)
-        return row
-    }
-
-    private func buildQueueCard(table: NSTableView? = nil, stateLabel: NSTextField? = nil) -> NSView {
-        let card = NSView()
-        card.translatesAutoresizingMaskIntoConstraints = false
-        let stack = NSStackView()
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.orientation = .vertical
-        stack.spacing = 12
-        card.addSubview(stack)
-        let queueTable = table ?? tableView
-        let queueLabel = stateLabel ?? queueStateLabel
+    private func buildQueueCard() -> NSView {
+        let (card, stack) = makeSectionCard(
+            title: "Selected files",
+            subtitle: "Ready files, progress, and final output.",
+            symbol: "list.bullet.rectangle.portrait"
+        )
 
         let scroll = NSScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.hasVerticalScroller = true
         scroll.borderType = .noBorder
-        scroll.drawsBackground = false
-        scroll.documentView = queueTable
-        queueTable.enclosingScrollView?.drawsBackground = false
+        scroll.drawsBackground = true
+        scroll.backgroundColor = Palette.log
+        scroll.documentView = tableView
+        tableView.enclosingScrollView?.drawsBackground = true
 
-        stack.addArrangedSubview(makeLabel("Queue", size: 16, weight: .semibold, color: Palette.text))
-        stack.addArrangedSubview(queueLabel)
+        stack.addArrangedSubview(queueStateLabel)
         stack.addArrangedSubview(scroll)
-        scroll.heightAnchor.constraint(equalToConstant: 176).isActive = true
-        NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: card.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor)
-        ])
+        scroll.heightAnchor.constraint(equalToConstant: 150).isActive = true
         return card
     }
 
     private func buildLogCard() -> NSView {
         let (card, stack) = makeSectionCard(
-            title: "Activity",
-            subtitle: "Timeline of progress, warnings, and errors.",
+            title: "Follow the results",
+            subtitle: "Every processed file writes a line here so you can see exactly what happened.",
             symbol: "terminal"
         )
 
@@ -1638,33 +1708,68 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         stack.addArrangedSubview(progressRow)
         stack.addArrangedSubview(scroll)
-        scroll.heightAnchor.constraint(equalToConstant: 148).isActive = true
+        scroll.heightAnchor.constraint(equalToConstant: 122).isActive = true
+        return card
+    }
+
+    private func buildFooterCard() -> NSView {
+        let card = CardView()
+        let container = NSStackView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.orientation = .horizontal
+        container.alignment = .centerY
+        container.spacing = 16
+        card.addSubview(container)
+
+        let left = NSStackView()
+        left.orientation = .horizontal
+        left.alignment = .centerY
+        left.spacing = 14
+        left.addArrangedSubview(progressIndicator)
+        left.addArrangedSubview(statusLabel)
+        left.setContentHuggingPriority(.defaultLow, for: .horizontal)
+
+        container.addArrangedSubview(left)
+        container.addArrangedSubview(NSView())
+        let actions = NSStackView(views: [clearCompletedButton, compressAgainButton, openOutputButton])
+        actions.orientation = .horizontal
+        actions.spacing = 8
+        container.addArrangedSubview(actions)
+
+        NSLayoutConstraint.activate([
+            container.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
+            container.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -18),
+            container.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
+            container.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
+        ])
+
         return card
     }
 
     private func makeSectionCard(title: String, subtitle: String, symbol: String) -> (CardView, NSStackView) {
-        let card = CardView(background: NSColor.white.withAlphaComponent(0.9))
+        let card = CardView()
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.orientation = .vertical
-        stack.spacing = 10
+        stack.spacing = 12
         card.addSubview(stack)
 
         let titleRow = NSStackView()
         titleRow.orientation = .horizontal
         titleRow.alignment = .centerY
-        titleRow.spacing = 8
-        titleRow.addArrangedSubview(makeLabel(title, size: 18, weight: .semibold, color: Palette.text))
+        titleRow.spacing = 10
+        titleRow.addArrangedSubview(makeSymbolBadge(symbol: symbol, tint: Palette.accent))
+        titleRow.addArrangedSubview(makeLabel(title, size: 19, weight: .semibold, color: Palette.text))
         titleRow.addArrangedSubview(NSView())
 
         stack.addArrangedSubview(titleRow)
-        stack.addArrangedSubview(makeWrappingLabel(subtitle, size: 13, weight: .regular, color: Palette.muted))
+        stack.addArrangedSubview(makeWrappingLabel(subtitle, size: 12, weight: .regular, color: Palette.muted))
 
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 18),
             stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -18),
-            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 18),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -18)
         ])
 
         return (card, stack)
@@ -1686,7 +1791,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     @objc private func setTargetFromSegment(_ sender: NSSegmentedControl) {
-        let values = ["150kb", "300kb", "500kb", "2mb"]
+        let values = ["150kb", "300kb", "500kb"]
         guard sender.selectedSegment >= 0, sender.selectedSegment < values.count else { return }
         maxSizeField.stringValue = values[sender.selectedSegment]
         updateDashboard()
@@ -1767,10 +1872,10 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     @objc private func scrollToSettings() {
-        switchScreen(.images)
-        if advancedSettingsPanel?.isHidden == true {
-            toggleAdvancedSettings()
-        }
+        guard let scrollView = contentScrollView else { return }
+        let point = NSPoint(x: 0, y: 360)
+        scrollView.contentView.scroll(to: point)
+        scrollView.reflectScrolledClipView(scrollView.contentView)
     }
 
 
@@ -2306,7 +2411,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                 self.appendLog(summary)
                 self.lastOutputFolder = outputFolder
                 self.openOutputButton.isEnabled = outputFolder != nil
-                self.imageStatusPanel?.isHidden = false
                 if let folder = outputFolder {
                     self.appendLog("Output folder: \(folder.path)")
                 }
@@ -2674,29 +2778,16 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let live = Set(selectedFiles.map { queueStatusKey($0) })
         fileStates = fileStates.filter { live.contains($0.key) }
         tableView.reloadData()
-        queueRouteTableView.reloadData()
         updateDashboard()
         schedulePreviewUpdate()
 
         if selectedFiles.isEmpty {
             queueHintLabel.stringValue = "Nothing is queued yet. Add files, add a folder, or drag images into the drop zone."
             queueStateLabel.stringValue = "Drop files to start"
-            queueRouteStateLabel.stringValue = "Drop files to start"
         } else {
             queueHintLabel.stringValue = "Tip: Pick an output folder so optimized files keep the same base name safely."
             queueStateLabel.stringValue = "\(selectedFiles.count) file(s) ready"
-            queueRouteStateLabel.stringValue = "\(selectedFiles.count) file(s) ready"
         }
-        let hasFiles = !selectedFiles.isEmpty
-        imageSupportPanel?.isHidden = !hasFiles
-        imageStatusPanel?.isHidden = !hasFiles && lastOutputFolder == nil
-        removeSelectedButton.isHidden = !hasFiles
-        clearAllButton.isHidden = !hasFiles
-        if !hasFiles {
-            queuePanel?.isHidden = true
-            queueToggleButton.title = "Queue"
-        }
-        stopButton.isHidden = !isRunning
         compressButton.isEnabled = !selectedFiles.isEmpty && !isRunning
         clearCompletedButton.isEnabled = selectedFiles.contains { fileStates[queueStatusKey($0)]?.status == .done }
     }
@@ -2755,8 +2846,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         isRunning = running
         compressButton.isEnabled = !running && !selectedFiles.isEmpty
         stopButton.isEnabled = running
-        stopButton.isHidden = !running
-        imageStatusPanel?.isHidden = !running && selectedFiles.isEmpty && lastOutputFolder == nil
         if running {
             progressIndicator.startAnimation(nil)
         } else {
@@ -2860,11 +2949,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let output = NSMutableAttributedString()
 
         for line in lines {
-            logger.write(line)
-            if line.hasPrefix("[DIAG]") {
-                continue
-            }
-
             let logColor: NSColor
             if line.contains("[ERROR]") {
                 logColor = Palette.danger
@@ -2877,16 +2961,15 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             }
 
             output.append(NSAttributedString(
-                string: "• " + line + "\n",
+                string: line + "\n",
                 attributes: [
                     .foregroundColor: logColor,
-                    .font: NSFont.systemFont(ofSize: 12, weight: .regular),
-                    .paragraphStyle: activityParagraphStyle()
+                    .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
                 ]
             ))
+            logger.write(line)
         }
 
-        guard output.length > 0 else { return }
         logTextView.textStorage?.append(output)
         if autoScroll {
             logTextView.scrollToEndOfDocument(nil)
@@ -2914,6 +2997,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     func setStartupStatus(_ message: String) {
+        statusLabel.stringValue = message
         appendLog(message)
     }
 
@@ -3067,15 +3151,6 @@ private func makeWrappingLabel(_ text: String, size: CGFloat, weight: NSFont.Wei
     return label
 }
 
-private func activityParagraphStyle() -> NSParagraphStyle {
-    let style = NSMutableParagraphStyle()
-    style.lineSpacing = 2
-    style.paragraphSpacing = 6
-    style.headIndent = 13
-    style.firstLineHeadIndent = 0
-    return style
-}
-
 private func makeBadgeLabel(_ text: String) -> NSTextField {
     let label = NSTextField(labelWithString: text)
     label.translatesAutoresizingMaskIntoConstraints = false
@@ -3098,16 +3173,6 @@ private func styleSecondaryButton(_ button: NSButton) {
     button.imageHugsTitle = true
     button.setButtonType(.momentaryPushIn)
     button.heightAnchor.constraint(equalToConstant: 34).isActive = true
-}
-
-private func styleTopNavigationButton(_ button: NSButton) {
-    button.translatesAutoresizingMaskIntoConstraints = false
-    button.isBordered = false
-    button.bezelStyle = .inline
-    button.font = premiumFont(size: 13, weight: .medium)
-    button.contentTintColor = Palette.muted
-    button.setButtonType(.momentaryPushIn)
-    button.heightAnchor.constraint(equalToConstant: 32).isActive = true
 }
 
 private func stylePrimaryButton(_ button: NSButton) {

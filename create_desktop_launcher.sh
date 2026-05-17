@@ -6,6 +6,7 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DESKTOP_DIR="$HOME/Desktop"
 APP_NAME="Image Compressor.app"
 APP_PATH="$DESKTOP_DIR/$APP_NAME"
+BUILD_VERSION="$(date +%Y%m%d%H%M%S)"
 ICONSET_DIR="$PROJECT_DIR/icon.iconset"
 ICON_SOURCE="$PROJECT_DIR/icon_source.svg"
 BASE_PNG="$PROJECT_DIR/.icon_base.png"
@@ -79,7 +80,7 @@ cat > "$TEMP_APP_PATH/Contents/Info.plist" <<EOF
   <key>CFBundleShortVersionString</key>
   <string>2.0</string>
   <key>CFBundleVersion</key>
-  <string>2</string>
+  <string>$BUILD_VERSION</string>
   <key>LSMinimumSystemVersion</key>
   <string>11.0</string>
   <key>NSHighResolutionCapable</key>

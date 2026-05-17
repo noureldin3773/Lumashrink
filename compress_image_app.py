@@ -31,25 +31,21 @@ except ModuleNotFoundError:
 
 
 PALETTE = {
-    "bg": "#F7F6F3",
-    "card": "#FFFFFF",
-    "soft": "#F1EFEA",
-    "soft_alt": "#FBFBFA",
-    "accent": "#111111",
-    "accent_dark": "#2F3437",
-    "text": "#111111",
-    "muted": "#787774",
-    "line": "#EAEAEA",
-    "success": "#346538",
-    "warning": "#956400",
-    "danger": "#9F2F2D",
-    "log_bg": "#FBFBFA",
-    "log_fg": "#2F3437",
-    "hint_bg": "#FBF3DB",
-    "note_bg": "#EDF3EC",
+    "window": "#F7F8FA",
+    "surface": "#FFFFFF",
+    "surface_soft": "#F1F4F8",
+    "surface_emphasis": "#EEF3FA",
+    "text": "#0F172A",
+    "muted": "#5B6475",
+    "line": "#D6DEE8",
+    "accent": "#0A66F0",
+    "accent_press": "#084CB5",
+    "danger": "#B42332",
+    "success": "#237A4A",
 }
 
-FONT_FAMILY = "SF Pro Display"
+FONT_FAMILY = "SF Pro Text"
+MONO_FAMILY = "SF Mono"
 APP_SESSION_PATH = Path.home() / "Library" / "Application Support" / "ImageCompressor" / "session.json"
 APP_LOG_DIR = Path.home() / "Library" / "Logs" / "ImageCompressorTk"
 PRESET_MAP = {"WhatsApp": "150kb", "Email": "300kb", "Web": "500kb", "Archive": "2mb"}
@@ -59,9 +55,9 @@ class CompressorApp:
     def __init__(self) -> None:
         self.root = TkinterDnD.Tk() if TKDND_AVAILABLE else tk.Tk()
         self.root.title("Image Compressor")
-        self.root.geometry("1240x920")
-        self.root.minsize(1080, 780)
-        self.root.configure(bg=PALETTE["bg"])
+        self.root.geometry("1220x860")
+        self.root.minsize(980, 720)
+        self.root.configure(bg=PALETTE["window"])
 
         self.selected_inputs: list[Path] = []
         self.last_output_folder: Path | None = None
@@ -70,24 +66,16 @@ class CompressorApp:
         self.name_mode_var = tk.StringVar(value="suffix")
         self.suffix_var = tk.StringVar(value="-compressed")
         self.output_dir_var = tk.StringVar(value="")
-        self.status_var = tk.StringVar(
-            value="Everything runs locally on your Mac. Add files and press Compress Now."
-        )
-        self.save_mode_hint_var = tk.StringVar()
-        self.queue_stats_var = tk.StringVar()
-        self.target_card_var = tk.StringVar()
-        self.mode_card_var = tk.StringVar()
-        self.file_hint_var = tk.StringVar()
+        self.status_var = tk.StringVar(value="Drop images, then press Compress.")
         self.is_running = False
+        self.show_activity_var = tk.BooleanVar(value=False)
+        self.show_advanced_var = tk.BooleanVar(value=False)
         self.current_log_file = self._prepare_log_file()
 
         self.style = ttk.Style(self.root)
         self._configure_style()
         self._build_ui()
         self._bind_shortcuts()
-
-        for var in (self.max_size_var, self.format_var, self.name_mode_var):
-            var.trace_add("write", self._refresh_dashboard)
 
         self._update_save_mode_ui()
         self._refresh_file_list()
@@ -113,34 +101,23 @@ class CompressorApp:
             self.style.theme_use("clam")
         except tk.TclError:
             pass
-
         self.style.configure(
             "App.TCombobox",
-            padding=6,
+            padding=7,
             foreground=PALETTE["text"],
-            fieldbackground=PALETTE["card"],
-            background=PALETTE["card"],
+            fieldbackground=PALETTE["surface"],
+            background=PALETTE["surface"],
             bordercolor=PALETTE["line"],
             lightcolor=PALETTE["line"],
             darkcolor=PALETTE["line"],
             arrowcolor=PALETTE["text"],
         )
-        self.style.map(
-            "App.TCombobox",
-            fieldbackground=[("readonly", PALETTE["card"])],
-            background=[("readonly", PALETTE["card"])],
-            foreground=[("readonly", PALETTE["text"])],
-            selectbackground=[("readonly", PALETTE["card"])],
-            selectforeground=[("readonly", PALETTE["text"])],
-        )
         self.style.configure(
             "App.Horizontal.TProgressbar",
-            thickness=10,
+            thickness=8,
             background=PALETTE["accent"],
-            troughcolor=PALETTE["soft"],
-            bordercolor=PALETTE["soft"],
-            lightcolor=PALETTE["accent"],
-            darkcolor=PALETTE["accent"],
+            troughcolor=PALETTE["surface_soft"],
+            bordercolor=PALETTE["surface_soft"],
         )
 
     def _bind_shortcuts(self) -> None:
@@ -153,609 +130,220 @@ class CompressorApp:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
-        shell = tk.Frame(self.root, bg=PALETTE["bg"], padx=22, pady=20)
-        shell.grid(row=0, column=0, sticky="nsew")
-        shell.columnconfigure(0, weight=1)
-        shell.rowconfigure(3, weight=1)
+        frame = tk.Frame(self.root, bg=PALETTE["window"], padx=28, pady=24)
+        frame.grid(row=0, column=0, sticky="nsew")
+        frame.columnconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
 
-        self._build_hero(shell)
-        self._build_metrics(shell)
+        self._build_topbar(frame)
+        self._build_workspace(frame)
 
-        top = tk.Frame(shell, bg=PALETTE["bg"])
-        top.grid(row=2, column=0, sticky="nsew", pady=(0, 16))
-        top.columnconfigure(0, weight=5)
-        top.columnconfigure(1, weight=4)
-        top.rowconfigure(0, weight=1)
+    def _build_topbar(self, parent: tk.Frame) -> None:
+        bar = tk.Frame(parent, bg=PALETTE["window"])
+        bar.grid(row=0, column=0, sticky="ew", pady=(0, 22))
+        bar.columnconfigure(0, weight=1)
 
-        self._build_sources_panel(top)
-        self._build_settings_panel(top)
-
-        bottom = tk.Frame(shell, bg=PALETTE["bg"])
-        bottom.grid(row=3, column=0, sticky="nsew")
-        bottom.columnconfigure(0, weight=11)
-        bottom.columnconfigure(1, weight=9)
-        bottom.rowconfigure(0, weight=1)
-
-        self._build_queue_panel(bottom)
-        self._build_log_panel(bottom)
-        self._build_footer(shell)
-
-    def _build_hero(self, parent: tk.Frame) -> None:
-        hero = tk.Frame(parent, bg=PALETTE["card"], padx=24, pady=22, highlightthickness=1, highlightbackground=PALETTE["line"])
-        hero.grid(row=0, column=0, sticky="ew", pady=(0, 14))
-        hero.columnconfigure(0, weight=1)
-
-        badge = tk.Label(
-            hero,
-            text="Local app | Best quality under target",
-            bg="#E1F3FE",
-            fg="#1F6C9F",
-            font=(FONT_FAMILY, 10, "bold"),
-            padx=12,
-            pady=6,
-        )
-        badge.grid(row=0, column=0, sticky="w")
-
-        title = tk.Label(
-            hero,
-            text="Image Compression Workspace",
-            bg=PALETTE["card"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 22, "bold"),
-            anchor="w",
-            justify="left",
-        )
-        title.grid(row=1, column=0, sticky="w", pady=(14, 8))
-
-        subtitle = tk.Label(
-            hero,
-            text=(
-                "The app lowers compression first and only shrinks dimensions when it has to. "
-                "A target like 150kb is aggressive, so this aims for the best visual result "
-                "under the limit while keeping the whole workflow local."
-            ),
-            bg=PALETTE["card"],
-            fg=PALETTE["muted"],
-            font=(FONT_FAMILY, 11),
-            wraplength=1080,
-            justify="left",
-            anchor="w",
-        )
-        subtitle.grid(row=2, column=0, sticky="w")
-
-    def _build_metrics(self, parent: tk.Frame) -> None:
-        metrics = tk.Frame(parent, bg=PALETTE["bg"])
-        metrics.grid(row=1, column=0, sticky="ew", pady=(0, 16))
-        metrics.columnconfigure(0, weight=1)
-        metrics.columnconfigure(1, weight=1)
-        metrics.columnconfigure(2, weight=1)
-
-        self._build_metric_card(metrics, 0, "Queued", self.queue_stats_var)
-        self._build_metric_card(metrics, 1, "Target", self.target_card_var)
-        self._build_metric_card(metrics, 2, "Output", self.mode_card_var)
-
-    def _build_metric_card(
-        self, parent: tk.Frame, column: int, label: str, value_var: tk.StringVar
-    ) -> None:
-        card = tk.Frame(
-            parent,
-            bg=PALETTE["card"],
-            padx=18,
-            pady=16,
-            highlightthickness=1,
-            highlightbackground=PALETTE["line"],
-        )
-        card.grid(row=0, column=column, sticky="nsew", padx=(0 if column == 0 else 8, 0))
-        parent.columnconfigure(column, weight=1)
+        left = tk.Frame(bar, bg=PALETTE["window"])
+        left.grid(row=0, column=0, sticky="w")
 
         tk.Label(
-            card,
-            text=label,
-            bg=PALETTE["card"],
-            fg=PALETTE["muted"],
-            font=(FONT_FAMILY, 10, "bold"),
+            left,
+            text="Image Compressor",
+            bg=PALETTE["window"],
+            fg=PALETTE["text"],
+            font=(FONT_FAMILY, 24, "bold"),
         ).grid(row=0, column=0, sticky="w")
-
         tk.Label(
-            card,
-            textvariable=value_var,
-            bg=PALETTE["card"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 16, "bold"),
-            justify="left",
-            anchor="w",
-        ).grid(row=1, column=0, sticky="w", pady=(8, 0))
-
-    def _build_sources_panel(self, parent: tk.Frame) -> None:
-        card = self._make_card(
-            parent,
-            row=0,
-            column=0,
-            title="1. Add your images",
-            subtitle=(
-                "Drag files or folders into the drop zone. You can also add files manually, "
-                "remove selected items, or clear the queue."
-            ),
-            padx=(0, 10),
-        )
-        card.rowconfigure(2, weight=1)
-
-        drop_area = tk.Frame(
-            card,
-            bg=PALETTE["soft_alt"],
-            padx=24,
-            pady=28,
-            highlightthickness=2,
-            highlightbackground=PALETTE["accent"],
-        )
-        drop_area.grid(row=2, column=0, sticky="nsew", pady=(4, 16))
-        drop_area.columnconfigure(0, weight=1)
-        drop_area.rowconfigure(0, weight=1)
-
-        drop_title = tk.Label(
-            drop_area,
-            text="Drop images here",
-            bg=PALETTE["soft_alt"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 20, "bold"),
-        )
-        drop_title.grid(row=0, column=0, sticky="n", pady=(10, 8))
-
-        drop_copy = (
-            "Drag JPG, PNG, WebP, TIFF, or whole folders into this area."
-            if TKDND_AVAILABLE
-            else "Drag-and-drop support is optional. Use Add Files or Add Folder below."
-        )
-        drop_body = tk.Label(
-            drop_area,
-            text=drop_copy,
-            bg=PALETTE["soft_alt"],
+            left,
+            text="Upload, compress, and export with less noise.",
+            bg=PALETTE["window"],
             fg=PALETTE["muted"],
             font=(FONT_FAMILY, 12),
-            wraplength=540,
-            justify="center",
-        )
-        drop_body.grid(row=1, column=0, sticky="n", pady=(0, 14))
+        ).grid(row=1, column=0, sticky="w", pady=(4, 0))
+
+        right = tk.Frame(bar, bg=PALETTE["window"])
+        right.grid(row=0, column=1, sticky="e")
+        self._make_button(right, "Options", self._toggle_advanced, kind="subtle").grid(row=0, column=0, padx=(0, 10))
+        self._make_button(right, "Activity", self._toggle_activity, kind="subtle").grid(row=0, column=1)
+
+    def _build_workspace(self, parent: tk.Frame) -> None:
+        area = tk.Frame(parent, bg=PALETTE["window"])
+        area.grid(row=1, column=0, sticky="nsew")
+        area.columnconfigure(0, weight=1)
+        area.rowconfigure(0, weight=1)
+
+        main = tk.Frame(area, bg=PALETTE["surface"], padx=28, pady=24, highlightthickness=1, highlightbackground=PALETTE["line"])
+        main.grid(row=0, column=0, sticky="nsew")
+        main.columnconfigure(0, weight=1)
+
+        self._build_drop_zone(main)
+        self._build_file_queue(main)
+        self._build_primary_actions(main)
+        self._build_advanced_section(main)
+        self._build_activity(main)
+
+    def _build_drop_zone(self, parent: tk.Frame) -> None:
+        drop = tk.Frame(parent, bg=PALETTE["surface_emphasis"], padx=24, pady=34, highlightthickness=1, highlightbackground=PALETTE["line"])
+        drop.grid(row=0, column=0, sticky="ew")
+        drop.columnconfigure(0, weight=1)
+
+        tk.Label(drop, text="Drop images here", bg=PALETTE["surface_emphasis"], fg=PALETTE["text"], font=(FONT_FAMILY, 30, "bold")).grid(row=0, column=0)
+        subtitle = "Drag JPG, PNG, WebP, TIFF, or folders." if TKDND_AVAILABLE else "Use Add Files or Add Folder below."
+        tk.Label(drop, text=subtitle, bg=PALETTE["surface_emphasis"], fg=PALETTE["muted"], font=(FONT_FAMILY, 13)).grid(row=1, column=0, pady=(8, 20))
+
+        actions = tk.Frame(drop, bg=PALETTE["surface_emphasis"])
+        actions.grid(row=2, column=0)
+        self._make_button(actions, "Add Files", self._pick_files).grid(row=0, column=0, padx=(0, 10))
+        self._make_button(actions, "Add Folder", self._pick_folder, kind="secondary").grid(row=0, column=1)
 
         if TKDND_AVAILABLE:
-            for widget in (drop_area, drop_title, drop_body):
+            for widget in (drop,):
                 widget.drop_target_register(DND_FILES)
                 widget.dnd_bind("<<Drop>>", self._handle_drop)
 
-        buttons = tk.Frame(card, bg=PALETTE["card"])
-        buttons.grid(row=3, column=0, sticky="ew")
-        buttons.columnconfigure(0, weight=1)
-        buttons.columnconfigure(1, weight=1)
-        buttons.columnconfigure(2, weight=1)
-        buttons.columnconfigure(3, weight=1)
-
-        self._make_button(buttons, "Add Files", self._pick_files).grid(
-            row=0, column=0, sticky="ew", padx=(0, 8)
-        )
-        self._make_button(buttons, "Add Folder", self._pick_folder).grid(
-            row=0, column=1, sticky="ew", padx=(0, 8)
-        )
-        self._make_button(buttons, "Remove Selected", self._remove_selected).grid(
-            row=0, column=2, sticky="ew", padx=(0, 8)
-        )
-        self._make_button(buttons, "Clear All", self._clear_files, kind="danger").grid(
-            row=0, column=3, sticky="ew"
-        )
-
-        tk.Label(
-            card,
-            textvariable=self.file_hint_var,
-            bg=PALETTE["card"],
-            fg=PALETTE["muted"],
-            font=(FONT_FAMILY, 11),
-            anchor="w",
-            justify="left",
-        ).grid(row=4, column=0, sticky="w", pady=(14, 0))
-
-    def _build_settings_panel(self, parent: tk.Frame) -> None:
-        card = self._make_card(
-            parent,
-            row=0,
-            column=1,
-            title="2. Choose how to save",
-            subtitle=(
-                "Set your max size, pick an output format, then choose whether to add a "
-                "suffix, keep the same name in another folder, or overwrite the original."
-            ),
-        )
-        card.columnconfigure(1, weight=1)
-
-        self._add_field_label(card, 2, "Target size")
-        self.target_entry = self._make_entry(card, self.max_size_var)
-        self.target_entry.grid(row=2, column=1, sticky="ew", pady=5)
-
-        preset_row = tk.Frame(card, bg=PALETTE["card"])
-        preset_row.grid(row=3, column=1, sticky="w", pady=(0, 10))
-        for index, (label, value) in enumerate(PRESET_MAP.items()):
-            self._make_button(
-                preset_row,
-                label,
-                command=lambda chosen=value: self.max_size_var.set(chosen),
-                kind="subtle",
-            ).grid(row=0, column=index, padx=(0, 8))
-
-        self._add_field_label(card, 4, "Format")
-        self.format_box = ttk.Combobox(
-            card,
-            textvariable=self.format_var,
-            values=("auto", "keep", "jpeg", "png", "webp"),
-            state="readonly",
-            style="App.TCombobox",
-        )
-        self.format_box.grid(row=4, column=1, sticky="ew", pady=5)
-
-        self._add_field_label(card, 5, "Save mode")
-        self.name_mode_box = ttk.Combobox(
-            card,
-            textvariable=self.name_mode_var,
-            values=("suffix", "same-name", "overwrite"),
-            state="readonly",
-            style="App.TCombobox",
-        )
-        self.name_mode_box.grid(row=5, column=1, sticky="ew", pady=5)
-        self.name_mode_box.bind(
-            "<<ComboboxSelected>>", lambda _event: self._update_save_mode_ui()
-        )
-
-        self._add_field_label(card, 6, "Suffix")
-        self.suffix_entry = self._make_entry(card, self.suffix_var)
-        self.suffix_entry.grid(row=6, column=1, sticky="ew", pady=5)
-
-        self._add_field_label(card, 7, "Output folder")
-        folder_row = tk.Frame(card, bg=PALETTE["card"])
-        folder_row.grid(row=7, column=1, sticky="ew", pady=5)
-        folder_row.columnconfigure(0, weight=1)
-
-        self.output_dir_entry = self._make_entry(folder_row, self.output_dir_var)
-        self.output_dir_entry.grid(row=0, column=0, sticky="ew", padx=(0, 8))
-        self.browse_button = self._make_button(
-            folder_row,
-            "Choose",
-            self._choose_output_folder,
-            kind="subtle",
-        )
-        self.browse_button.grid(row=0, column=1, padx=(0, 8))
-        self.clear_output_button = self._make_button(
-            folder_row,
-            "Clear",
-            lambda: self.output_dir_var.set(""),
-            kind="subtle",
-        )
-        self.clear_output_button.grid(row=0, column=2)
-
-        hint_box = tk.Frame(
-            card,
-            bg=PALETTE["hint_bg"],
-            padx=14,
-            pady=10,
-            highlightthickness=1,
-            highlightbackground="#7C6A22",
-        )
-        hint_box.grid(row=8, column=0, columnspan=2, sticky="ew", pady=(14, 10))
-        tk.Label(
-            hint_box,
-            textvariable=self.save_mode_hint_var,
-            bg=PALETTE["hint_bg"],
-            fg=PALETTE["warning"],
-            font=(FONT_FAMILY, 11),
-            justify="left",
-            wraplength=420,
-        ).grid(row=0, column=0, sticky="w")
-
-        note_box = tk.Frame(
-            card,
-            bg=PALETTE["note_bg"],
-            padx=14,
-            pady=10,
-            highlightthickness=1,
-            highlightbackground=PALETTE["line"],
-        )
-        note_box.grid(row=9, column=0, columnspan=2, sticky="ew", pady=(0, 6))
-        tk.Label(
-            note_box,
-            text=(
-                "Tip: Compressing a 12 MB image down to 150 KB can require both stronger "
-                "compression and smaller dimensions. This app always tries the highest quality "
-                "that still fits the target."
-            ),
-            bg=PALETTE["note_bg"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 11),
-            justify="left",
-            wraplength=420,
-        ).grid(row=0, column=0, sticky="w")
-
-    def _build_queue_panel(self, parent: tk.Frame) -> None:
-        card = self._make_card(
-            parent,
-            row=0,
-            column=0,
-            title="3. Review the queue",
-            subtitle="Double-click any queued file to reveal it in Finder.",
-            padx=(0, 10),
-        )
-        card.rowconfigure(2, weight=1)
-
+    def _build_file_queue(self, parent: tk.Frame) -> None:
         self.queue_heading_var = tk.StringVar(value="No files queued yet.")
-        tk.Label(
-            card,
-            textvariable=self.queue_heading_var,
-            bg=PALETTE["card"],
-            fg=PALETTE["muted"],
-            font=(FONT_FAMILY, 11),
-            anchor="w",
-        ).grid(row=2, column=0, sticky="w", pady=(4, 10))
+        tk.Label(parent, textvariable=self.queue_heading_var, bg=PALETTE["surface"], fg=PALETTE["muted"], font=(FONT_FAMILY, 12)).grid(row=1, column=0, sticky="w", pady=(22, 10))
 
-        list_frame = tk.Frame(
-            card,
-            bg=PALETTE["card"],
-            highlightthickness=1,
-            highlightbackground=PALETTE["line"],
-        )
-        list_frame.grid(row=3, column=0, sticky="nsew")
+        list_frame = tk.Frame(parent, bg=PALETTE["surface_soft"], highlightthickness=1, highlightbackground=PALETTE["line"])
+        list_frame.grid(row=2, column=0, sticky="nsew")
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(0, weight=1)
-        card.rowconfigure(3, weight=1)
+        parent.rowconfigure(2, weight=1)
 
         self.file_list = tk.Listbox(
             list_frame,
-            height=12,
-            bg=PALETTE["log_bg"],
+            height=10,
+            bg=PALETTE["surface_soft"],
             fg=PALETTE["text"],
-            selectbackground="#E1F3FE",
+            selectbackground="#DCEBFF",
             selectforeground=PALETTE["text"],
             borderwidth=0,
             highlightthickness=0,
             activestyle="none",
-            font=("Menlo", 11),
+            font=(MONO_FAMILY, 11),
         )
         self.file_list.grid(row=0, column=0, sticky="nsew")
+        tk.Scrollbar(list_frame, orient="vertical", command=self.file_list.yview).grid(row=0, column=1, sticky="ns")
 
-        file_scroll = tk.Scrollbar(
-            list_frame,
-            orient="vertical",
-            command=self.file_list.yview,
-            bg=PALETTE["soft"],
-            troughcolor=PALETTE["bg"],
-            activebackground=PALETTE["accent"],
-        )
-        file_scroll.grid(row=0, column=1, sticky="ns")
-        self.file_list.configure(yscrollcommand=file_scroll.set)
+        list_actions = tk.Frame(parent, bg=PALETTE["surface"])
+        list_actions.grid(row=3, column=0, sticky="w", pady=(10, 0))
+        self._make_button(list_actions, "Remove Selected", self._remove_selected, kind="subtle").grid(row=0, column=0, padx=(0, 8))
+        self._make_button(list_actions, "Clear", self._clear_files, kind="danger").grid(row=0, column=1)
 
-    def _build_log_panel(self, parent: tk.Frame) -> None:
-        card = self._make_card(
-            parent,
-            row=0,
-            column=1,
-            title="4. Follow the results",
-            subtitle="Every file writes a line here so you can see what changed.",
-        )
-        card.rowconfigure(2, weight=1)
+    def _build_primary_actions(self, parent: tk.Frame) -> None:
+        bar = tk.Frame(parent, bg=PALETTE["surface"])
+        bar.grid(row=4, column=0, sticky="ew", pady=(22, 0))
+        bar.columnconfigure(0, weight=1)
 
-        self.log_text = tk.Text(
-            card,
-            height=12,
-            wrap="word",
-            state="disabled",
-            bg=PALETTE["log_bg"],
-            fg=PALETTE["log_fg"],
-            insertbackground=PALETTE["text"],
-            relief="flat",
-            borderwidth=0,
-            highlightthickness=0,
-            padx=14,
-            pady=14,
-            font=("Menlo", 11),
-        )
-        self.log_text.grid(row=2, column=0, sticky="nsew", pady=(6, 0))
+        tk.Label(bar, textvariable=self.status_var, bg=PALETTE["surface"], fg=PALETTE["text"], font=(FONT_FAMILY, 13, "bold"), anchor="w").grid(row=0, column=0, sticky="w")
 
-        log_scroll = tk.Scrollbar(
-            card,
-            orient="vertical",
-            command=self.log_text.yview,
-            bg=PALETTE["soft"],
-            troughcolor=PALETTE["bg"],
-            activebackground=PALETTE["accent"],
-        )
-        log_scroll.grid(row=2, column=1, sticky="ns", pady=(6, 0))
-        self.log_text.configure(yscrollcommand=log_scroll.set)
+        self.progress = ttk.Progressbar(bar, mode="indeterminate", style="App.Horizontal.TProgressbar")
+        self.progress.grid(row=1, column=0, sticky="ew", pady=(10, 14))
 
-    def _build_footer(self, parent: tk.Frame) -> None:
-        footer = tk.Frame(
-            parent,
-            bg=PALETTE["card"],
-            padx=18,
-            pady=16,
-            highlightthickness=1,
-            highlightbackground=PALETTE["line"],
-        )
-        footer.grid(row=4, column=0, sticky="ew", pady=(16, 0))
-        footer.columnconfigure(0, weight=2)
-        footer.columnconfigure(1, weight=1)
-        footer.columnconfigure(2, weight=0)
-
-        left = tk.Frame(footer, bg=PALETTE["card"])
-        left.grid(row=0, column=0, sticky="ew", padx=(0, 16))
-        left.columnconfigure(0, weight=1)
-
-        tk.Label(
-            left,
-            textvariable=self.status_var,
-            bg=PALETTE["card"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 12, "bold"),
-            justify="left",
-            anchor="w",
-            wraplength=700,
-        ).grid(row=0, column=0, sticky="ew")
-
-        self.progress = ttk.Progressbar(
-            left,
-            mode="indeterminate",
-            style="App.Horizontal.TProgressbar",
-        )
-        self.progress.grid(row=1, column=0, sticky="ew", pady=(12, 0))
-
-        action_bar = tk.Frame(footer, bg=PALETTE["card"])
-        action_bar.grid(row=0, column=2, sticky="e")
-
-        self.open_output_button = self._make_button(
-            action_bar,
-            "Open Output Folder",
-            self._open_output_folder,
-            kind="subtle",
-        )
+        actions = tk.Frame(bar, bg=PALETTE["surface"])
+        actions.grid(row=2, column=0, sticky="e")
+        self.open_output_button = self._make_button(actions, "Open Output", self._open_output_folder, kind="subtle")
         self.open_output_button.grid(row=0, column=0, padx=(0, 10))
         self.open_output_button.config(state="disabled")
-
-        self.compress_button = self._make_button(
-            action_bar,
-            "Compress Now",
-            self._start_compression,
-            kind="primary",
-            padx=26,
-            pady=12,
-        )
+        self.compress_button = self._make_button(actions, "Compress", self._start_compression, kind="primary", padx=28, pady=12)
         self.compress_button.grid(row=0, column=1)
 
-    def _make_card(
-        self,
-        parent: tk.Frame,
-        row: int,
-        column: int,
-        title: str,
-        subtitle: str,
-        padx: tuple[int, int] = (0, 0),
-    ) -> tk.Frame:
-        card = tk.Frame(
-            parent,
-            bg=PALETTE["card"],
-            padx=18,
-            pady=18,
-            highlightthickness=1,
-            highlightbackground=PALETTE["line"],
-        )
-        card.grid(row=row, column=column, sticky="nsew", padx=padx)
-        card.columnconfigure(0, weight=1)
-        card.rowconfigure(0, weight=0)
+    def _build_advanced_section(self, parent: tk.Frame) -> None:
+        self.advanced_frame = tk.Frame(parent, bg=PALETTE["surface"], pady=16)
+        self.advanced_frame.grid(row=5, column=0, sticky="ew")
+        self.advanced_frame.columnconfigure(1, weight=1)
+        self._add_field_label(self.advanced_frame, 0, "Target size")
+        self.target_entry = self._make_entry(self.advanced_frame, self.max_size_var)
+        self.target_entry.grid(row=0, column=1, sticky="ew", pady=4)
 
-        tk.Label(
-            card,
-            text=title,
-            bg=PALETTE["card"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 16, "bold"),
-            anchor="w",
-        ).grid(row=0, column=0, sticky="w")
+        preset_row = tk.Frame(self.advanced_frame, bg=PALETTE["surface"])
+        preset_row.grid(row=1, column=1, sticky="w", pady=(2, 10))
+        for i, (label, value) in enumerate(PRESET_MAP.items()):
+            self._make_button(preset_row, label, lambda chosen=value: self.max_size_var.set(chosen), kind="subtle", padx=10, pady=7).grid(row=0, column=i, padx=(0, 7))
 
-        tk.Label(
-            card,
-            text=subtitle,
-            bg=PALETTE["card"],
-            fg=PALETTE["muted"],
-            font=(FONT_FAMILY, 11),
-            wraplength=560 if column == 0 else 460,
-            justify="left",
-            anchor="w",
-        ).grid(row=1, column=0, sticky="w", pady=(6, 14))
-        return card
+        self._add_field_label(self.advanced_frame, 2, "Format")
+        self.format_box = ttk.Combobox(self.advanced_frame, textvariable=self.format_var, values=("auto", "keep", "jpeg", "png", "webp"), state="readonly", style="App.TCombobox")
+        self.format_box.grid(row=2, column=1, sticky="ew", pady=4)
 
-    def _add_field_label(self, parent: tk.Frame, row: int, text: str) -> None:
-        tk.Label(
-            parent,
-            text=text,
-            bg=PALETTE["card"],
-            fg=PALETTE["text"],
-            font=(FONT_FAMILY, 11, "bold"),
-            anchor="w",
-        ).grid(row=row, column=0, sticky="w", pady=5, padx=(0, 12))
+        self._add_field_label(self.advanced_frame, 3, "Save mode")
+        self.name_mode_box = ttk.Combobox(self.advanced_frame, textvariable=self.name_mode_var, values=("suffix", "same-name", "overwrite"), state="readonly", style="App.TCombobox")
+        self.name_mode_box.grid(row=3, column=1, sticky="ew", pady=4)
+        self.name_mode_box.bind("<<ComboboxSelected>>", lambda _event: self._update_save_mode_ui())
+
+        self._add_field_label(self.advanced_frame, 4, "Suffix")
+        self.suffix_entry = self._make_entry(self.advanced_frame, self.suffix_var)
+        self.suffix_entry.grid(row=4, column=1, sticky="ew", pady=4)
+
+        self._add_field_label(self.advanced_frame, 5, "Output folder")
+        folder_row = tk.Frame(self.advanced_frame, bg=PALETTE["surface"])
+        folder_row.grid(row=5, column=1, sticky="ew", pady=4)
+        folder_row.columnconfigure(0, weight=1)
+        self.output_dir_entry = self._make_entry(folder_row, self.output_dir_var)
+        self.output_dir_entry.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+        self.browse_button = self._make_button(folder_row, "Choose", self._choose_output_folder, kind="subtle", padx=10, pady=7)
+        self.browse_button.grid(row=0, column=1, padx=(0, 8))
+        self.clear_output_button = self._make_button(folder_row, "Clear", lambda: self.output_dir_var.set(""), kind="subtle", padx=10, pady=7)
+        self.clear_output_button.grid(row=0, column=2)
+
+        self._set_advanced_visible(False)
+
+    def _build_activity(self, parent: tk.Frame) -> None:
+        self.activity_frame = tk.Frame(parent, bg=PALETTE["surface"], pady=14)
+        self.activity_frame.grid(row=6, column=0, sticky="nsew")
+        self.activity_frame.columnconfigure(0, weight=1)
+        self.activity_frame.rowconfigure(1, weight=1)
+        tk.Label(self.activity_frame, text="Activity", bg=PALETTE["surface"], fg=PALETTE["muted"], font=(FONT_FAMILY, 12, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 8))
+
+        self.log_text = tk.Text(self.activity_frame, height=8, wrap="word", state="disabled", bg=PALETTE["surface_soft"], fg=PALETTE["text"], relief="flat", borderwidth=0, highlightthickness=1, highlightbackground=PALETTE["line"], padx=12, pady=10, font=(MONO_FAMILY, 11))
+        self.log_text.grid(row=1, column=0, sticky="nsew")
+        self._set_activity_visible(False)
+
+    def _add_field_label(self, parent: tk.Widget, row: int, text: str) -> None:
+        tk.Label(parent, text=text, bg=PALETTE["surface"], fg=PALETTE["muted"], font=(FONT_FAMILY, 11)).grid(row=row, column=0, sticky="w", padx=(0, 12), pady=4)
 
     def _make_entry(self, parent: tk.Widget, textvariable: tk.StringVar) -> tk.Entry:
-        return tk.Entry(
-            parent,
-            textvariable=textvariable,
-            bg=PALETTE["card"],
-            fg=PALETTE["text"],
-            insertbackground=PALETTE["text"],
-            relief="flat",
-            borderwidth=0,
-            highlightthickness=1,
-            highlightbackground=PALETTE["line"],
-            highlightcolor=PALETTE["accent"],
-            font=(FONT_FAMILY, 12),
-        )
+        return tk.Entry(parent, textvariable=textvariable, bg=PALETTE["surface"], fg=PALETTE["text"], insertbackground=PALETTE["text"], relief="flat", borderwidth=0, highlightthickness=1, highlightbackground=PALETTE["line"], highlightcolor=PALETTE["accent"], font=(FONT_FAMILY, 12))
 
-    def _make_button(
-        self,
-        parent: tk.Widget,
-        text: str,
-        command,
-        kind: str = "secondary",
-        padx: int = 16,
-        pady: int = 10,
-    ) -> tk.Button:
+    def _make_button(self, parent: tk.Widget, text: str, command, kind: str = "secondary", padx: int = 16, pady: int = 10) -> tk.Button:
         styles = {
-            "primary": {
-                "bg": PALETTE["accent"],
-                "fg": "white",
-                "activebackground": PALETTE["accent_dark"],
-                "activeforeground": "white",
-            },
-            "secondary": {
-                "bg": "#F1EFEA",
-                "fg": PALETTE["text"],
-                "activebackground": "#EAE7DF",
-                "activeforeground": PALETTE["text"],
-            },
-            "subtle": {
-                "bg": "#FBFBFA",
-                "fg": PALETTE["text"],
-                "activebackground": "#F1EFEA",
-                "activeforeground": PALETTE["text"],
-            },
-            "danger": {
-                "bg": "#FDEBEC",
-                "fg": PALETTE["danger"],
-                "activebackground": "#F7DADC",
-                "activeforeground": PALETTE["danger"],
-            },
+            "primary": {"bg": PALETTE["accent"], "fg": "white", "activebackground": PALETTE["accent_press"], "activeforeground": "white"},
+            "secondary": {"bg": "#E9EEF6", "fg": PALETTE["text"], "activebackground": "#DDE7F4", "activeforeground": PALETTE["text"]},
+            "subtle": {"bg": PALETTE["surface_soft"], "fg": PALETTE["text"], "activebackground": "#E6EDF7", "activeforeground": PALETTE["text"]},
+            "danger": {"bg": "#FDECEE", "fg": PALETTE["danger"], "activebackground": "#F8DCDF", "activeforeground": PALETTE["danger"]},
         }
-        colors = styles[kind]
-        return tk.Button(
-            parent,
-            text=text,
-            command=command,
-            relief="flat",
-            borderwidth=0,
-            highlightthickness=0,
-            cursor="hand2",
-            disabledforeground="#94A3B8",
-            font=(FONT_FAMILY, 11, "bold"),
-            padx=padx,
-            pady=pady,
-            **colors,
-        )
+        button = tk.Button(parent, text=text, command=command, relief="flat", borderwidth=0, highlightthickness=0, cursor="hand2", disabledforeground="#98A2B3", font=(FONT_FAMILY, 11, "bold"), padx=padx, pady=pady, **styles[kind])
         button.bind("<Return>", lambda _event: command())
         button.bind("<space>", lambda _event: command())
         return button
+
+    def _toggle_advanced(self) -> None:
+        self._set_advanced_visible(not self.show_advanced_var.get())
+
+    def _toggle_activity(self) -> None:
+        self._set_activity_visible(not self.show_activity_var.get())
+
+    def _set_advanced_visible(self, visible: bool) -> None:
+        self.show_advanced_var.set(visible)
+        if visible:
+            self.advanced_frame.grid()
+        else:
+            self.advanced_frame.grid_remove()
+
+    def _set_activity_visible(self, visible: bool) -> None:
+        self.show_activity_var.set(visible)
+        if visible:
+            self.activity_frame.grid()
+        else:
+            self.activity_frame.grid_remove()
+
     def _choose_output_folder(self) -> None:
         selected = filedialog.askdirectory()
         if selected:
             self.output_dir_var.set(selected)
 
     def _pick_files(self) -> None:
-        filenames = filedialog.askopenfilenames(
-            title="Select images",
-            filetypes=[
-                ("Supported images", "*.jpg *.jpeg *.png *.webp *.bmp *.tif *.tiff"),
-                ("All files", "*.*"),
-            ],
-        )
+        filenames = filedialog.askopenfilenames(title="Select images", filetypes=[("Supported images", "*.jpg *.jpeg *.png *.webp *.bmp *.tif *.tiff"), ("All files", "*.*")])
         if filenames:
             self._add_inputs([Path(name) for name in filenames])
 
@@ -767,18 +355,16 @@ class CompressorApp:
     def _clear_files(self) -> None:
         self.selected_inputs.clear()
         self._refresh_file_list()
-        self.status_var.set("Queue cleared. Add new files whenever you are ready.")
+        self.status_var.set("Queue cleared.")
 
     def _remove_selected(self) -> None:
         selected_indexes = list(self.file_list.curselection())
         if not selected_indexes:
             return
-
         for index in reversed(selected_indexes):
             del self.selected_inputs[index]
-
         self._refresh_file_list()
-        self.status_var.set("Removed the selected item(s) from the queue.")
+        self.status_var.set("Removed selected item(s).")
 
     def _maybe_reveal_selected_file(self, event: tk.Event) -> None:
         if event.widget is self.file_list:
@@ -788,7 +374,6 @@ class CompressorApp:
         selection = self.file_list.curselection()
         if not selection:
             return
-
         path = self.selected_inputs[selection[0]]
         try:
             subprocess.Popen(["open", "-R", str(path)])
@@ -811,103 +396,44 @@ class CompressorApp:
     def _add_inputs(self, paths: list[Path]) -> None:
         existing = {path.resolve() for path in self.selected_inputs}
         added = 0
-
         for path in paths:
             expanded = path.expanduser()
             if not expanded.exists():
                 continue
-
             for file_path in collect_input_files([expanded.resolve()]):
                 resolved = file_path.resolve()
                 if resolved not in existing:
                     self.selected_inputs.append(resolved)
                     existing.add(resolved)
                     added += 1
-
         self._refresh_file_list()
-        if added:
-            self.status_var.set(f"Added {added} file(s) to the queue.")
-        else:
-            self.status_var.set("No supported image files were found in that selection.")
+        self.status_var.set(f"Added {added} file(s)." if added else "No supported image files found.")
 
     def _refresh_file_list(self) -> None:
         self.file_list.delete(0, tk.END)
-
-        total_size = 0
         for path in self.selected_inputs:
-            try:
-                total_size += path.stat().st_size
-            except OSError:
-                pass
-
             display_size = human_size(path.stat().st_size) if path.exists() else "Missing"
-            self.file_list.insert(
-                tk.END,
-                f"{path.name} | {display_size} | {path.parent}",
-            )
-
-        queue_count = len(self.selected_inputs)
-        if queue_count:
-            self.queue_heading_var.set(
-                "Review the list below before you start compressing."
-            )
-            self.file_hint_var.set(
-                "Tip: Use same-name mode plus an output folder if you want the compressed file "
-                "to keep the original filename safely."
-            )
-            self.queue_stats_var.set(
-                f"{queue_count} file(s)\n{human_size(total_size)} total"
-            )
-        else:
-            self.queue_heading_var.set("No files queued yet.")
-            self.file_hint_var.set(
-                "Nothing is queued yet. Add files, add a folder, or drag images into the drop zone."
-            )
-            self.queue_stats_var.set("0 file(s)\n0 B total")
-
-        self._refresh_dashboard()
-
-    def _refresh_dashboard(self, *_args) -> None:
-        raw_target = self.max_size_var.get().strip()
-        try:
-            target_text = f"{human_size(parse_size_to_bytes(raw_target))} max"
-        except ValueError:
-            target_text = raw_target or "Set a target"
-
-        self.target_card_var.set(target_text)
-        self.mode_card_var.set(
-            f"{self.name_mode_var.get()}\n{self.format_var.get()} format"
+            self.file_list.insert(tk.END, f"{path.name} | {display_size} | {path.parent}")
+        self.queue_heading_var.set(
+            f"{len(self.selected_inputs)} file(s) ready." if self.selected_inputs else "No files queued yet."
         )
 
     def _set_entry_enabled(self, entry: tk.Entry, enabled: bool) -> None:
         entry.configure(state="normal" if enabled else "disabled")
-        entry.configure(
-            disabledbackground="#EEF2F8",
-            disabledforeground="#7C8594",
-            bg=PALETTE["card"],
-        )
+        entry.configure(disabledbackground="#EEF2F6", disabledforeground="#7D8796", bg=PALETTE["surface"])
 
     def _update_save_mode_ui(self) -> None:
         mode = self.name_mode_var.get()
-
         if mode == "suffix":
             self._set_entry_enabled(self.suffix_entry, True)
             self._set_entry_enabled(self.output_dir_entry, True)
             self.browse_button.config(state="normal")
             self.clear_output_button.config(state="normal")
-            self.save_mode_hint_var.set(
-                "Suffix mode creates a new file like photo-compressed.jpg. "
-                "If you leave the output folder empty, the app saves next to the original."
-            )
         elif mode == "same-name":
             self._set_entry_enabled(self.suffix_entry, False)
             self._set_entry_enabled(self.output_dir_entry, True)
             self.browse_button.config(state="normal")
             self.clear_output_button.config(state="normal")
-            self.save_mode_hint_var.set(
-                "Same-name mode keeps the original filename but saves it into another folder. "
-                "Pick an output folder so the source file stays safe."
-            )
         else:
             if self.format_var.get() == "auto":
                 self.format_var.set("keep")
@@ -915,12 +441,6 @@ class CompressorApp:
             self._set_entry_enabled(self.output_dir_entry, False)
             self.browse_button.config(state="disabled")
             self.clear_output_button.config(state="disabled")
-            self.save_mode_hint_var.set(
-                "Overwrite mode replaces the original file in place. Keeping the original format "
-                "is the safest option for this mode."
-            )
-
-        self._refresh_dashboard()
 
     def _append_log(self, text: str) -> None:
         self.log_text.configure(state="normal")
@@ -947,15 +467,6 @@ class CompressorApp:
         except Exception:
             pass
 
-        try:
-            subprocess.Popen(
-                ["osascript", "-e", 'tell application "Python" to activate'],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception:
-            pass
-
     def _set_running(self, running: bool) -> None:
         self.is_running = running
         self.root.config(cursor="watch" if running else "")
@@ -968,11 +479,9 @@ class CompressorApp:
     def _start_compression(self) -> None:
         if self.is_running:
             return
-
         if not self.selected_inputs:
             messagebox.showerror("No files", "Add at least one image or folder first.")
             return
-
         try:
             parse_size_to_bytes(self.max_size_var.get().strip())
         except ValueError as error:
@@ -981,12 +490,8 @@ class CompressorApp:
 
         output_argument = None
         output_text = self.output_dir_var.get().strip()
-
         if self.name_mode_var.get() == "same-name" and not output_text:
-            messagebox.showerror(
-                "Output folder required",
-                "Choose an output folder for same-name mode, or use overwrite mode instead.",
-            )
+            messagebox.showerror("Output folder required", "Choose an output folder for same-name mode, or use overwrite mode.")
             return
 
         if self.name_mode_var.get() != "overwrite" and output_text:
@@ -995,29 +500,13 @@ class CompressorApp:
                 output_argument.mkdir(parents=True, exist_ok=True)
                 output_argument = output_argument.resolve()
             except OSError as error:
-                messagebox.showerror(
-                    "Invalid output folder",
-                    f"Could not use the chosen output folder.\n\n{error}",
-                )
+                messagebox.showerror("Invalid output folder", f"Could not use the chosen output folder.\n\n{error}")
                 return
 
-        args = argparse.Namespace(
-            max_size=self.max_size_var.get().strip(),
-            format=self.format_var.get().strip(),
-            name_mode=self.name_mode_var.get().strip(),
-            suffix=self.suffix_var.get(),
-            min_quality=35,
-            max_quality=95,
-            min_side=320,
-            keep_metadata=False,
-            background="FFFFFF",
-        )
-
+        args = argparse.Namespace(max_size=self.max_size_var.get().strip(), format=self.format_var.get().strip(), name_mode=self.name_mode_var.get().strip(), suffix=self.suffix_var.get(), min_quality=35, max_quality=95, min_side=320, keep_metadata=False, background="FFFFFF")
         files = collect_input_files(self.selected_inputs)
         if not files:
-            messagebox.showerror(
-                "No supported files", "The current queue does not contain supported images."
-            )
+            messagebox.showerror("No supported files", "The current queue does not contain supported images.")
             return
 
         self.last_output_folder = None
@@ -1025,25 +514,14 @@ class CompressorApp:
         self._save_session()
         self._append_log("")
         self._append_log(f"Starting compression for {len(files)} file(s)...")
-        self.status_var.set("Compressing your images now...")
+        self.status_var.set("Compressing...")
         self._set_running(True)
 
-        worker = threading.Thread(
-            target=self._run_compression,
-            args=(files, output_argument, args),
-            daemon=True,
-        )
-        worker.start()
+        threading.Thread(target=self._run_compression, args=(files, output_argument, args), daemon=True).start()
 
-    def _run_compression(
-        self,
-        files: list[Path],
-        output_argument: Path | None,
-        args: argparse.Namespace,
-    ) -> None:
+    def _run_compression(self, files: list[Path], output_argument: Path | None, args: argparse.Namespace) -> None:
         failures = 0
         written_paths: list[Path] = []
-
         try:
             for file_path in files:
                 try:
@@ -1055,36 +533,16 @@ class CompressorApp:
                         failures += 1
                 except Exception as error:
                     failures += 1
-                    self.root.after(
-                        0,
-                        self._append_log,
-                        f"[ERROR] {file_path.name} | {error}",
-                    )
+                    self.root.after(0, self._append_log, f"[ERROR] {file_path.name} | {error}")
         finally:
-            summary = (
-                f"Finished. {len(files) - failures} succeeded, {failures} had issues."
-                if failures
-                else f"Finished. {len(files)} file(s) processed successfully."
-            )
-            folder_to_open = None
-            if written_paths:
-                folder_to_open = (
-                    output_argument
-                    if output_argument is not None and output_argument.is_dir()
-                    else written_paths[0].parent
-                )
-            self.root.after(
-                0,
-                self._finish_run,
-                summary,
-                folder_to_open,
-            )
+            summary = f"Finished. {len(files) - failures} succeeded, {failures} had issues." if failures else f"Finished. {len(files)} file(s) processed successfully."
+            folder_to_open = output_argument if (written_paths and output_argument is not None and output_argument.is_dir()) else (written_paths[0].parent if written_paths else None)
+            self.root.after(0, self._finish_run, summary, folder_to_open)
 
     def _finish_run(self, summary: str, folder_to_open: Path | None) -> None:
         self.status_var.set(summary)
         self._append_log(summary)
         self._set_running(False)
-
         if folder_to_open is not None:
             self.last_output_folder = folder_to_open
             self.open_output_button.config(state="normal")
@@ -1101,11 +559,7 @@ class CompressorApp:
 
     def _notify_completion(self, summary: str) -> None:
         try:
-            subprocess.Popen(
-                ["osascript", "-e", f'display notification "{summary}" with title "Image Compressor"'],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            subprocess.Popen(["osascript", "-e", f'display notification "{summary}" with title "Image Compressor"'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             pass
 
