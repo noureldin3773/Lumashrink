@@ -30,6 +30,9 @@ private enum Palette {
     static let cyan = NSColor(calibratedRed: 0.38, green: 0.75, blue: 0.90, alpha: 1.0)
     static let mint = NSColor(calibratedRed: 0.40, green: 0.78, blue: 0.66, alpha: 1.0)
     static let champagne = NSColor(calibratedRed: 0.45, green: 0.33, blue: 0.08, alpha: 1.0)
+    static let focus = NSColor(calibratedRed: 0.05, green: 0.48, blue: 0.98, alpha: 1.0)
+    static let controlGlass = NSColor.white.withAlphaComponent(0.72)
+    static let controlQuiet = NSColor.white.withAlphaComponent(0.62)
 }
 
 private final class AppLogger {
@@ -119,6 +122,82 @@ private class CardView: NSVisualEffectView {
     }
 }
 
+private enum LiquidGlassRole {
+    case surface
+    case floatingPanel
+    case statusPill
+    case sheet
+
+    var material: NSVisualEffectView.Material {
+        switch self {
+        case .surface: return .contentBackground
+        case .floatingPanel: return .popover
+        case .statusPill: return .menu
+        case .sheet: return .sheet
+        }
+    }
+
+    var background: NSColor {
+        switch self {
+        case .surface: return NSColor.white.withAlphaComponent(0.56)
+        case .floatingPanel: return NSColor.white.withAlphaComponent(0.68)
+        case .statusPill: return NSColor.white.withAlphaComponent(0.74)
+        case .sheet: return NSColor.white.withAlphaComponent(0.82)
+        }
+    }
+
+    var radius: CGFloat {
+        switch self {
+        case .statusPill: return 14
+        case .surface: return 22
+        case .floatingPanel, .sheet: return 18
+        }
+    }
+}
+
+private final class LiquidGlassView: NSVisualEffectView {
+    private let highlightLayer = CALayer()
+
+    init(role: LiquidGlassRole = .surface) {
+        super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
+        material = role.material
+        blendingMode = .withinWindow
+        state = .active
+        wantsLayer = true
+        layer?.backgroundColor = role.background.cgColor
+        layer?.cornerRadius = role.radius
+        layer?.cornerCurve = .continuous
+        layer?.borderWidth = 0.8
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.42).cgColor
+        layer?.shadowColor = NSColor.black.withAlphaComponent(0.035).cgColor
+        layer?.shadowOffset = CGSize(width: 0, height: 8)
+        layer?.shadowOpacity = 1
+        layer?.shadowRadius = 18
+
+        highlightLayer.borderWidth = 1
+        highlightLayer.borderColor = NSColor.white.withAlphaComponent(0.35).cgColor
+        highlightLayer.cornerCurve = .continuous
+        layer?.addSublayer(highlightLayer)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layout() {
+        super.layout()
+        let radius = layer?.cornerRadius ?? 18
+        highlightLayer.frame = bounds.insetBy(dx: 1.5, dy: 1.5)
+        highlightLayer.cornerRadius = max(radius - 1.5, 0)
+    }
+}
+
+private enum MotionTokens {
+    static let quick: TimeInterval = 0.14
+    static let standard: TimeInterval = 0.18
+}
+
 private final class GradientBackgroundView: NSView {
     private let gradientLayer = CAGradientLayer()
 
@@ -178,6 +257,20 @@ private final class StyledTextField: NSTextField {
         cell?.backgroundStyle = .emphasized
         heightAnchor.constraint(equalToConstant: 46).isActive = true
     }
+
+    override func becomeFirstResponder() -> Bool {
+        let ok = super.becomeFirstResponder()
+        layer?.borderColor = Palette.focus.withAlphaComponent(0.85).cgColor
+        layer?.borderWidth = 1.2
+        return ok
+    }
+
+    override func resignFirstResponder() -> Bool {
+        let ok = super.resignFirstResponder()
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.10).cgColor
+        layer?.borderWidth = 1.0
+        return ok
+    }
 }
 
 private final class FlippedView: NSView {
@@ -216,17 +309,17 @@ private final class DropZoneView: NSView {
         materialLayer.startPoint = CGPoint(x: 0.08, y: 1)
         materialLayer.endPoint = CGPoint(x: 1, y: 0)
         layer?.addSublayer(materialLayer)
-        layer?.backgroundColor = NSColor.white.withAlphaComponent(0.62).cgColor
+        layer?.backgroundColor = NSColor.white.withAlphaComponent(0.52).cgColor
         layer?.cornerRadius = 32
         layer?.cornerCurve = .continuous
         layer?.borderWidth = 1
-        layer?.borderColor = Palette.border.withAlphaComponent(0.55).cgColor
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.52).cgColor
         layer?.shadowColor = NSColor.black.withAlphaComponent(0.05).cgColor
         layer?.shadowOffset = CGSize(width: 0, height: 10)
         layer?.shadowOpacity = 1
         layer?.shadowRadius = 26
         innerRingLayer.borderWidth = 1
-        innerRingLayer.borderColor = NSColor.white.withAlphaComponent(0.45).cgColor
+        innerRingLayer.borderColor = NSColor.white.withAlphaComponent(0.52).cgColor
         innerRingLayer.cornerCurve = .continuous
         layer?.addSublayer(innerRingLayer)
         registerForDraggedTypes([.fileURL])
@@ -301,13 +394,13 @@ private final class DropZoneView: NSView {
         }
         layer?.borderColor = hovering
             ? Palette.accentBright.withAlphaComponent(0.32).cgColor
-            : Palette.border.withAlphaComponent(0.55).cgColor
+            : NSColor.white.withAlphaComponent(0.52).cgColor
     }
 
     private func setActiveMaterial(_ active: Bool) {
         layer?.borderColor = active
             ? Palette.accentBright.withAlphaComponent(0.55).cgColor
-            : Palette.border.withAlphaComponent(0.55).cgColor
+            : NSColor.white.withAlphaComponent(0.52).cgColor
         materialLayer.colors = active
             ? [
                 NSColor.white.withAlphaComponent(0.94).cgColor,
@@ -322,7 +415,7 @@ private final class DropZoneView: NSView {
     }
 
     private func resetMaterial() {
-        layer?.borderColor = Palette.border.withAlphaComponent(0.55).cgColor
+        layer?.borderColor = NSColor.white.withAlphaComponent(0.52).cgColor
         setActiveMaterial(false)
     }
 
@@ -678,6 +771,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let supportedExtensions: Set<String> = ["jpg", "jpeg", "png", "webp", "bmp", "tif", "tiff"]
 
     private var selectedFiles: [URL] = []
+    private let fileStatesLock = NSLock()
     private var fileStates: [String: QueueFileState] = [:]
     private var previewCache: [String: PreviewCacheEntry] = [:]
     private var compressionRunStartedAt: Date?
@@ -879,16 +973,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func buildTopNavigationBar() -> NSView {
-        let bar = NSVisualEffectView()
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        bar.material = .headerView
-        bar.blendingMode = .withinWindow
-        bar.state = .active
-        bar.wantsLayer = true
-        bar.layer?.cornerRadius = 14
-        bar.layer?.cornerCurve = .continuous
-        bar.layer?.borderWidth = 0.6
-        bar.layer?.borderColor = Palette.border.withAlphaComponent(0.55).cgColor
+        let bar = LiquidGlassView(role: .statusPill)
 
         let row = NSStackView()
         row.translatesAutoresizingMaskIntoConstraints = false
@@ -945,7 +1030,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func setPanel(_ panel: NSView, hidden: Bool) {
         if hidden {
             NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.14
+                context.duration = MotionTokens.quick
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 panel.animator().alphaValue = 0
             } completionHandler: {
@@ -955,7 +1040,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             panel.alphaValue = 0
             panel.isHidden = false
             NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.18
+                context.duration = MotionTokens.standard
                 context.timingFunction = CAMediaTimingFunction(controlPoints: 0.16, 1.0, 0.3, 1.0)
                 panel.animator().alphaValue = 1
             }
@@ -963,7 +1048,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func buildMainWorkspaceCard() -> NSView {
-        let workbench = CardView(background: NSColor.white.withAlphaComponent(0.82))
+        let workbench = LiquidGlassView(role: .surface)
 
         let layout = NSStackView()
         layout.translatesAutoresizingMaskIntoConstraints = false
@@ -1339,9 +1424,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         queueTable.headerView = nil
         queueTable.usesAlternatingRowBackgroundColors = false
         queueTable.backgroundColor = .clear
-        queueTable.rowHeight = 42
+        queueTable.rowHeight = 44
         queueTable.selectionHighlightStyle = .regular
-        queueTable.intercellSpacing = NSSize(width: 0, height: 8)
+        queueTable.intercellSpacing = NSSize(width: 0, height: 6)
         queueTable.target = self
         queueTable.doubleAction = #selector(revealSelectedFile)
         if queueTable.tableColumns.isEmpty {
@@ -1359,7 +1444,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func updateResponsiveLayout(for width: CGFloat) {
-        let compact = width < 1320
+        let compact = width < 1260
         controlsRowStack?.orientation = compact ? .vertical : .horizontal
         controlsRowStack?.distribution = compact ? .fill : .fillEqually
         bottomRowStack?.orientation = compact ? .vertical : .horizontal
@@ -1408,7 +1493,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func buildSettingsCard() -> NSView {
-        let card = NSView()
+        let card = LiquidGlassView(role: .floatingPanel)
         card.translatesAutoresizingMaskIntoConstraints = false
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -1447,10 +1532,10 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         stack.addArrangedSubview(saveModeHintLabel)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: card.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
         ])
 
         return card
@@ -1566,22 +1651,30 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func buildImageStatusRow() -> NSView {
+        let panel = LiquidGlassView(role: .statusPill)
         let row = NSStackView()
         row.translatesAutoresizingMaskIntoConstraints = false
         row.orientation = .horizontal
         row.alignment = .centerY
         row.spacing = 14
+        panel.addSubview(row)
         row.addArrangedSubview(progressIndicator)
         row.addArrangedSubview(statusLabel)
         row.addArrangedSubview(NSView())
         row.addArrangedSubview(clearCompletedButton)
         row.addArrangedSubview(compressAgainButton)
         row.addArrangedSubview(openOutputButton)
-        return row
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 14),
+            row.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -14),
+            row.topAnchor.constraint(equalTo: panel.topAnchor, constant: 12),
+            row.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -12)
+        ])
+        return panel
     }
 
     private func buildQueueCard(table: NSTableView? = nil, stateLabel: NSTextField? = nil) -> NSView {
-        let card = NSView()
+        let card = LiquidGlassView(role: .floatingPanel)
         card.translatesAutoresizingMaskIntoConstraints = false
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -1604,10 +1697,10 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         stack.addArrangedSubview(scroll)
         scroll.heightAnchor.constraint(equalToConstant: 176).isActive = true
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: card.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
+            stack.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
+            stack.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
         ])
         return card
     }
@@ -1643,7 +1736,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func makeSectionCard(title: String, subtitle: String, symbol: String) -> (CardView, NSStackView) {
-        let card = CardView(background: NSColor.white.withAlphaComponent(0.9))
+        let card = CardView(background: NSColor.white.withAlphaComponent(0.74))
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.orientation = .vertical
@@ -1754,7 +1847,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     @objc private func clearCompleted() {
         selectedFiles.removeAll { url in
-            fileStates[queueStatusKey(url)]?.status == .done
+            statusForFile(url) == .done
         }
         refreshQueue()
         saveSessionState()
@@ -2182,8 +2275,19 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     private func setFileStatus(_ url: URL, _ status: QueueFileStatus) {
-        fileStates[queueStatusKey(url), default: QueueFileState()].status = status
+        let key = queueStatusKey(url)
+        fileStatesLock.lock()
+        fileStates[key, default: QueueFileState()].status = status
+        fileStatesLock.unlock()
         DispatchQueue.main.async { [weak self] in self?.tableView.reloadData() }
+    }
+
+    private func statusForFile(_ url: URL) -> QueueFileStatus {
+        let key = queueStatusKey(url)
+        fileStatesLock.lock()
+        let status = fileStates[key]?.status ?? .queued
+        fileStatesLock.unlock()
+        return status
     }
 
     private func parseStatusFromLines(_ lines: [String]) -> QueueFileStatus {
@@ -2672,7 +2776,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func refreshQueue() {
         selectedFiles.sort { $0.lastPathComponent.localizedCaseInsensitiveCompare($1.lastPathComponent) == .orderedAscending }
         let live = Set(selectedFiles.map { queueStatusKey($0) })
+        fileStatesLock.lock()
         fileStates = fileStates.filter { live.contains($0.key) }
+        fileStatesLock.unlock()
         tableView.reloadData()
         queueRouteTableView.reloadData()
         updateDashboard()
@@ -2698,7 +2804,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         }
         stopButton.isHidden = !isRunning
         compressButton.isEnabled = !selectedFiles.isEmpty && !isRunning
-        clearCompletedButton.isEnabled = selectedFiles.contains { fileStates[queueStatusKey($0)]?.status == .done }
+        clearCompletedButton.isEnabled = selectedFiles.contains { statusForFile($0) == .done }
     }
 
     private func updateDashboard() {
@@ -2932,6 +3038,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         alert.alertStyle = .warning
         alert.messageText = title
         alert.informativeText = message
+        alert.window.appearance = NSAppearance(named: .aqua)
         alert.runModal()
     }
 
@@ -2960,8 +3067,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             cell.addSubview(label)
 
             NSLayoutConstraint.activate([
-                label.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 10),
-                label.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -10),
+                label.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 12),
+                label.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -12),
                 label.centerYAnchor.constraint(equalTo: cell.centerYAnchor)
             ])
 
@@ -2970,9 +3077,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let url = selectedFiles[row]
         let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
-        let status = fileStates[queueStatusKey(url)]?.status.rawValue ?? QueueFileStatus.queued.rawValue
+        let status = statusForFile(url).rawValue
         let sizeText = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
-        label.stringValue = "\(url.lastPathComponent)    \(sizeText)    \(status)"
+        label.stringValue = "\(url.lastPathComponent)   \(sizeText)   \(status)"
         switch status {
         case QueueFileStatus.done.rawValue:
             label.textColor = Palette.success
@@ -3090,10 +3197,15 @@ private func makeBadgeLabel(_ text: String) -> NSTextField {
 
 private func styleSecondaryButton(_ button: NSButton) {
     button.translatesAutoresizingMaskIntoConstraints = false
-    button.isBordered = true
+    button.isBordered = false
     button.bezelStyle = .rounded
     button.font = premiumFont(size: 13, weight: .semibold)
-    button.wantsLayer = false
+    button.wantsLayer = true
+    button.layer?.backgroundColor = Palette.controlQuiet.cgColor
+    button.layer?.cornerRadius = 11
+    button.layer?.cornerCurve = .continuous
+    button.layer?.borderWidth = 0.8
+    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.52).cgColor
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
     button.setButtonType(.momentaryPushIn)
@@ -3112,22 +3224,33 @@ private func styleTopNavigationButton(_ button: NSButton) {
 
 private func stylePrimaryButton(_ button: NSButton) {
     button.translatesAutoresizingMaskIntoConstraints = false
-    button.isBordered = true
+    button.isBordered = false
     button.bezelStyle = .rounded
     button.font = premiumFont(size: 13, weight: .semibold)
-    button.wantsLayer = false
+    button.wantsLayer = true
+    button.layer?.backgroundColor = Palette.primaryButton.cgColor
+    button.layer?.cornerRadius = 12
+    button.layer?.cornerCurve = .continuous
+    button.layer?.borderWidth = 0.8
+    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.36).cgColor
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
     button.setButtonType(.momentaryPushIn)
+    button.contentTintColor = .white
     button.heightAnchor.constraint(equalToConstant: 36).isActive = true
 }
 
 private func styleDangerButton(_ button: NSButton) {
     button.translatesAutoresizingMaskIntoConstraints = false
-    button.isBordered = true
+    button.isBordered = false
     button.bezelStyle = .rounded
     button.font = premiumFont(size: 13, weight: .semibold)
-    button.wantsLayer = false
+    button.wantsLayer = true
+    button.layer?.backgroundColor = NSColor(calibratedRed: 0.94, green: 0.86, blue: 0.87, alpha: 0.8).cgColor
+    button.layer?.cornerRadius = 11
+    button.layer?.cornerCurve = .continuous
+    button.layer?.borderWidth = 0.8
+    button.layer?.borderColor = NSColor.white.withAlphaComponent(0.45).cgColor
     button.imagePosition = .imageLeading
     button.imageHugsTitle = true
     button.setButtonType(.momentaryPushIn)
@@ -3137,7 +3260,12 @@ private func styleDangerButton(_ button: NSButton) {
 private func stylePopup(_ popup: NSPopUpButton) {
     popup.translatesAutoresizingMaskIntoConstraints = false
     popup.font = premiumFont(size: 13, weight: .semibold)
-    popup.wantsLayer = false
+    popup.wantsLayer = true
+    popup.layer?.backgroundColor = Palette.controlGlass.cgColor
+    popup.layer?.cornerRadius = 10
+    popup.layer?.cornerCurve = .continuous
+    popup.layer?.borderWidth = 0.8
+    popup.layer?.borderColor = NSColor.white.withAlphaComponent(0.5).cgColor
     popup.heightAnchor.constraint(equalToConstant: 30).isActive = true
 }
 
