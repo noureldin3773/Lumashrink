@@ -277,6 +277,176 @@ private final class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
 
+private final class GlobalProgressTimelineView: NSView {
+    var states: [QueueFileStatus] = [] {
+        didSet { needsDisplay = true }
+    }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+        wantsLayer = true
+        heightAnchor.constraint(equalToConstant: 8).isActive = true
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        let track = NSBezierPath(roundedRect: bounds.insetBy(dx: 0, dy: 2), xRadius: 4, yRadius: 4)
+        Palette.border.withAlphaComponent(0.34).setFill()
+        track.fill()
+
+        guard !states.isEmpty else { return }
+        let gap: CGFloat = states.count > 1 ? 2 : 0
+        let segmentWidth = max(3, (bounds.width - CGFloat(states.count - 1) * gap) / CGFloat(states.count))
+        for (index, status) in states.enumerated() {
+            let rect = NSRect(
+                x: CGFloat(index) * (segmentWidth + gap),
+                y: 2,
+                width: segmentWidth,
+                height: max(bounds.height - 4, 2)
+            )
+            color(for: status).withAlphaComponent(0.78).setFill()
+            NSBezierPath(roundedRect: rect, xRadius: 3, yRadius: 3).fill()
+        }
+    }
+
+    private func color(for status: QueueFileStatus) -> NSColor {
+        switch status {
+        case .done: return Palette.success
+        case .processing: return Palette.accent
+        case .bestEffort: return Palette.warning
+        case .failed: return Palette.danger
+        case .skipped: return Palette.muted
+        case .queued: return Palette.border
+        }
+    }
+}
+
+private final class FileProgressLine: NSView {
+    var status: QueueFileStatus = .queued {
+        didSet { needsDisplay = true }
+    }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+        wantsLayer = true
+        heightAnchor.constraint(equalToConstant: 4).isActive = true
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        Palette.border.withAlphaComponent(0.36).setFill()
+        NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2).fill()
+
+        let progress: CGFloat
+        let color: NSColor
+        switch status {
+        case .queued:
+            progress = 0
+            color = Palette.border
+        case .processing:
+            progress = 0.62
+            color = Palette.accent
+        case .done, .bestEffort, .skipped:
+            progress = 1
+            color = status == .bestEffort ? Palette.warning : Palette.success
+        case .failed:
+            progress = 1
+            color = Palette.danger
+        }
+
+        guard progress > 0 else { return }
+        color.withAlphaComponent(0.82).setFill()
+        let fill = NSRect(x: 0, y: 0, width: bounds.width * progress, height: bounds.height)
+        NSBezierPath(roundedRect: fill, xRadius: 2, yRadius: 2).fill()
+    }
+}
+
+private struct QueueDisplayState {
+    let status: QueueFileStatus
+    let sourceSize: Int64
+    let targetSize: Int64?
+}
+
+private final class QueueFileCellView: NSTableCellView {
+    private let iconView = NSImageView()
+    private let titleLabel = makeLabel("", size: 12, weight: .semibold, color: Palette.text)
+    private let metaLabel = makeLabel("", size: 11, weight: .regular, color: Palette.muted)
+    private let statusLabel = makeLabel("", size: 11, weight: .semibold, color: Palette.muted)
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        identifier = NSUserInterfaceItemIdentifier("file-cell")
+        wantsLayer = true
+        layer?.cornerRadius = 12
+        layer?.cornerCurve = .continuous
+        layer?.backgroundColor = NSColor.white.withAlphaComponent(0.24).cgColor
+
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.image = makeSymbolImage("photo", pointSize: 15)
+        iconView.contentTintColor = Palette.accent
+        addSubview(iconView)
+
+        let textStack = NSStackView()
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        textStack.orientation = .vertical
+        textStack.spacing = 3
+        textStack.addArrangedSubview(titleLabel)
+        textStack.addArrangedSubview(metaLabel)
+        addSubview(textStack)
+
+        statusLabel.alignment = .right
+        statusLabel.setContentHuggingPriority(.required, for: .horizontal)
+        addSubview(statusLabel)
+
+        NSLayoutConstraint.activate([
+            iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            iconView.topAnchor.constraint(equalTo: topAnchor, constant: 11),
+            iconView.widthAnchor.constraint(equalToConstant: 21),
+            iconView.heightAnchor.constraint(equalToConstant: 21),
+            textStack.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 10),
+            textStack.trailingAnchor.constraint(lessThanOrEqualTo: statusLabel.leadingAnchor, constant: -12),
+            textStack.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            statusLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            statusLabel.centerYAnchor.constraint(equalTo: textStack.centerYAnchor)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func configure(url: URL, state: QueueDisplayState) {
+        titleLabel.stringValue = url.lastPathComponent
+        let type = url.pathExtension.isEmpty ? "file" : url.pathExtension.uppercased()
+        let original = ByteCountFormatter.string(fromByteCount: state.sourceSize, countStyle: .file)
+        let target = state.targetSize.map { ByteCountFormatter.string(fromByteCount: min(state.sourceSize, $0), countStyle: .file) } ?? "target pending"
+        metaLabel.stringValue = "\(type) | \(original) -> \(target) | \(estimatedSavingsText(source: state.sourceSize, target: state.targetSize))"
+        statusLabel.stringValue = state.status.rawValue
+
+        switch state.status {
+        case .done:
+            statusLabel.textColor = Palette.success
+        case .failed:
+            statusLabel.textColor = Palette.danger
+        case .processing:
+            statusLabel.textColor = Palette.accent
+        case .bestEffort:
+            statusLabel.textColor = Palette.warning
+        default:
+            statusLabel.textColor = Palette.muted
+        }
+    }
+}
+
 private final class DropZoneView: NSView {
     var onDrop: (([URL]) -> Void)?
 
@@ -285,7 +455,7 @@ private final class DropZoneView: NSView {
     private let iconView = NSImageView()
     private let titleLabel = makeLabel(
         "Drop images here",
-        size: 32,
+        size: 22,
         weight: .semibold,
         color: Palette.text
     )
@@ -334,8 +504,8 @@ private final class DropZoneView: NSView {
         addSubview(stack)
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.image = makeSymbolImage("square.and.arrow.down.on.square", pointSize: 46)
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 46, weight: .regular)
+        iconView.image = makeSymbolImage("square.and.arrow.down.on.square", pointSize: 30)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 30, weight: .regular)
         iconView.contentTintColor = Palette.accentBright
         stack.addArrangedSubview(iconView)
         stack.addArrangedSubview(titleLabel)
@@ -346,7 +516,7 @@ private final class DropZoneView: NSView {
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
             stack.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 24),
             stack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -24),
-            heightAnchor.constraint(greaterThanOrEqualToConstant: 520)
+            heightAnchor.constraint(greaterThanOrEqualToConstant: 184)
         ])
 
         addTrackingArea(NSTrackingArea(
@@ -765,6 +935,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         case images = "Compress Images"
         case videos = "Compress Videos"
         case rename = "Rename Extensions"
+        case settings = "Settings"
     }
     private let logger = AppLogger.shared
     private let sessionStateKey = "image_compressor_session_v1"
@@ -822,6 +993,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let progressIndicator = NSProgressIndicator()
     private let batchProgressIndicator = NSProgressIndicator()
     private let batchProgressLabel = makeLabel("0 complete / 0 left", size: 12, weight: .medium, color: Palette.muted)
+    private let queueSummaryLabel = makeLabel("Build a compression queue", size: 18, weight: .semibold, color: Palette.text)
+    private let queueDetailLabel = makeLabel("Upload -> queue -> compress -> export", size: 12, weight: .medium, color: Palette.muted)
+    private let globalTimelineView = GlobalProgressTimelineView()
     private let queueStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
     private let queueRouteStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
 
@@ -889,6 +1063,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private var stagedContentViews: [NSView] = []
     private var controlsRowStack: NSStackView?
     private var bottomRowStack: NSStackView?
+    private weak var imageWorkflowGrid: NSStackView?
+    private var imageWorkflowRatioConstraints: [NSLayoutConstraint] = []
     private weak var advancedSettingsPanel: NSView?
     private weak var imageSupportPanel: NSView?
     private weak var queuePanel: NSView?
@@ -960,8 +1136,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
         let videoCard = buildVideoCompressionCard()
         videoSectionView = videoCard
+        let settingsCard = buildStandaloneSettingsScreen()
 
-        [imagesRoot, videoCard, extensionCard].forEach {
+        [imagesRoot, videoCard, extensionCard, settingsCard].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             root.addArrangedSubview($0)
             stagedContentViews.append($0)
@@ -969,6 +1146,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         screenRoots[.images] = imagesRoot
         screenRoots[.videos] = videoCard
         screenRoots[.rename] = extensionCard
+        screenRoots[.settings] = settingsCard
         switchScreen(.images)
     }
 
@@ -987,13 +1165,21 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         row.addArrangedSubview(title)
         row.addArrangedSubview(NSView())
 
-        for screen in Screen.allCases {
+        for screen in Screen.allCases where screen != .settings {
             let button = NSButton(title: screen.rawValue, target: self, action: #selector(topNavigationSelect(_:)))
             button.identifier = NSUserInterfaceItemIdentifier(screen.rawValue)
             styleTopNavigationButton(button)
             row.addArrangedSubview(button)
             screenButtons[screen] = button
         }
+
+        let settingsNavButton = NSButton(title: "Settings", target: self, action: #selector(topNavigationSelect(_:)))
+        settingsNavButton.identifier = NSUserInterfaceItemIdentifier(Screen.settings.rawValue)
+        styleTopNavigationButton(settingsNavButton)
+        settingsNavButton.image = makeSymbolImage("gearshape", pointSize: 13)
+        settingsNavButton.imagePosition = .imageLeading
+        row.addArrangedSubview(settingsNavButton)
+        screenButtons[.settings] = settingsNavButton
 
         let activityButton = NSButton(title: "Activity", target: self, action: #selector(toggleActivityLog))
         styleTopNavigationButton(activityButton)
@@ -1050,22 +1236,16 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func buildMainWorkspaceCard() -> NSView {
         let workbench = LiquidGlassView(role: .surface)
 
-        let layout = NSStackView()
-        layout.translatesAutoresizingMaskIntoConstraints = false
-        layout.orientation = .horizontal
-        layout.alignment = .top
-        layout.spacing = 28
-        workbench.addSubview(layout)
-
-        let canvas = NSStackView()
-        canvas.orientation = .vertical
-        canvas.spacing = 22
-        canvas.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        let root = NSStackView()
+        root.translatesAutoresizingMaskIntoConstraints = false
+        root.orientation = .vertical
+        root.spacing = 20
+        workbench.addSubview(root)
 
         let titleStack = NSStackView()
         titleStack.orientation = .vertical
         titleStack.spacing = 7
-        titleStack.addArrangedSubview(makeLabel("Compress Images", size: 38, weight: .semibold, color: Palette.text))
+        titleStack.addArrangedSubview(makeLabel("Compress Images", size: 36, weight: .semibold, color: Palette.text))
         titleStack.addArrangedSubview(makeWrappingLabel(
             "A focused workspace for turning large image sets into export-ready files.",
             size: 15,
@@ -1073,69 +1253,26 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             color: Palette.muted
         ))
 
-        let uploadWorkspace = buildSourcesCard()
-        canvas.addArrangedSubview(titleStack)
-        canvas.addArrangedSubview(uploadWorkspace)
-
-        let commandRail = NSStackView()
-        commandRail.orientation = .vertical
-        commandRail.alignment = .width
-        commandRail.spacing = 18
-        commandRail.edgeInsets = NSEdgeInsets(top: 6, left: 0, bottom: 0, right: 0)
-        commandRail.setContentHuggingPriority(.required, for: .horizontal)
-
-        let primaryCluster = NSStackView()
-        primaryCluster.orientation = .vertical
-        primaryCluster.alignment = .width
-        primaryCluster.spacing = 9
-        primaryCluster.addArrangedSubview(compressButton)
-        primaryCluster.addArrangedSubview(queueToggleButton)
-        primaryCluster.addArrangedSubview(advancedSettingsToggleButton)
-
         let statusRow = buildImageStatusRow()
-        statusRow.isHidden = true
         imageStatusPanel = statusRow
 
-        let advancedPanel = buildSettingsCard()
-        advancedPanel.isHidden = true
-        advancedSettingsPanel = advancedPanel
+        let summary = buildQueueSummaryPanel()
+        root.addArrangedSubview(titleStack)
+        root.addArrangedSubview(summary)
+        root.addArrangedSubview(statusRow)
 
-        let queuePanel = buildQueueCard()
-        queuePanel.isHidden = true
-        self.queuePanel = queuePanel
-
-        let previewPanel = buildPreviewCard()
-        previewPanel.isHidden = true
-
-        let supportStack = NSStackView()
-        supportStack.orientation = .vertical
-        supportStack.alignment = .width
-        supportStack.spacing = 14
-        supportStack.addArrangedSubview(queuePanel)
-        supportStack.addArrangedSubview(previewPanel)
-        supportStack.isHidden = true
-        imageSupportPanel = supportStack
-
+        let workflowBlock = buildImageWorkflowBlock()
         let activity = buildLogCard()
-        activity.isHidden = true
         activityPanel = activity
 
-        commandRail.addArrangedSubview(primaryCluster)
-        commandRail.addArrangedSubview(statusRow)
-        commandRail.addArrangedSubview(advancedPanel)
-        commandRail.addArrangedSubview(supportStack)
-        commandRail.addArrangedSubview(activity)
-
-        layout.addArrangedSubview(canvas)
-        layout.addArrangedSubview(commandRail)
+        root.addArrangedSubview(workflowBlock)
+        root.addArrangedSubview(activity)
 
         NSLayoutConstraint.activate([
-            layout.leadingAnchor.constraint(equalTo: workbench.leadingAnchor, constant: 28),
-            layout.trailingAnchor.constraint(equalTo: workbench.trailingAnchor, constant: -24),
-            layout.topAnchor.constraint(equalTo: workbench.topAnchor, constant: 26),
-            layout.bottomAnchor.constraint(equalTo: workbench.bottomAnchor, constant: -24),
-            canvas.widthAnchor.constraint(greaterThanOrEqualToConstant: 430),
-            commandRail.widthAnchor.constraint(equalToConstant: 292)
+            root.leadingAnchor.constraint(equalTo: workbench.leadingAnchor, constant: 28),
+            root.trailingAnchor.constraint(equalTo: workbench.trailingAnchor, constant: -24),
+            root.topAnchor.constraint(equalTo: workbench.topAnchor, constant: 26),
+            root.bottomAnchor.constraint(equalTo: workbench.bottomAnchor, constant: -24)
         ])
 
         return workbench
@@ -1145,12 +1282,12 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         switchScreen(.images)
     }
 
+    @objc private func showSettingsScreen() {
+        switchScreen(.settings)
+    }
+
     @objc private func toggleAdvancedSettings() {
-        guard let panel = advancedSettingsPanel else { return }
-        let willHide = !panel.isHidden
-        setPanel(panel, hidden: willHide)
-        advancedSettingsToggleButton.title = willHide ? "Show Settings" : "Hide Settings"
-        view.layoutSubtreeIfNeeded()
+        showSettingsScreen()
     }
 
     @objc private func topNavigationSelect(_ sender: NSButton) {
@@ -1244,9 +1381,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         compressAgainButton.target = self
         compressAgainButton.action = #selector(compressAgain)
         settingsButton.target = self
-        settingsButton.action = #selector(scrollToSettings)
+        settingsButton.action = #selector(showSettingsScreen)
         advancedSettingsToggleButton.target = self
-        advancedSettingsToggleButton.action = #selector(toggleAdvancedSettings)
+        advancedSettingsToggleButton.action = #selector(showSettingsScreen)
         queueToggleButton.target = self
         queueToggleButton.action = #selector(toggleQueuePanel)
         stopButton.target = self
@@ -1333,13 +1470,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         saveModePopup.action = #selector(saveModeChanged)
         extensionPopup.selectItem(withTitle: "webp")
 
-        previewToggleButton.translatesAutoresizingMaskIntoConstraints = false
-        previewToggleButton.setButtonType(.pushOnPushOff)
-        previewToggleButton.state = .off
-        previewToggleButton.target = self
-        previewToggleButton.action = #selector(toggleLivePreview(_:))
-        previewToggleButton.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        previewToggleButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        previewToggleButton.isHidden = true
 
         targetPresetControl.segmentStyle = .capsule
         targetPresetControl.controlSize = .large
@@ -1361,7 +1492,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         qualitySlider.sendAction(on: [.leftMouseDragged, .leftMouseUp])
         qualitySlider.setContentHuggingPriority(.defaultLow, for: .horizontal)
         qualitySlider.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        qualitySlider.widthAnchor.constraint(greaterThanOrEqualToConstant: 320).isActive = true
+        qualitySlider.widthAnchor.constraint(greaterThanOrEqualToConstant: 220).isActive = true
         qualityValueLabel.alignment = .right
         qualityValueLabel.widthAnchor.constraint(equalToConstant: 48).isActive = true
 
@@ -1384,7 +1515,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         configureButtonImage(clearOutputButton, symbolName: "xmark.circle")
         configureButtonImage(openOutputButton, symbolName: "folder")
         configureButtonImage(stopButton, symbolName: "stop.circle")
-        configureButtonImage(previewToggleButton, symbolName: "eye")
+        configureButtonImage(settingsButton, symbolName: "gearshape")
+        configureButtonImage(advancedSettingsToggleButton, symbolName: "gearshape")
         configureButtonImage(compressButton, symbolName: "arrow.down.circle")
         configureButtonImage(chooseExtensionFileButton, symbolName: "doc")
         configureButtonImage(applyExtensionButton, symbolName: "arrow.clockwise")
@@ -1415,8 +1547,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         batchProgressIndicator.heightAnchor.constraint(equalToConstant: 10).isActive = true
 
         updateSaveModeUI()
-        previewCard?.isHidden = true
-        previewHeightConstraint?.constant = 0
         updateResponsiveLayout(for: view.bounds.width)
     }
 
@@ -1424,7 +1554,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         queueTable.headerView = nil
         queueTable.usesAlternatingRowBackgroundColors = false
         queueTable.backgroundColor = .clear
-        queueTable.rowHeight = 44
+        queueTable.rowHeight = 64
         queueTable.selectionHighlightStyle = .regular
         queueTable.intercellSpacing = NSSize(width: 0, height: 6)
         queueTable.target = self
@@ -1449,6 +1579,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         controlsRowStack?.distribution = compact ? .fill : .fillEqually
         bottomRowStack?.orientation = compact ? .vertical : .horizontal
         bottomRowStack?.distribution = compact ? .fill : .fillEqually
+        imageWorkflowGrid?.orientation = compact ? .vertical : .horizontal
+        imageWorkflowGrid?.distribution = compact ? .fill : .fillProportionally
+        imageWorkflowRatioConstraints.forEach { $0.isActive = !compact }
     }
 
     @objc private func mediaModeChanged(_ sender: NSSegmentedControl) {
@@ -1471,7 +1604,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         dropZone.onDrop = { [weak self] urls in
             self?.addInputURLs(urls)
         }
-        dropZone.heightAnchor.constraint(greaterThanOrEqualToConstant: 540).isActive = true
+        dropZone.heightAnchor.constraint(greaterThanOrEqualToConstant: 190).isActive = true
 
         let actionRow = NSStackView(views: [addFilesButton, addFolderButton])
         actionRow.orientation = .horizontal
@@ -1490,6 +1623,193 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         ])
 
         return card
+    }
+
+    private func buildImageWorkflowBlock() -> NSView {
+        let block = LiquidGlassView(role: .floatingPanel)
+        block.translatesAutoresizingMaskIntoConstraints = false
+
+        let grid = NSStackView()
+        grid.translatesAutoresizingMaskIntoConstraints = false
+        grid.orientation = .horizontal
+        grid.alignment = .top
+        grid.spacing = 18
+        grid.distribution = .fillProportionally
+        block.addSubview(grid)
+        imageWorkflowGrid = grid
+
+        let importColumn = buildImportColumn()
+        let queueColumn = buildQueueColumn()
+        let actionColumn = buildImageActionColumn()
+        queuePanel = queueColumn
+
+        grid.addArrangedSubview(importColumn)
+        grid.addArrangedSubview(queueColumn)
+        grid.addArrangedSubview(actionColumn)
+
+        imageWorkflowRatioConstraints = [
+            importColumn.widthAnchor.constraint(equalTo: queueColumn.widthAnchor, multiplier: 0.875),
+            actionColumn.widthAnchor.constraint(equalTo: queueColumn.widthAnchor, multiplier: 0.625)
+        ]
+        NSLayoutConstraint.activate(imageWorkflowRatioConstraints)
+
+        NSLayoutConstraint.activate([
+            grid.leadingAnchor.constraint(equalTo: block.leadingAnchor, constant: 18),
+            grid.trailingAnchor.constraint(equalTo: block.trailingAnchor, constant: -18),
+            grid.topAnchor.constraint(equalTo: block.topAnchor, constant: 18),
+            grid.bottomAnchor.constraint(equalTo: block.bottomAnchor, constant: -18),
+            block.heightAnchor.constraint(greaterThanOrEqualToConstant: 430)
+        ])
+        return block
+    }
+
+    private func buildWorkflowColumn(title: String, subtitle: String? = nil) -> (NSView, NSStackView) {
+        let column = NSView()
+        column.translatesAutoresizingMaskIntoConstraints = false
+
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.alignment = .width
+        stack.spacing = 12
+        column.addSubview(stack)
+
+        let heading = NSStackView()
+        heading.orientation = .vertical
+        heading.spacing = 3
+        heading.addArrangedSubview(makeLabel(title, size: 16, weight: .semibold, color: Palette.text))
+        if let subtitle {
+            heading.addArrangedSubview(makeWrappingLabel(subtitle, size: 12, weight: .regular, color: Palette.muted))
+        }
+        stack.addArrangedSubview(heading)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: column.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: column.trailingAnchor),
+            stack.topAnchor.constraint(equalTo: column.topAnchor),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: column.bottomAnchor)
+        ])
+        return (column, stack)
+    }
+
+    private func buildImportColumn() -> NSView {
+        let (column, stack) = buildWorkflowColumn(
+            title: "Import",
+            subtitle: "Drop images or choose files to start the queue."
+        )
+        stack.addArrangedSubview(buildSourcesCard())
+        return column
+    }
+
+    private func buildQueueColumn() -> NSView {
+        let (column, stack) = buildWorkflowColumn(
+            title: "Compression Queue",
+            subtitle: "Files move from waiting to export in this list."
+        )
+
+        let toolbar = NSStackView()
+        toolbar.orientation = .horizontal
+        toolbar.alignment = .centerY
+        toolbar.spacing = 8
+        toolbar.addArrangedSubview(queueStateLabel)
+        toolbar.addArrangedSubview(NSView())
+        toolbar.addArrangedSubview(removeSelectedButton)
+        toolbar.addArrangedSubview(clearAllButton)
+        stack.addArrangedSubview(toolbar)
+
+        let scroll = NSScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.hasVerticalScroller = true
+        scroll.borderType = .noBorder
+        scroll.drawsBackground = false
+        scroll.documentView = tableView
+        tableView.enclosingScrollView?.drawsBackground = false
+        stack.addArrangedSubview(scroll)
+
+        NSLayoutConstraint.activate([
+            scroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 318)
+        ])
+        return column
+    }
+
+    private func buildImageActionColumn() -> NSView {
+        let (column, stack) = buildWorkflowColumn(
+            title: "Action",
+            subtitle: "Settings live in the top bar. Start when the queue is ready."
+        )
+        let settingsSummary = NSStackView()
+        settingsSummary.orientation = .vertical
+        settingsSummary.spacing = 8
+        settingsSummary.addArrangedSubview(makeStatPill(title: "Target", valueLabel: targetValueLabel, detailLabel: targetDetailLabel))
+        settingsSummary.addArrangedSubview(makeStatPill(title: "Output", valueLabel: outputValueLabel, detailLabel: outputDetailLabel))
+        stack.addArrangedSubview(settingsSummary)
+        stack.addArrangedSubview(settingsButton)
+        stack.addArrangedSubview(NSView())
+        stack.addArrangedSubview(compressButton)
+        stack.addArrangedSubview(stopButton)
+        return column
+    }
+
+    private func makeStatPill(title: String, valueLabel: NSTextField, detailLabel: NSTextField) -> NSView {
+        let view = NSView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.wantsLayer = true
+        view.layer?.cornerRadius = 12
+        view.layer?.cornerCurve = .continuous
+        view.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.22).cgColor
+
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 3
+        view.addSubview(stack)
+        stack.addArrangedSubview(makeLabel(title.uppercased(), size: 10, weight: .medium, color: Palette.subtle))
+        stack.addArrangedSubview(valueLabel)
+        stack.addArrangedSubview(detailLabel)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
+            stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
+            stack.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -10)
+        ])
+        return view
+    }
+
+    private func buildStandaloneSettingsScreen() -> NSView {
+        let screen = LiquidGlassView(role: .surface)
+        screen.translatesAutoresizingMaskIntoConstraints = false
+
+        let root = NSStackView()
+        root.translatesAutoresizingMaskIntoConstraints = false
+        root.orientation = .vertical
+        root.spacing = 20
+        screen.addSubview(root)
+
+        let titleStack = NSStackView()
+        titleStack.orientation = .vertical
+        titleStack.spacing = 7
+        titleStack.addArrangedSubview(makeLabel("Settings", size: 36, weight: .semibold, color: Palette.text))
+        titleStack.addArrangedSubview(makeWrappingLabel(
+            "Compression presets, quality preview, and export location.",
+            size: 15,
+            weight: .regular,
+            color: Palette.muted
+        ))
+
+        let settingsCard = buildSettingsCard()
+        advancedSettingsPanel = settingsCard
+        root.addArrangedSubview(titleStack)
+        root.addArrangedSubview(settingsCard)
+
+        NSLayoutConstraint.activate([
+            root.leadingAnchor.constraint(equalTo: screen.leadingAnchor, constant: 28),
+            root.trailingAnchor.constraint(equalTo: screen.trailingAnchor, constant: -24),
+            root.topAnchor.constraint(equalTo: screen.topAnchor, constant: 26),
+            root.bottomAnchor.constraint(lessThanOrEqualTo: screen.bottomAnchor, constant: -24),
+            settingsCard.widthAnchor.constraint(lessThanOrEqualToConstant: 560)
+        ])
+        return screen
     }
 
     private func buildSettingsCard() -> NSView {
@@ -1511,8 +1831,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         qualityRow.alignment = .centerY
         qualityRow.spacing = 12
         qualityRow.distribution = .fill
-        stack.addArrangedSubview(makeFormGroup(label: "Quality preview", control: qualityRow))
-        stack.addArrangedSubview(previewToggleButton)
+        stack.addArrangedSubview(makeFormGroup(label: "Quality", control: qualityRow))
 
         let formatRow = NSStackView(views: [
             makeFormGroup(label: "Format", control: formatPopup),
@@ -1661,14 +1980,47 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         row.addArrangedSubview(progressIndicator)
         row.addArrangedSubview(statusLabel)
         row.addArrangedSubview(NSView())
-        row.addArrangedSubview(clearCompletedButton)
-        row.addArrangedSubview(compressAgainButton)
-        row.addArrangedSubview(openOutputButton)
         NSLayoutConstraint.activate([
             row.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 14),
             row.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -14),
             row.topAnchor.constraint(equalTo: panel.topAnchor, constant: 12),
             row.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -12)
+        ])
+        return panel
+    }
+
+    private func buildQueueSummaryPanel() -> NSView {
+        let panel = LiquidGlassView(role: .statusPill)
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 10
+        panel.addSubview(stack)
+
+        let row = NSStackView()
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 16
+
+        let copyStack = NSStackView()
+        copyStack.orientation = .vertical
+        copyStack.spacing = 3
+        copyStack.addArrangedSubview(queueSummaryLabel)
+        copyStack.addArrangedSubview(queueDetailLabel)
+
+        row.addArrangedSubview(copyStack)
+        row.addArrangedSubview(NSView())
+        row.addArrangedSubview(clearCompletedButton)
+        row.addArrangedSubview(compressAgainButton)
+        row.addArrangedSubview(openOutputButton)
+
+        stack.addArrangedSubview(row)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -16),
+            stack.topAnchor.constraint(equalTo: panel.topAnchor, constant: 12),
+            stack.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -12)
         ])
         return panel
     }
@@ -1679,7 +2031,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let stack = NSStackView()
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.orientation = .vertical
-        stack.spacing = 12
+        stack.spacing = 14
         card.addSubview(stack)
         let queueTable = table ?? tableView
         let queueLabel = stateLabel ?? queueStateLabel
@@ -1692,10 +2044,19 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         scroll.documentView = queueTable
         queueTable.enclosingScrollView?.drawsBackground = false
 
-        stack.addArrangedSubview(makeLabel("Queue", size: 16, weight: .semibold, color: Palette.text))
+        let header = NSStackView()
+        header.orientation = .horizontal
+        header.alignment = .centerY
+        header.spacing = 12
+        header.addArrangedSubview(makeLabel("Compression Queue", size: 18, weight: .semibold, color: Palette.text))
+        header.addArrangedSubview(NSView())
+        header.addArrangedSubview(removeSelectedButton)
+        header.addArrangedSubview(clearAllButton)
+
+        stack.addArrangedSubview(header)
         stack.addArrangedSubview(queueLabel)
         stack.addArrangedSubview(scroll)
-        scroll.heightAnchor.constraint(equalToConstant: 176).isActive = true
+        scroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 280).isActive = true
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
             stack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
@@ -1707,8 +2068,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     private func buildLogCard() -> NSView {
         let (card, stack) = makeSectionCard(
-            title: "Activity",
-            subtitle: "Timeline of progress, warnings, and errors.",
+            title: "Processing Timeline",
+            subtitle: "Compression events, warnings, and export details stay attached to this run.",
             symbol: "terminal"
         )
 
@@ -1720,18 +2081,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         scroll.backgroundColor = Palette.log
         scroll.documentView = logTextView
 
-        let progressRow = NSStackView()
-        progressRow.orientation = .horizontal
-        progressRow.alignment = .centerY
-        progressRow.spacing = 12
-        progressRow.addArrangedSubview(batchProgressIndicator)
-        progressRow.addArrangedSubview(batchProgressLabel)
-        batchProgressIndicator.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        batchProgressLabel.setContentHuggingPriority(.required, for: .horizontal)
-
-        stack.addArrangedSubview(progressRow)
         stack.addArrangedSubview(scroll)
-        scroll.heightAnchor.constraint(equalToConstant: 148).isActive = true
+        scroll.heightAnchor.constraint(equalToConstant: 170).isActive = true
         return card
     }
 
@@ -1788,7 +2139,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     @objc private func qualitySliderChanged(_ sender: NSSlider) {
         qualityValueLabel.stringValue = "\(Int(sender.doubleValue.rounded()))%"
         updateDashboard()
-        schedulePreviewUpdate()
     }
 
     @objc private func toggleLivePreview(_ sender: NSButton) {
@@ -1860,10 +2210,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     @objc private func scrollToSettings() {
-        switchScreen(.images)
-        if advancedSettingsPanel?.isHidden == true {
-            toggleAdvancedSettings()
-        }
+        switchScreen(.settings)
     }
 
 
@@ -1919,18 +2266,6 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         extensionPopup.selectItem(withTitle: "webp")
         extensionToolStatusLabel.stringValue = "Pick one or more files, type the new extension, then rename them in the same folder."
         applyExtensionButton.isEnabled = false
-
-        previewWorkItem?.cancel()
-        previewRequestID = UUID()
-        previewToggleButton.state = .off
-        previewToggleButton.title = "Show Live Preview"
-        previewCard?.isHidden = true
-        previewHeightConstraint?.constant = 0
-        previewOriginalImageView.image = nil
-        previewOutputImageView.image = nil
-        previewOriginalLabel.stringValue = "Original"
-        previewOutputLabel.stringValue = "Move the slider"
-        previewStatusLabel.stringValue = "Add an image to see a live quality preview."
 
         logTextView.string = ""
         resetBatchProgress()
@@ -2279,7 +2614,11 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         fileStatesLock.lock()
         fileStates[key, default: QueueFileState()].status = status
         fileStatesLock.unlock()
-        DispatchQueue.main.async { [weak self] in self?.tableView.reloadData() }
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+            self?.queueRouteTableView.reloadData()
+            self?.updateQueueSummary()
+        }
     }
 
     private func statusForFile(_ url: URL) -> QueueFileStatus {
@@ -2288,6 +2627,15 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let status = fileStates[key]?.status ?? .queued
         fileStatesLock.unlock()
         return status
+    }
+
+    private func queueDisplayState(for url: URL) -> QueueDisplayState {
+        let sourceSize = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+        return QueueDisplayState(
+            status: statusForFile(url),
+            sourceSize: sourceSize,
+            targetSize: targetSizeBytes()
+        )
     }
 
     private func parseStatusFromLines(_ lines: [String]) -> QueueFileStatus {
@@ -2716,6 +3064,10 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         return ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
     }
 
+    private func targetSizeBytes() -> Int64? {
+        parseByteCount(maxSizeField.stringValue)
+    }
+
     private func addInputURLs(_ urls: [URL]) {
         var seen = Set(selectedFiles.map { $0.standardizedFileURL.path })
         var added = 0
@@ -2782,7 +3134,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         tableView.reloadData()
         queueRouteTableView.reloadData()
         updateDashboard()
-        schedulePreviewUpdate()
+        updateQueueSummary()
 
         if selectedFiles.isEmpty {
             queueHintLabel.stringValue = "Nothing is queued yet. Add files, add a folder, or drag images into the drop zone."
@@ -2794,17 +3146,44 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             queueRouteStateLabel.stringValue = "\(selectedFiles.count) file(s) ready"
         }
         let hasFiles = !selectedFiles.isEmpty
-        imageSupportPanel?.isHidden = !hasFiles
+        imageSupportPanel?.isHidden = true
         imageStatusPanel?.isHidden = !hasFiles && lastOutputFolder == nil
         removeSelectedButton.isHidden = !hasFiles
         clearAllButton.isHidden = !hasFiles
-        if !hasFiles {
-            queuePanel?.isHidden = true
-            queueToggleButton.title = "Queue"
-        }
+        queuePanel?.isHidden = false
+        queueToggleButton.title = "Queue"
         stopButton.isHidden = !isRunning
         compressButton.isEnabled = !selectedFiles.isEmpty && !isRunning
         clearCompletedButton.isEnabled = selectedFiles.contains { statusForFile($0) == .done }
+    }
+
+    private func updateQueueSummary() {
+        let states = selectedFiles.map { statusForFile($0) }
+        globalTimelineView.states = states
+        let totalBytes = selectedFiles.reduce(Int64(0)) { partial, url in
+            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+            return partial + size
+        }
+
+        guard !selectedFiles.isEmpty else {
+            queueSummaryLabel.stringValue = "Build a compression queue"
+            queueDetailLabel.stringValue = "Upload -> queue -> compress -> export"
+            return
+        }
+
+        let original = ByteCountFormatter.string(fromByteCount: totalBytes, countStyle: .file)
+        let targetTotal = targetSizeBytes().map { min(totalBytes, $0 * Int64(selectedFiles.count)) }
+        let target = targetTotal.map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? "target pending"
+        let completed = states.filter { [.done, .bestEffort, .skipped, .failed].contains($0) }.count
+        queueSummaryLabel.stringValue = "\(selectedFiles.count) files | \(original) -> \(target)"
+        queueDetailLabel.stringValue = "\(completed)/\(selectedFiles.count) complete | \(queueStageText(states))"
+    }
+
+    private func queueStageText(_ states: [QueueFileStatus]) -> String {
+        if states.contains(.processing) { return "compressing" }
+        if states.contains(.failed) { return "review needed" }
+        if states.allSatisfy({ [.done, .bestEffort, .skipped].contains($0) }) { return "ready to export" }
+        return "ready to compress"
     }
 
     private func updateDashboard() {
@@ -2833,6 +3212,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         case "2mb": targetPresetControl.selectedSegment = 3
         default: targetPresetControl.selectedSegment = -1
         }
+        updateQueueSummary()
     }
 
     private func updateSaveModeUI() {
@@ -3052,46 +3432,43 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let identifier = NSUserInterfaceItemIdentifier("file-cell")
-        let label: NSTextField
-
-        if let cell = tableView.makeView(withIdentifier: identifier, owner: self) as? NSTableCellView,
-           let existingLabel = cell.textField {
-            label = existingLabel
-        } else {
-            let cell = NSTableCellView()
-            cell.identifier = identifier
-            label = makeLabel("", size: 12, weight: .medium, color: Palette.text)
-            label.translatesAutoresizingMaskIntoConstraints = false
-            label.lineBreakMode = .byTruncatingMiddle
-            cell.textField = label
-            cell.addSubview(label)
-
-            NSLayoutConstraint.activate([
-                label.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 12),
-                label.trailingAnchor.constraint(equalTo: cell.trailingAnchor, constant: -12),
-                label.centerYAnchor.constraint(equalTo: cell.centerYAnchor)
-            ])
-
-            return cell
-        }
-
         let url = selectedFiles[row]
-        let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
-        let status = statusForFile(url).rawValue
-        let sizeText = ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
-        label.stringValue = "\(url.lastPathComponent)   \(sizeText)   \(status)"
-        switch status {
-        case QueueFileStatus.done.rawValue:
-            label.textColor = Palette.success
-        case QueueFileStatus.failed.rawValue:
-            label.textColor = Palette.danger
-        case QueueFileStatus.processing.rawValue:
-            label.textColor = Palette.accent
-        default:
-            label.textColor = Palette.text
-        }
-        return label.superview
+        let cell = (tableView.makeView(withIdentifier: identifier, owner: self) as? QueueFileCellView)
+            ?? QueueFileCellView()
+        cell.configure(url: url, state: queueDisplayState(for: url))
+        return cell
     }
+}
+
+private func parseByteCount(_ text: String) -> Int64? {
+    let raw = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    guard !raw.isEmpty else { return nil }
+    let pattern = #"^([0-9]+(?:\.[0-9]+)?)\s*([kmgt]?b?)?$"#
+    guard let regex = try? NSRegularExpression(pattern: pattern),
+          let match = regex.firstMatch(in: raw, range: NSRange(raw.startIndex..., in: raw)),
+          let numberRange = Range(match.range(at: 1), in: raw),
+          let value = Double(raw[numberRange]) else {
+        return nil
+    }
+
+    let unit = Range(match.range(at: 2), in: raw).map { String(raw[$0]) } ?? "b"
+    let multiplier: Double
+    switch unit {
+    case "k", "kb": multiplier = 1024
+    case "m", "mb": multiplier = 1024 * 1024
+    case "g", "gb": multiplier = 1024 * 1024 * 1024
+    case "t", "tb": multiplier = 1024 * 1024 * 1024 * 1024
+    default: multiplier = 1
+    }
+    return Int64((value * multiplier).rounded())
+}
+
+private func estimatedSavingsText(source: Int64, target: Int64?) -> String {
+    guard let target, source > 0 else { return "savings pending" }
+    let output = min(source, target)
+    let saved = max(source - output, 0)
+    let percent = Int((Double(saved) / Double(source) * 100).rounded())
+    return "\(percent)% saved"
 }
 
 private func makeLabel(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor) -> NSTextField {
