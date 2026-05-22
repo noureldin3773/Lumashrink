@@ -377,10 +377,24 @@ private struct QueueDisplayState {
 }
 
 private final class QueueFileCellView: NSTableCellView {
+    private let backgroundLayer = CALayer()
     private let iconView = NSImageView()
-    private let titleLabel = makeLabel("", size: 12, weight: .semibold, color: Palette.text)
+    private let titleLabel = makeLabel("", size: 13, weight: .semibold, color: Palette.text)
     private let metaLabel = makeLabel("", size: 11, weight: .regular, color: Palette.muted)
     private let statusLabel = makeLabel("", size: 11, weight: .semibold, color: Palette.muted)
+    private let progressBar = FileProgressLine()
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet {
+            let selected = backgroundStyle == .emphasized
+            backgroundLayer.backgroundColor = selected
+                ? Palette.accent.withAlphaComponent(0.10).cgColor
+                : NSColor.white.withAlphaComponent(0.24).cgColor
+            layer?.borderColor = selected
+                ? Palette.accent.withAlphaComponent(0.30).cgColor
+                : NSColor.clear.cgColor
+        }
+    }
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -388,7 +402,13 @@ private final class QueueFileCellView: NSTableCellView {
         wantsLayer = true
         layer?.cornerRadius = 12
         layer?.cornerCurve = .continuous
-        layer?.backgroundColor = NSColor.white.withAlphaComponent(0.24).cgColor
+        layer?.backgroundColor = .clear
+        layer?.borderWidth = 1
+
+        backgroundLayer.cornerRadius = 12
+        backgroundLayer.cornerCurve = .continuous
+        backgroundLayer.backgroundColor = NSColor.white.withAlphaComponent(0.24).cgColor
+        layer?.addSublayer(backgroundLayer)
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.image = makeSymbolImage("photo", pointSize: 15)
@@ -407,17 +427,28 @@ private final class QueueFileCellView: NSTableCellView {
         statusLabel.setContentHuggingPriority(.required, for: .horizontal)
         addSubview(statusLabel)
 
+        progressBar.layer?.cornerRadius = 2
+        addSubview(progressBar)
+
         NSLayoutConstraint.activate([
             iconView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             iconView.topAnchor.constraint(equalTo: topAnchor, constant: 11),
-            iconView.widthAnchor.constraint(equalToConstant: 21),
-            iconView.heightAnchor.constraint(equalToConstant: 21),
-            textStack.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 10),
+            iconView.widthAnchor.constraint(equalToConstant: 42),
+            iconView.heightAnchor.constraint(equalToConstant: 42),
+            textStack.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
             textStack.trailingAnchor.constraint(lessThanOrEqualTo: statusLabel.leadingAnchor, constant: -12),
             textStack.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             statusLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            statusLabel.centerYAnchor.constraint(equalTo: textStack.centerYAnchor)
+            statusLabel.centerYAnchor.constraint(equalTo: textStack.centerYAnchor),
+            progressBar.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
+            progressBar.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+            progressBar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5)
         ])
+    }
+
+    override func layout() {
+        super.layout()
+        backgroundLayer.frame = bounds
     }
 
     required init?(coder: NSCoder) {
@@ -431,6 +462,21 @@ private final class QueueFileCellView: NSTableCellView {
         let target = state.targetSize.map { ByteCountFormatter.string(fromByteCount: min(state.sourceSize, $0), countStyle: .file) } ?? "target pending"
         metaLabel.stringValue = "\(type) | \(original) -> \(target) | \(estimatedSavingsText(source: state.sourceSize, target: state.targetSize))"
         statusLabel.stringValue = state.status.rawValue
+        progressBar.status = state.status
+        if let thumbnail = NSImage(contentsOf: url) {
+            thumbnail.size = NSSize(width: 34, height: 34)
+            iconView.image = thumbnail
+            iconView.imageScaling = .scaleProportionallyUpOrDown
+            iconView.wantsLayer = true
+            iconView.layer?.cornerRadius = 7
+            iconView.layer?.cornerCurve = .continuous
+            iconView.layer?.masksToBounds = true
+            iconView.layer?.backgroundColor = Palette.log.cgColor
+            iconView.contentTintColor = nil
+        } else {
+            iconView.image = makeSymbolImage("photo", pointSize: 15)
+            iconView.contentTintColor = Palette.accent
+        }
 
         switch state.status {
         case .done:
@@ -454,13 +500,13 @@ private final class DropZoneView: NSView {
     private let innerRingLayer = CALayer()
     private let iconView = NSImageView()
     private let titleLabel = makeLabel(
-        "Drop images here",
-        size: 22,
+        "Drop files anywhere",
+        size: 26,
         weight: .semibold,
         color: Palette.text
     )
     private let subtitleLabel = makeWrappingLabel(
-        "Drag JPG, PNG, WebP, TIFF, or entire folders into this area.",
+        "Add JPG, PNG, WebP, TIFF, or entire folders. LumaShrink keeps every pixel local and prepares creator-ready exports.",
         size: 13,
         weight: .regular,
         color: Palette.muted
@@ -504,8 +550,8 @@ private final class DropZoneView: NSView {
         addSubview(stack)
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.image = makeSymbolImage("square.and.arrow.down.on.square", pointSize: 30)
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 30, weight: .regular)
+        iconView.image = makeSymbolImage("sparkles.rectangle.stack", pointSize: 34)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 34, weight: .regular)
         iconView.contentTintColor = Palette.accentBright
         stack.addArrangedSubview(iconView)
         stack.addArrangedSubview(titleLabel)
@@ -776,6 +822,7 @@ private struct CompressionSettings {
     let outputFormat: String
     let nameMode: String
     let outputFolder: URL?
+    let isBestQuality: Bool
 }
 
 private struct CompressionRunResult {
@@ -821,7 +868,7 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Image Compressor"
+        window.title = "LumaShrink"
         window.contentMinSize = NSSize(width: 980, height: 700)
         window.contentMaxSize = NSSize(width: 1440, height: 900)
         window.minSize = NSSize(width: 860, height: 640)
@@ -856,16 +903,16 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
 
         let appMenuItem = NSMenuItem()
         mainMenu.addItem(appMenuItem)
-        let appMenu = NSMenu(title: "Image Compressor")
+        let appMenu = NSMenu(title: "LumaShrink")
         appMenuItem.submenu = appMenu
-        appMenu.addItem(withTitle: "About Image Compressor", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
+        appMenu.addItem(withTitle: "About LumaShrink", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Hide Image Compressor", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
+        appMenu.addItem(withTitle: "Hide LumaShrink", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         let hideOthers = appMenu.addItem(withTitle: "Hide Others", action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
         hideOthers.keyEquivalentModifierMask = [.command, .option]
         appMenu.addItem(withTitle: "Show All", action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Quit Image Compressor", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Quit LumaShrink", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
 
         let fileMenuItem = NSMenuItem()
         mainMenu.addItem(fileMenuItem)
@@ -963,8 +1010,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
 
     private let queuedValueLabel = makeLabel("0 files", size: 24, weight: .semibold, color: Palette.text)
     private let queuedDetailLabel = makeLabel("0 B total", size: 12, weight: .regular, color: Palette.muted)
-    private let targetValueLabel = makeLabel("150 KB max", size: 24, weight: .semibold, color: Palette.text)
-    private let targetDetailLabel = makeLabel("Fast WebP target", size: 12, weight: .regular, color: Palette.muted)
+    private let targetValueLabel = makeLabel("500 KB max", size: 24, weight: .semibold, color: Palette.text)
+    private let targetDetailLabel = makeLabel("Website Ready", size: 12, weight: .regular, color: Palette.muted)
     private let outputValueLabel = makeLabel("Same Name", size: 24, weight: .semibold, color: Palette.text)
     private let outputDetailLabel = makeLabel("best extension", size: 12, weight: .regular, color: Palette.muted)
 
@@ -975,7 +1022,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         color: Palette.muted
     )
     private let saveModeHintLabel = makeWrappingLabel(
-        "Fast mode chooses the best output format and targets 150 KB.",
+        "Creator presets tune target size, quality, and output format while preserving the queue workflow.",
         size: 12,
         weight: .regular,
         color: Palette.warning
@@ -999,14 +1046,14 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let queueStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
     private let queueRouteStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
 
-    private let maxSizeField = StyledTextField(value: "150kb")
+    private let maxSizeField = StyledTextField(value: "500kb")
     private let qualitySlider = NSSlider(value: 85, minValue: 0, maxValue: 100, target: nil, action: nil)
     private let qualityValueLabel = makeLabel("85%", size: 14, weight: .medium, color: Palette.text)
     private let previewToggleButton = NSButton(title: "Show Live Preview", target: nil, action: nil)
     private let formatPopup = NSPopUpButton()
     private let saveModePopup = NSPopUpButton()
     private let outputFolderField = StyledTextField(value: "")
-    private let targetPresetControl = NSSegmentedControl(labels: ["Small", "Email", "Web", "Archive"], trackingMode: .selectOne, target: nil, action: nil)
+    private let targetPresetControl = NSSegmentedControl(labels: ["Website", "AI Art", "Social", "Ultra", "Portfolio", "Framer", "Fast"], trackingMode: .selectOne, target: nil, action: nil)
     private let mediaModeControl = NSSegmentedControl(labels: ["Images", "Videos"], trackingMode: .selectOne, target: nil, action: nil)
     private let previewOriginalImageView = NSImageView()
     private let previewOutputImageView = NSImageView()
@@ -1245,9 +1292,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let titleStack = NSStackView()
         titleStack.orientation = .vertical
         titleStack.spacing = 7
-        titleStack.addArrangedSubview(makeLabel("Compress Images", size: 36, weight: .semibold, color: Palette.text))
+        titleStack.addArrangedSubview(makeLabel("Creator Image Compression", size: 38, weight: .semibold, color: Palette.text))
         titleStack.addArrangedSubview(makeWrappingLabel(
-            "A focused workspace for turning large image sets into export-ready files.",
+            "A polished local workspace for turning heavy image sets into website, AI artwork, social, and portfolio-ready exports.",
             size: 15,
             weight: .regular,
             color: Palette.muted
@@ -1456,14 +1503,13 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         videoFileField.isEditable = false
         videoFileField.textColor = Palette.muted
 
-        formatPopup.addItems(withTitles: ["auto"])
+        formatPopup.addItems(withTitles: ["Best Quality", "Auto"])
         saveModePopup.addItems(withTitles: ["same-name"])
         extensionPopup.addItems(withTitles: ["webp", "jpg", "jpeg", "png", "heic", "tiff", "bmp", "gif"])
         stylePopup(formatPopup)
         stylePopup(saveModePopup)
         stylePopup(extensionPopup)
-        formatPopup.selectItem(withTitle: "auto")
-        formatPopup.isEnabled = false
+        formatPopup.selectItem(withTitle: "Best Quality")
         saveModePopup.selectItem(withTitle: "same-name")
         saveModePopup.isEnabled = false
         saveModePopup.target = self
@@ -1554,7 +1600,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         queueTable.headerView = nil
         queueTable.usesAlternatingRowBackgroundColors = false
         queueTable.backgroundColor = .clear
-        queueTable.rowHeight = 64
+        queueTable.rowHeight = 72
         queueTable.selectionHighlightStyle = .regular
         queueTable.intercellSpacing = NSSize(width: 0, height: 6)
         queueTable.target = self
@@ -1695,7 +1741,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func buildImportColumn() -> NSView {
         let (column, stack) = buildWorkflowColumn(
             title: "Import",
-            subtitle: "Drop images or choose files to start the queue."
+            subtitle: "Drop images and folders into the glass target."
         )
         stack.addArrangedSubview(buildSourcesCard())
         return column
@@ -1704,7 +1750,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func buildQueueColumn() -> NSView {
         let (column, stack) = buildWorkflowColumn(
             title: "Compression Queue",
-            subtitle: "Files move from waiting to export in this list."
+            subtitle: "Live states, estimates, and thumbnails keep the batch readable."
         )
 
         let toolbar = NSStackView()
@@ -1735,7 +1781,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private func buildImageActionColumn() -> NSView {
         let (column, stack) = buildWorkflowColumn(
             title: "Action",
-            subtitle: "Settings live in the top bar. Start when the queue is ready."
+            subtitle: "Review the active preset, then export when the queue is ready."
         )
         let settingsSummary = NSStackView()
         settingsSummary.orientation = .vertical
@@ -1789,9 +1835,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let titleStack = NSStackView()
         titleStack.orientation = .vertical
         titleStack.spacing = 7
-        titleStack.addArrangedSubview(makeLabel("Settings", size: 36, weight: .semibold, color: Palette.text))
+        titleStack.addArrangedSubview(makeLabel("Creator Presets", size: 36, weight: .semibold, color: Palette.text))
         titleStack.addArrangedSubview(makeWrappingLabel(
-            "Compression presets, quality preview, and export location.",
+            "Creator-focused modes, quality preview, and export location.",
             size: 15,
             weight: .regular,
             color: Palette.muted
@@ -2015,6 +2061,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         row.addArrangedSubview(openOutputButton)
 
         stack.addArrangedSubview(row)
+        stack.addArrangedSubview(globalTimelineView)
 
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 16),
@@ -2130,7 +2177,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     @objc private func setTargetFromSegment(_ sender: NSSegmentedControl) {
-        let values = ["150kb", "300kb", "500kb", "2mb"]
+        let values = ["500kb", "2mb", "900kb", "4mb", "1.5mb", "350kb", "180kb"]
         guard sender.selectedSegment >= 0, sender.selectedSegment < values.count else { return }
         maxSizeField.stringValue = values[sender.selectedSegment]
         updateDashboard()
@@ -2775,7 +2822,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         }
 
         let mode = saveModePopup.titleOfSelectedItem ?? "same-name"
-        let format = "auto"
+        let formatTitle = formatPopup.titleOfSelectedItem ?? "Best Quality"
+        let isBestQuality = formatTitle == "Best Quality"
+        let format = isBestQuality ? "webp" : "auto"
         let outputText = outputFolderField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
 
         var outputFolder: URL?
@@ -2797,7 +2846,8 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             maxSize: maxSize,
             outputFormat: format,
             nameMode: mode,
-            outputFolder: outputFolder
+            outputFolder: outputFolder,
+            isBestQuality: isBestQuality
         )
     }
 
@@ -2863,6 +2913,16 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
                 registerCompressionProcess(process)
                 process.waitUntilExit()
                 unregisterCompressionProcess(process)
+                if settings.isBestQuality {
+                    let parent = settings.outputFolder ?? fileURL.deletingLastPathComponent()
+                    let baseName = fileURL.deletingPathExtension().lastPathComponent
+                    let webpURL = parent.appendingPathComponent("\(baseName).webp")
+                    let pngURL = parent.appendingPathComponent("\(baseName).png")
+                    if FileManager.default.fileExists(atPath: webpURL.path) {
+                        try? FileManager.default.removeItem(at: pngURL)
+                        try? FileManager.default.moveItem(at: webpURL, to: pngURL)
+                    }
+                }
                 launchError = nil
                 break
             } catch {
@@ -3174,9 +3234,12 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let original = ByteCountFormatter.string(fromByteCount: totalBytes, countStyle: .file)
         let targetTotal = targetSizeBytes().map { min(totalBytes, $0 * Int64(selectedFiles.count)) }
         let target = targetTotal.map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) } ?? "target pending"
+        let savedBytes = targetTotal.map { max(totalBytes - $0, 0) } ?? 0
+        let saved = ByteCountFormatter.string(fromByteCount: savedBytes, countStyle: .file)
+        let ratio = totalBytes > 0 ? Int((Double(savedBytes) / Double(totalBytes) * 100).rounded()) : 0
         let completed = states.filter { [.done, .bestEffort, .skipped, .failed].contains($0) }.count
         queueSummaryLabel.stringValue = "\(selectedFiles.count) files | \(original) -> \(target)"
-        queueDetailLabel.stringValue = "\(completed)/\(selectedFiles.count) complete | \(queueStageText(states))"
+        queueDetailLabel.stringValue = "\(completed)/\(selectedFiles.count) complete | \(saved) saved | \(ratio)% ratio | \(queueStageText(states))"
     }
 
     private func queueStageText(_ states: [QueueFileStatus]) -> String {
@@ -3195,7 +3258,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         queuedValueLabel.stringValue = "\(selectedFiles.count) file(s)"
         queuedDetailLabel.stringValue = ByteCountFormatter.string(fromByteCount: totalBytes, countStyle: .file)
         targetValueLabel.stringValue = maxSizeField.stringValue.uppercased()
-        targetDetailLabel.stringValue = "Fast WebP target"
+        targetDetailLabel.stringValue = activePresetName()
 
         let mode = saveModePopup.titleOfSelectedItem ?? "same-name"
         let prettyMode = mode
@@ -3203,16 +3266,34 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             .map { $0.capitalized }
             .joined(separator: " ")
         outputValueLabel.stringValue = prettyMode
-        outputDetailLabel.stringValue = "best extension"
+        outputDetailLabel.stringValue = (formatPopup.titleOfSelectedItem ?? "Best Quality") == "Best Quality"
+            ? "Best Quality PNG delivery"
+            : "Auto optimized format"
 
         switch maxSizeField.stringValue.lowercased() {
-        case "150kb": targetPresetControl.selectedSegment = 0
-        case "300kb": targetPresetControl.selectedSegment = 1
-        case "500kb": targetPresetControl.selectedSegment = 2
-        case "2mb": targetPresetControl.selectedSegment = 3
+        case "500kb": targetPresetControl.selectedSegment = 0
+        case "2mb": targetPresetControl.selectedSegment = 1
+        case "900kb": targetPresetControl.selectedSegment = 2
+        case "4mb": targetPresetControl.selectedSegment = 3
+        case "1.5mb": targetPresetControl.selectedSegment = 4
+        case "350kb": targetPresetControl.selectedSegment = 5
+        case "180kb": targetPresetControl.selectedSegment = 6
         default: targetPresetControl.selectedSegment = -1
         }
         updateQueueSummary()
+    }
+
+    private func activePresetName() -> String {
+        switch maxSizeField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "500kb": return "Website Ready"
+        case "2mb": return "AI Artwork"
+        case "900kb": return "Social Media"
+        case "4mb": return "Ultra Quality"
+        case "1.5mb": return "Portfolio Mode"
+        case "350kb": return "Framer/Webflow"
+        case "180kb": return "Fast Export"
+        default: return "Custom creator target"
+        }
     }
 
     private func updateSaveModeUI() {
@@ -3222,7 +3303,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             outputFolderField.isEnabled = true
             chooseOutputButton.isEnabled = true
             clearOutputButton.isEnabled = true
-            saveModeHintLabel.stringValue = "Fast mode keeps the base filename and can switch extension to hit the target size."
+            saveModeHintLabel.stringValue = "\(activePresetName()) keeps the base filename and can switch extension to hit the target size."
         case "overwrite":
             outputFolderField.isEnabled = false
             chooseOutputButton.isEnabled = false
@@ -3233,7 +3314,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             outputFolderField.isEnabled = true
             chooseOutputButton.isEnabled = true
             clearOutputButton.isEnabled = true
-            saveModeHintLabel.stringValue = "Fast mode keeps the base filename and can switch extension."
+            saveModeHintLabel.stringValue = "\(activePresetName()) keeps the base filename and can switch extension."
         }
     }
 

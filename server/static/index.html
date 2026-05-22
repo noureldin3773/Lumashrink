@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Compressor</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div class="header-left">
+      <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <div>
+        <h1 class="title">Image Compressor</h1>
+        <span class="subtitle">Batch compression with real-time preview</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="session-badge" id="sessionBadge">No session</span>
+      <button class="btn btn-ghost" id="clearSessionBtn" title="New session">&olarr; New</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Left column: Queue + Drop zone -->
+    <section class="col-primary">
+      <div class="card drop-zone" id="dropZone">
+        <div class="drop-content" id="dropContent">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p class="drop-title">Drop images &amp; videos here</p>
+          <p class="drop-sub">or <a href="#" id="fileInputLink">browse files</a></p>
+        </div>
+        <div class="drop-active" id="dropActive" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p class="drop-title" style="color:#3b82f6">Drop to add files</p>
+        </div>
+      </div>
+      <input type="file" id="fileInput" multiple accept="image/*,video/*" hidden>
+
+      <div class="card queue-card">
+        <div class="card-header">
+          <h2>File Queue</h2>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge" id="fileCount">0 files</span>
+            <label class="btn btn-primary btn-sm" for="fileInput" tabindex="0" role="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+            </label>
+          </div>
+        </div>
+        <div class="queue-empty" id="queueEmpty">
+          <p>Add files to begin</p>
+        </div>
+        <div class="queue-table" id="queueTable" hidden>
+          <div id="queueList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right column: Settings + Controls + Progress + Log -->
+    <section class="col-secondary">
+      <!-- Settings -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Settings</h2>
+        </div>
+        <div class="settings-grid">
+          <div class="field">
+            <label>Target Size</label>
+            <div class="preset-row" id="sizePresets">
+              <button class="preset" data-value="10kb">10 KB</button>
+              <button class="preset" data-value="50kb">50 KB</button>
+              <button class="preset active" data-value="150kb">150 KB</button>
+              <button class="preset" data-value="500kb">500 KB</button>
+              <button class="preset" data-value="1mb">1 MB</button>
+              <button class="preset" data-value="">Custom</button>
+            </div>
+            <div class="custom-size" id="customSizeRow" hidden>
+              <input type="text" id="customSizeInput" placeholder="e.g. 300kb" class="input">
+              <select id="customSizeUnit" class="input" style="max-width:80px">
+                <option value="b">B</option>
+                <option value="kb" selected>KB</option>
+                <option value="mb">MB</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Output Format</label>
+            <select id="outputFormat" class="input">
+              <option value="auto">Auto</option>
+              <option value="keep">Keep original</option>
+              <option value="jpeg">JPEG</option>
+              <option value="png">PNG</option>
+              <option value="webp">WebP</option>
+              <option value="best_quality">Best Quality</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quality Range</label>
+            <div class="range-row">
+              <input type="range" id="minQuality" min="1" max="100" value="20">
+              <span class="range-label" id="minQualityLabel">20</span>
+              <span class="range-sep">&ndash;</span>
+              <input type="range" id="maxQuality" min="1" max="100" value="100">
+              <span class="range-label" id="maxQualityLabel">100</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Min Side</label>
+            <select id="minSide" class="input">
+              <option value="160">160 px</option>
+              <option value="320" selected>320 px</option>
+              <option value="480">480 px</option>
+              <option value="640">640 px</option>
+              <option value="800">800 px</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Naming</label>
+            <select id="nameMode" class="input">
+              <option value="suffix">Suffix</option>
+              <option value="same-name">Same name</option>
+              <option value="overwrite">Overwrite</option>
+            </select>
+          </div>
+          <div class="field checkbox-row">
+            <label>
+              <input type="checkbox" id="keepMetadata"> Keep metadata
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Preview</h2>
+        </div>
+        <div class="preview-area" id="previewArea">
+          <p class="preview-placeholder">Select a queued file to preview</p>
+          <img id="previewImage" hidden>
+          <div class="preview-stats" id="previewStats" hidden>
+            <span id="previewOriginal"></span>
+            <span id="previewCompressed"></span>
+          </div>
+        </div>
+        <div class="preview-slider-row" id="previewSliderRow" hidden>
+          <label>Quality</label>
+          <input type="range" id="previewQuality" min="10" max="100" value="80">
+          <span id="previewQualityLabel">80</span>
+        </div>
+      </div>
+
+      <!-- Batch progress -->
+      <div class="card" id="batchProgressCard" hidden>
+        <div class="card-header">
+          <h2>Progress</h2>
+        </div>
+        <div class="batch-progress">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="batchProgressFill" style="width:0%"></div>
+          </div>
+          <div class="progress-stats" id="batchStats">
+            <span id="batchCount">0 / 0 done</span>
+            <span id="batchRate">&mdash; files/s</span>
+            <span id="batchETA">ETA &mdash;</span>
+          </div>
+          <div class="progress-savings" id="batchSavings" style="display:none;font-size:12px;color:var(--success);margin-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-row">
+        <button class="btn btn-primary" id="compressBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Compress
+        </button>
+        <button class="btn btn-danger" id="stopBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12"/></svg>
+          Stop
+        </button>
+        <button class="btn btn-ghost" id="clearFilesBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          Clear all
+        </button>
+        <button class="btn btn-success" id="downloadAllBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download all
+        </button>
+      </div>
+
+      <!-- Log -->
+      <div class="card log-card">
+        <div class="card-header">
+          <h2>Processing Timeline</h2>
+          <button class="btn btn-ghost btn-sm" id="clearLogBtn">Clear</button>
+        </div>
+        <div class="log-area" id="logArea">
+          <div class="log-empty">Ready to compress</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

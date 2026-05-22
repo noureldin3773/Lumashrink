@@ -70,6 +70,15 @@ PNG_PALETTE_STEPS = [
 
 SIPS_AVAILABLE = shutil.which("sips") is not None
 
+_SUPPORTS_WEBP: bool | None = None
+
+
+def webp_supported() -> bool:
+    global _SUPPORTS_WEBP
+    if _SUPPORTS_WEBP is None:
+        _SUPPORTS_WEBP = PIL_AVAILABLE and features is not None and features.check("webp")
+    return _SUPPORTS_WEBP
+
 
 @dataclass
 class SourceImage:
@@ -208,7 +217,7 @@ def query_sips_image_info(path: Path) -> tuple[int, int, str]:
 def choose_output_format(requested_format: str, source: SourceImage) -> str:
     requested_format = requested_format.lower()
     source_suffix = source.path.suffix.lower()
-    supports_webp = PIL_AVAILABLE and features is not None and features.check("webp")
+    supports_webp = webp_supported()
 
     if not PIL_AVAILABLE:
         if requested_format == "webp":

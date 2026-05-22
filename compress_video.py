@@ -14,7 +14,6 @@ from pathlib import Path
 DEFAULT_TARGET_BYTES = 1_000_000
 MAX_RECOMMENDED_INPUT_BYTES = 10_000_000
 GOOD_QUALITY_CQ = 45
-HIGH_QUALITY_CRF = "18"
 QUALITY_ATTEMPTS = ("18", "20", "21")
 
 
@@ -44,6 +43,10 @@ def parse_size(value: str) -> int:
     return int(float(text))
 
 
+_ENCODER_CACHE: dict[str, bool] = {}
+_DURATION_CACHE: dict[str, float] = {}
+
+
 def run(command: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -62,6 +65,11 @@ def require_tool(name: str) -> str:
 
 
 def get_duration(ffprobe: str, source: Path) -> float:
+    source_str = str(source)
+    cached = _DURATION_CACHE.get(source_str)
+    if cached is not None:
+        return cached
+
     result = run(
         [
             ffprobe,
@@ -71,7 +79,7 @@ def get_duration(ffprobe: str, source: Path) -> float:
             "format=duration",
             "-of",
             "json",
-            str(source),
+            source_str,
         ]
     )
     if result.returncode != 0:
@@ -80,12 +88,19 @@ def get_duration(ffprobe: str, source: Path) -> float:
     duration = float(data["format"]["duration"])
     if duration <= 0:
         raise RuntimeError("Could not read a valid video duration.")
+    _DURATION_CACHE[source_str] = duration
     return duration
 
 
 def ffmpeg_supports_encoder(ffmpeg: str, encoder: str) -> bool:
+    key = f"{ffmpeg}:{encoder}"
+    cached = _ENCODER_CACHE.get(key)
+    if cached is not None:
+        return cached
     result = run([ffmpeg, "-hide_banner", "-encoders"])
-    return result.returncode == 0 and encoder in result.stdout
+    supported = result.returncode == 0 and encoder in result.stdout
+    _ENCODER_CACHE[key] = supported
+    return supported
 
 
 def choose_encoder(ffmpeg: str) -> tuple[str, str, bool]:
