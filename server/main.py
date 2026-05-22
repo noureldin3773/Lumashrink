@@ -147,7 +147,11 @@ async def shutdown():
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/")
-async def root():
+async def landing():
+    return FileResponse(str(STATIC_DIR / "landing.html"), media_type="text/html")
+
+@app.get("/app")
+async def app_root():
     return FileResponse(str(STATIC_DIR / "index.html"), media_type="text/html")
 
 

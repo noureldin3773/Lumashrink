@@ -4,7 +4,7 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DESKTOP_DIR="$HOME/Desktop"
-APP_NAME="Image Compressor.app"
+APP_NAME="LumaShrink.app"
 APP_PATH="$DESKTOP_DIR/$APP_NAME"
 BUILD_VERSION="$(date +%Y%m%d%H%M%S)"
 ICONSET_DIR="$PROJECT_DIR/icon.iconset"
@@ -13,7 +13,7 @@ BASE_PNG="$PROJECT_DIR/.icon_base.png"
 BUILD_DIR="$(mktemp -d)"
 TEMP_APP_PATH="$BUILD_DIR/$APP_NAME"
 RUNTIME_DIR="$TEMP_APP_PATH/Contents/Resources/runtime"
-EXECUTABLE_NAME="Image Compressor"
+EXECUTABLE_NAME="LumaShrink"
 BINARY_PATH="$TEMP_APP_PATH/Contents/MacOS/$EXECUTABLE_NAME"
 VENV_SOURCE="$PROJECT_DIR/.venv"
 RUNTIME_VENV_DIR="$RUNTIME_DIR/.venv"
@@ -62,17 +62,17 @@ cat > "$TEMP_APP_PATH/Contents/Info.plist" <<EOF
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>
-  <string>Image Compressor</string>
+  <string>LumaShrink</string>
   <key>CFBundleExecutable</key>
   <string>$EXECUTABLE_NAME</string>
   <key>CFBundleIconFile</key>
   <string>applet</string>
   <key>CFBundleIdentifier</key>
-  <string>local.codex.image-compressor</string>
+  <string>local.codex.lumashrink</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Image Compressor</string>
+  <string>LumaShrink</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>NSPrincipalClass</key>

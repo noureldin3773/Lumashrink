@@ -4,35 +4,35 @@ import UserNotifications
 private func L(_ key: String) -> String { NSLocalizedString(key, comment: "") }
 
 private enum Palette {
-    static let window = NSColor(calibratedWhite: 0.97, alpha: 1)
-    static let windowTop = NSColor(calibratedWhite: 0.98, alpha: 1)
-    static let card = NSColor(calibratedWhite: 0.995, alpha: 1)
-    static let cardAlt = NSColor(calibratedWhite: 0.975, alpha: 1)
-    static let border = NSColor(calibratedWhite: 0.86, alpha: 1)
-    static let accent = NSColor(calibratedRed: 0.08, green: 0.40, blue: 0.92, alpha: 1.0)
-    static let accentSoft = NSColor(calibratedRed: 0.58, green: 0.72, blue: 0.95, alpha: 1.0)
-    static let accentBright = NSColor(calibratedRed: 0.18, green: 0.46, blue: 0.93, alpha: 1.0)
-    static let primaryButton = NSColor(calibratedRed: 0.08, green: 0.40, blue: 0.92, alpha: 1.0)
-    static let primaryButtonPressed = NSColor(calibratedRed: 0.07, green: 0.31, blue: 0.74, alpha: 1.0)
-    static let secondaryButton = NSColor(calibratedWhite: 0.95, alpha: 1)
+    static let window = NSColor(calibratedRed: 0.948, green: 0.972, blue: 1.0, alpha: 1.0)
+    static let windowTop = NSColor(calibratedRed: 0.988, green: 0.996, blue: 1.0, alpha: 1.0)
+    static let card = NSColor(calibratedRed: 0.996, green: 0.999, blue: 1.0, alpha: 0.90)
+    static let cardAlt = NSColor(calibratedRed: 0.982, green: 0.992, blue: 1.0, alpha: 0.84)
+    static let border = NSColor(calibratedRed: 0.812, green: 0.878, blue: 0.965, alpha: 1.0)
+    static let accent = NSColor(calibratedRed: 0.086, green: 0.466, blue: 1.0, alpha: 1.0)
+    static let accentSoft = NSColor(calibratedRed: 0.102, green: 0.466, blue: 1.0, alpha: 0.15)
+    static let accentBright = NSColor(calibratedRed: 0.204, green: 0.494, blue: 0.969, alpha: 1.0)
+    static let primaryButton = NSColor(calibratedRed: 0.086, green: 0.400, blue: 0.839, alpha: 1.0)
+    static let primaryButtonPressed = NSColor(calibratedRed: 0.039, green: 0.337, blue: 0.761, alpha: 1.0)
+    static let secondaryButton = NSColor.white.withAlphaComponent(0.72)
     static let secondaryButtonText = NSColor(calibratedRed: 0.10, green: 0.14, blue: 0.20, alpha: 1.0)
     static let dangerButton = NSColor(calibratedRed: 0.41, green: 0.17, blue: 0.22, alpha: 1.0)
-    static let text = NSColor(calibratedWhite: 0.16, alpha: 1)
-    static let muted = NSColor(calibratedWhite: 0.38, alpha: 1)
-    static let subtle = NSColor(calibratedRed: 0.36, green: 0.32, blue: 0.24, alpha: 1.0)
+    static let text = NSColor(calibratedRed: 0.067, green: 0.095, blue: 0.153, alpha: 1.0)
+    static let muted = NSColor(calibratedRed: 0.360, green: 0.430, blue: 0.548, alpha: 1.0)
+    static let subtle = NSColor(calibratedRed: 0.430, green: 0.506, blue: 0.635, alpha: 1.0)
     static let warning = NSColor(calibratedRed: 0.45, green: 0.33, blue: 0.08, alpha: 1.0)
     static let success = NSColor(calibratedRed: 0.10, green: 0.40, blue: 0.25, alpha: 1.0)
     static let danger = NSColor(calibratedRed: 0.62, green: 0.18, blue: 0.20, alpha: 1.0)
-    static let log = NSColor(calibratedWhite: 0.975, alpha: 1)
-    static let pill = NSColor(calibratedWhite: 0.985, alpha: 1)
-    static let overlay = NSColor(calibratedWhite: 0.965, alpha: 1)
+    static let log = NSColor(calibratedRed: 0.976, green: 0.990, blue: 1.0, alpha: 0.82)
+    static let pill = NSColor(calibratedRed: 0.996, green: 0.999, blue: 1.0, alpha: 0.82)
+    static let overlay = NSColor(calibratedRed: 0.982, green: 0.992, blue: 1.0, alpha: 0.86)
     static let rose = NSColor(calibratedRed: 0.66, green: 0.32, blue: 0.41, alpha: 1.0)
     static let cyan = NSColor(calibratedRed: 0.38, green: 0.75, blue: 0.90, alpha: 1.0)
     static let mint = NSColor(calibratedRed: 0.40, green: 0.78, blue: 0.66, alpha: 1.0)
     static let champagne = NSColor(calibratedRed: 0.45, green: 0.33, blue: 0.08, alpha: 1.0)
     static let focus = NSColor(calibratedRed: 0.05, green: 0.48, blue: 0.98, alpha: 1.0)
-    static let controlGlass = NSColor.white.withAlphaComponent(0.72)
-    static let controlQuiet = NSColor.white.withAlphaComponent(0.62)
+    static let controlGlass = NSColor(calibratedRed: 0.996, green: 0.999, blue: 1.0, alpha: 0.78)
+    static let controlQuiet = NSColor(calibratedRed: 0.986, green: 0.994, blue: 1.0, alpha: 0.72)
 }
 
 private final class AppLogger {
@@ -205,9 +205,9 @@ private final class GradientBackgroundView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         gradientLayer.colors = [
-            NSColor(calibratedWhite: 0.985, alpha: 1).cgColor,
+            Palette.windowTop.cgColor,
             Palette.window.cgColor,
-            NSColor(calibratedWhite: 0.94, alpha: 1).cgColor
+            NSColor(calibratedRed: 0.916, green: 0.956, blue: 1.0, alpha: 1.0).cgColor
         ]
         gradientLayer.locations = [0, 0.58, 1]
         gradientLayer.startPoint = CGPoint(x: 0.04, y: 1)
@@ -517,8 +517,8 @@ private final class DropZoneView: NSView {
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
         materialLayer.colors = [
-            NSColor.white.withAlphaComponent(0.88).cgColor,
-            NSColor(calibratedWhite: 0.97, alpha: 0.78).cgColor,
+            NSColor.white.withAlphaComponent(0.92).cgColor,
+            NSColor(calibratedRed: 0.965, green: 0.980, blue: 1.0, alpha: 0.78).cgColor,
             Palette.accentSoft.withAlphaComponent(0.10).cgColor
         ]
         materialLayer.locations = [0, 0.72, 1]
@@ -526,7 +526,7 @@ private final class DropZoneView: NSView {
         materialLayer.endPoint = CGPoint(x: 1, y: 0)
         layer?.addSublayer(materialLayer)
         layer?.backgroundColor = NSColor.white.withAlphaComponent(0.52).cgColor
-        layer?.cornerRadius = 32
+        layer?.cornerRadius = 28
         layer?.cornerCurve = .continuous
         layer?.borderWidth = 1
         layer?.borderColor = NSColor.white.withAlphaComponent(0.52).cgColor
@@ -550,8 +550,8 @@ private final class DropZoneView: NSView {
         addSubview(stack)
 
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        iconView.image = makeSymbolImage("sparkles.rectangle.stack", pointSize: 34)
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 34, weight: .regular)
+        iconView.image = makeSymbolImage("square.and.arrow.up", pointSize: 44)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 44, weight: .regular)
         iconView.contentTintColor = Palette.accentBright
         stack.addArrangedSubview(iconView)
         stack.addArrangedSubview(titleLabel)
@@ -624,8 +624,8 @@ private final class DropZoneView: NSView {
                 Palette.accentBright.withAlphaComponent(0.12).cgColor
             ]
             : [
-                NSColor.white.withAlphaComponent(0.88).cgColor,
-                NSColor(calibratedWhite: 0.97, alpha: 0.78).cgColor,
+                NSColor.white.withAlphaComponent(0.94).cgColor,
+                Palette.cardAlt.cgColor,
                 Palette.accentSoft.withAlphaComponent(0.10).cgColor
             ]
     }
@@ -1207,7 +1207,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         row.spacing = 10
         bar.addSubview(row)
 
-        let title = makeLabel("Image Compressor", size: 14, weight: .semibold, color: Palette.text)
+        let title = makeLabel("LumaShrink", size: 14, weight: .semibold, color: Palette.text)
         title.setContentHuggingPriority(.required, for: .horizontal)
         row.addArrangedSubview(title)
         row.addArrangedSubview(NSView())
@@ -1286,43 +1286,218 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         let root = NSStackView()
         root.translatesAutoresizingMaskIntoConstraints = false
         root.orientation = .vertical
-        root.spacing = 20
+        root.alignment = .width
+        root.spacing = 18
         workbench.addSubview(root)
 
-        let titleStack = NSStackView()
-        titleStack.orientation = .vertical
-        titleStack.spacing = 7
-        titleStack.addArrangedSubview(makeLabel("Creator Image Compression", size: 38, weight: .semibold, color: Palette.text))
-        titleStack.addArrangedSubview(makeWrappingLabel(
-            "A polished local workspace for turning heavy image sets into website, AI artwork, social, and portfolio-ready exports.",
-            size: 15,
-            weight: .regular,
-            color: Palette.muted
-        ))
+        let content = NSStackView()
+        content.translatesAutoresizingMaskIntoConstraints = false
+        content.orientation = .horizontal
+        content.alignment = .top
+        content.spacing = 18
+        content.distribution = .fillProportionally
+
+        let primary = NSStackView()
+        primary.orientation = .vertical
+        primary.spacing = 18
+        primary.alignment = .width
+
+        let secondary = NSStackView()
+        secondary.orientation = .vertical
+        secondary.spacing = 18
+        secondary.alignment = .width
 
         let statusRow = buildImageStatusRow()
         imageStatusPanel = statusRow
 
         let summary = buildQueueSummaryPanel()
-        root.addArrangedSubview(titleStack)
-        root.addArrangedSubview(summary)
-        root.addArrangedSubview(statusRow)
+        primary.addArrangedSubview(buildSourcesCard())
+        primary.addArrangedSubview(summary)
+        primary.addArrangedSubview(statusRow)
 
-        let workflowBlock = buildImageWorkflowBlock()
+        let workflowBlock = buildQueueCard(table: tableView, stateLabel: queueStateLabel)
         let activity = buildLogCard()
         activityPanel = activity
 
-        root.addArrangedSubview(workflowBlock)
-        root.addArrangedSubview(activity)
+        primary.addArrangedSubview(workflowBlock)
+        secondary.addArrangedSubview(buildLauncherPresetPanel())
+        secondary.addArrangedSubview(activity)
+        secondary.addArrangedSubview(buildPreviewPlaceholderPanel())
+
+        root.addArrangedSubview(buildWebsiteHeaderCard())
+        root.addArrangedSubview(content)
+        content.addArrangedSubview(primary)
+        content.addArrangedSubview(secondary)
 
         NSLayoutConstraint.activate([
-            root.leadingAnchor.constraint(equalTo: workbench.leadingAnchor, constant: 28),
+            secondary.widthAnchor.constraint(greaterThanOrEqualToConstant: 360),
+            secondary.widthAnchor.constraint(lessThanOrEqualToConstant: 430)
+        ])
+
+        NSLayoutConstraint.activate([
+            root.leadingAnchor.constraint(equalTo: workbench.leadingAnchor, constant: 24),
             root.trailingAnchor.constraint(equalTo: workbench.trailingAnchor, constant: -24),
-            root.topAnchor.constraint(equalTo: workbench.topAnchor, constant: 26),
+            root.topAnchor.constraint(equalTo: workbench.topAnchor, constant: 22),
             root.bottomAnchor.constraint(equalTo: workbench.bottomAnchor, constant: -24)
         ])
 
         return workbench
+    }
+
+    private func buildWebsiteHeaderCard() -> NSView {
+        let panel = LiquidGlassView(role: .statusPill)
+        let row = NSStackView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        row.orientation = .horizontal
+        row.alignment = .centerY
+        row.spacing = 14
+        panel.addSubview(row)
+
+        let mark = makeSymbolBadge(symbol: "photo.on.rectangle.angled", tint: Palette.accent)
+        let copy = NSStackView()
+        copy.orientation = .vertical
+        copy.spacing = 3
+        copy.addArrangedSubview(makeLabel("LumaShrink", size: 28, weight: .semibold, color: Palette.text))
+        copy.addArrangedSubview(makeWrappingLabel(
+            "Premium local compression for creators, portfolios, and fast web launches.",
+            size: 13,
+            weight: .regular,
+            color: Palette.muted
+        ))
+
+        let session = makeHighlightPill(symbol: "link", text: "Session local")
+        let newButton = NSButton(title: "New", target: self, action: #selector(clearAll))
+        styleSecondaryButton(newButton)
+        configureButtonImage(newButton, symbolName: "arrow.clockwise")
+
+        row.addArrangedSubview(mark)
+        row.addArrangedSubview(copy)
+        row.addArrangedSubview(NSView())
+        row.addArrangedSubview(session)
+        row.addArrangedSubview(newButton)
+
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 18),
+            row.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -18),
+            row.topAnchor.constraint(equalTo: panel.topAnchor, constant: 14),
+            row.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -14)
+        ])
+        return panel
+    }
+
+    private func buildLauncherPresetPanel() -> NSView {
+        let panel = LiquidGlassView(role: .floatingPanel)
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 14
+        panel.addSubview(stack)
+
+        let header = NSStackView()
+        header.orientation = .vertical
+        header.spacing = 3
+        header.addArrangedSubview(makeLabel("Creator Presets", size: 20, weight: .semibold, color: Palette.text))
+        header.addArrangedSubview(makeWrappingLabel(
+            "Choose the export intent. Advanced controls stay available below.",
+            size: 12,
+            weight: .regular,
+            color: Palette.muted
+        ))
+
+        let grid = NSGridView()
+        grid.translatesAutoresizingMaskIntoConstraints = false
+        grid.rowSpacing = 10
+        grid.columnSpacing = 10
+        let presets: [(String, String, String, String)] = [
+            ("Website Ready", "Fast pages, crisp visuals", "500kb", "bolt.horizontal"),
+            ("AI Artwork", "Preserve painterly detail", "2mb", "sparkles"),
+            ("Social Media", "Clean feed exports", "900kb", "circle.lefthalf.filled"),
+            ("Ultra Quality", "Gentle compression", "4mb", "diamond.fill"),
+            ("Portfolio Mode", "Case-study ready", "1.5mb", "square.inset.filled"),
+            ("Framer/Webflow", "Landing page assets", "350kb", "command"),
+            ("Fast Export", "Tiny shareable files", "180kb", "bolt"),
+            ("Custom", "Set your own target", "150kb", "ellipsis")
+        ]
+        for rowIndex in stride(from: 0, to: presets.count, by: 2) {
+            let left = makePresetLauncherButton(presets[rowIndex])
+            let right = makePresetLauncherButton(presets[rowIndex + 1])
+            grid.addRow(with: [left, right])
+        }
+
+        stack.addArrangedSubview(header)
+        stack.addArrangedSubview(grid)
+        stack.addArrangedSubview(settingsButton)
+
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 18),
+            stack.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -18),
+            stack.topAnchor.constraint(equalTo: panel.topAnchor, constant: 18),
+            stack.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -18)
+        ])
+        return panel
+    }
+
+    private func makePresetLauncherButton(_ preset: (String, String, String, String)) -> NSButton {
+        let button = NSButton(title: "\(preset.0)\n\(preset.1)", target: self, action: #selector(setTargetFromPreset(_:)))
+        button.identifier = NSUserInterfaceItemIdentifier(preset.2)
+        button.image = makeSymbolImage(preset.3, pointSize: 13)
+        button.imagePosition = .imageLeading
+        button.alignment = .left
+        button.bezelStyle = .regularSquare
+        button.isBordered = false
+        button.font = premiumFont(size: 12, weight: .semibold)
+        button.contentTintColor = preset.0 == "Custom" ? Palette.muted : Palette.accent
+        button.wantsLayer = true
+        button.layer?.cornerRadius = 14
+        button.layer?.cornerCurve = .continuous
+        button.layer?.borderWidth = preset.0 == "Custom" ? 1.2 : 1
+        button.layer?.borderColor = (preset.0 == "Custom" ? Palette.accent : Palette.border).cgColor
+        button.layer?.backgroundColor = Palette.controlQuiet.cgColor
+        button.heightAnchor.constraint(equalToConstant: 64).isActive = true
+        return button
+    }
+
+    private func buildPreviewPlaceholderPanel() -> NSView {
+        let panel = LiquidGlassView(role: .floatingPanel)
+        let stack = NSStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.orientation = .vertical
+        stack.spacing = 12
+        panel.addSubview(stack)
+        stack.addArrangedSubview(makeLabel("Before / After Preview", size: 18, weight: .semibold, color: Palette.text))
+        stack.addArrangedSubview(makeWrappingLabel(
+            "Select a queued image to inspect compression detail.",
+            size: 12,
+            weight: .regular,
+            color: Palette.muted
+        ))
+        stack.addArrangedSubview(makePreviewWell())
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: panel.leadingAnchor, constant: 18),
+            stack.trailingAnchor.constraint(equalTo: panel.trailingAnchor, constant: -18),
+            stack.topAnchor.constraint(equalTo: panel.topAnchor, constant: 18),
+            stack.bottomAnchor.constraint(equalTo: panel.bottomAnchor, constant: -18)
+        ])
+        return panel
+    }
+
+    private func makePreviewWell() -> NSView {
+        let well = NSView()
+        well.translatesAutoresizingMaskIntoConstraints = false
+        well.wantsLayer = true
+        well.layer?.backgroundColor = Palette.overlay.cgColor
+        well.layer?.cornerRadius = 22
+        well.layer?.cornerCurve = .continuous
+        well.layer?.borderWidth = 1
+        well.layer?.borderColor = Palette.border.cgColor
+        let label = makeLabel("Preview will appear here", size: 13, weight: .semibold, color: Palette.muted)
+        well.addSubview(label)
+        NSLayoutConstraint.activate([
+            well.heightAnchor.constraint(equalToConstant: 214),
+            label.centerXAnchor.constraint(equalTo: well.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: well.centerYAnchor)
+        ])
+        return well
     }
 
     @objc private func showImageCompressionScreen() {
@@ -1650,7 +1825,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         dropZone.onDrop = { [weak self] urls in
             self?.addInputURLs(urls)
         }
-        dropZone.heightAnchor.constraint(greaterThanOrEqualToConstant: 190).isActive = true
+        dropZone.heightAnchor.constraint(greaterThanOrEqualToConstant: 292).isActive = true
 
         let actionRow = NSStackView(views: [addFilesButton, addFolderButton])
         actionRow.orientation = .horizontal
