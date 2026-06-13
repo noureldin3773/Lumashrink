@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import io
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -13,6 +14,13 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_venv_site = sorted(_SCRIPT_DIR.glob(".venv/lib/python*/site-packages"))
+for _p in _venv_site:
+    _resolved = str(_p.resolve())
+    if _resolved not in sys.path:
+        sys.path.insert(0, _resolved)
 
 try:
     from PIL import Image, ImageOps, UnidentifiedImageError, features

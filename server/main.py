@@ -516,7 +516,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
 async def preview_image(
     file: UploadFile = File(...),
     max_size: str = Form("150kb"),
-    quality: int = Form(80),
+    quality: int = Form(100),
 ):
     suffix = f"_preview_{uuid.uuid4().hex[:6]}"
     suffix_path = Path(tempfile.mktemp(suffix=".jpg"))

@@ -280,7 +280,7 @@ function selectPreview(fileId, options = {}) {
     return;
   }
 
-  const quality = options.preserveQuality ? $("#previewQuality").value : 80;
+  const quality = options.preserveQuality ? $("#previewQuality").value : 100;
   $("#previewQuality").value = quality;
   $("#previewQualityLabel").textContent = quality;
   $("#compareSlider").value = 56;
@@ -364,7 +364,7 @@ function getTargetSize() {
   const val = $("#customSizeInput").value.trim();
   const unit = $("#customSizeUnit").value;
   if (val) return val + unit;
-  return "500kb";
+  return "150kb";
 }
 
 function getSettings() {

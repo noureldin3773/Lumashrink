@@ -90,7 +90,7 @@ PRESET_MAP = {
     "Ultra Quality": ("4mb", "Gentle compression", "Ultra", "25-55%"),
     "Portfolio Mode": ("1.5mb", "Crisp case-study images", "Premium", "55-80%"),
     "Framer/Webflow": ("350kb", "Fast landing pages", "High", "80-95%"),
-    "Fast Export": ("180kb", "Tiny shareable files", "Balanced", "88-98%"),
+    "Fast Export": ("150kb", "Tiny shareable files", "Balanced", "88-98%"),
 }
 
 
@@ -121,13 +121,13 @@ class CompressorApp:
         self.queue_rows: dict[Path, QueueRow] = {}
         self.preview_image_ref: object | None = None
         self.last_output_folder: Path | None = None
-        self.max_size_var = tk.StringVar(value="500kb")
+        self.max_size_var = tk.StringVar(value="150kb")
         self.format_var = tk.StringVar(value="auto")
         self.name_mode_var = tk.StringVar(value="suffix")
         self.suffix_var = tk.StringVar(value="-compressed")
         self.output_dir_var = tk.StringVar(value="")
         self.status_var = tk.StringVar(value="Drop files anywhere to begin.")
-        self.smart_hint_var = tk.StringVar(value="Smart preset: Website Ready for fast creator exports.")
+        self.smart_hint_var = tk.StringVar(value="Smart preset: Fast Export for tiny shareable files.")
         self.total_saved_var = tk.StringVar(value="0 B")
         self.ratio_var = tk.StringVar(value="0%")
         self.files_done_var = tk.StringVar(value="0")
@@ -700,9 +700,9 @@ class CompressorApp:
         elif len(self.selected_inputs) >= 8:
             self.smart_hint_var.set("Smart hint: Batch export detected. Framer/Webflow is tuned for fast web delivery.")
         elif suffixes:
-            self.smart_hint_var.set("Smart hint: Website Ready balances crisp previews with meaningful savings.")
+            self.smart_hint_var.set("Smart hint: Fast Export delivers tiny shareable files with great savings.")
         else:
-            self.smart_hint_var.set("Smart preset: Website Ready for fast creator exports.")
+            self.smart_hint_var.set("Smart preset: Fast Export for tiny shareable files.")
 
     def _update_queue_scroll_region(self, _event: tk.Event | None = None) -> None:
         self.queue_canvas.configure(scrollregion=self.queue_canvas.bbox("all"))
@@ -806,7 +806,7 @@ class CompressorApp:
                 messagebox.showerror("Invalid output folder", f"Could not use the chosen output folder.\n\n{error}")
                 return
 
-        args = argparse.Namespace(max_size=self.max_size_var.get().strip(), format=self.format_var.get().strip(), name_mode=self.name_mode_var.get().strip(), suffix=self.suffix_var.get(), min_quality=35, max_quality=95, min_side=320, keep_metadata=False, background="FFFFFF")
+        args = argparse.Namespace(max_size=self.max_size_var.get().strip(), format=self.format_var.get().strip(), name_mode=self.name_mode_var.get().strip(), suffix=self.suffix_var.get(), min_quality=35, max_quality=100, min_side=320, keep_metadata=False, background="FFFFFF")
         files = collect_input_files(self.selected_inputs)
         if not files:
             messagebox.showerror("No supported files", "The current queue does not contain supported images.")
@@ -963,7 +963,7 @@ class CompressorApp:
         except Exception:
             return
         self.selected_inputs = [Path(p) for p in payload.get("inputs", []) if Path(p).exists()]
-        self.max_size_var.set(payload.get("max_size", "500kb"))
+        self.max_size_var.set(payload.get("max_size", "150kb"))
         self.format_var.set(payload.get("format", "auto"))
         self.name_mode_var.set(payload.get("name_mode", "suffix"))
         self.suffix_var.set(payload.get("suffix", "-compressed"))

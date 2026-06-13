@@ -1046,9 +1046,9 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     private let queueStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
     private let queueRouteStateLabel = makeLabel("Drop files to start", size: 12, weight: .regular, color: Palette.muted)
 
-    private let maxSizeField = StyledTextField(value: "500kb")
-    private let qualitySlider = NSSlider(value: 85, minValue: 0, maxValue: 100, target: nil, action: nil)
-    private let qualityValueLabel = makeLabel("85%", size: 14, weight: .medium, color: Palette.text)
+    private let maxSizeField = StyledTextField(value: "150kb")
+    private let qualitySlider = NSSlider(value: 100, minValue: 0, maxValue: 100, target: nil, action: nil)
+    private let qualityValueLabel = makeLabel("100%", size: 14, weight: .medium, color: Palette.text)
     private let previewToggleButton = NSButton(title: "Show Live Preview", target: nil, action: nil)
     private let formatPopup = NSPopUpButton()
     private let saveModePopup = NSPopUpButton()
@@ -1415,7 +1415,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
             ("Ultra Quality", "Gentle compression", "4mb", "diamond.fill"),
             ("Portfolio Mode", "Case-study ready", "1.5mb", "square.inset.filled"),
             ("Framer/Webflow", "Landing page assets", "350kb", "command"),
-            ("Fast Export", "Tiny shareable files", "180kb", "bolt"),
+            ("Fast Export", "Tiny shareable files", "150kb", "bolt"),
             ("Custom", "Set your own target", "150kb", "ellipsis")
         ]
         for rowIndex in stride(from: 0, to: presets.count, by: 2) {
@@ -2352,7 +2352,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
     }
 
     @objc private func setTargetFromSegment(_ sender: NSSegmentedControl) {
-        let values = ["500kb", "2mb", "900kb", "4mb", "1.5mb", "350kb", "180kb"]
+        let values = ["500kb", "2mb", "900kb", "4mb", "1.5mb", "350kb", "150kb"]
         guard sender.selectedSegment >= 0, sender.selectedSegment < values.count else { return }
         maxSizeField.stringValue = values[sender.selectedSegment]
         updateDashboard()
@@ -3452,7 +3452,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         case "4mb": targetPresetControl.selectedSegment = 3
         case "1.5mb": targetPresetControl.selectedSegment = 4
         case "350kb": targetPresetControl.selectedSegment = 5
-        case "180kb": targetPresetControl.selectedSegment = 6
+        case "150kb": targetPresetControl.selectedSegment = 6
         default: targetPresetControl.selectedSegment = -1
         }
         updateQueueSummary()
@@ -3466,7 +3466,7 @@ private final class AppViewController: NSViewController, NSTableViewDataSource, 
         case "4mb": return "Ultra Quality"
         case "1.5mb": return "Portfolio Mode"
         case "350kb": return "Framer/Webflow"
-        case "180kb": return "Fast Export"
+        case "150kb": return "Fast Export"
         default: return "Custom creator target"
         }
     }
