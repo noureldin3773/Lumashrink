@@ -3,22 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LumaShrink — Compress images without destroying quality</title>
-<meta name="description" content="Premium local compression for creators, portfolios, AI artwork, and fast web launches.">
+<title>LumaShrink — Shrink images. Keep the quality.</title>
+<meta name="description" content="Local image compression that keeps your work looking sharp. Drop a folder, hit a target size, ship instantly — no uploads, no quality sacrifice.">
+<meta name="theme-color" content="#eef3fb">
+<meta property="og:title" content="LumaShrink — Shrink images. Keep the quality.">
+<meta property="og:description" content="Local image compression for creators who care. Private, offline, and insanely fast.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LumaShrink — Shrink images. Keep the quality.">
+<meta name="twitter:description" content="Local image compression for creators who care. Private, offline, and insanely fast.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230a84ff' stroke-width='2'><path d='M4 7.5A3.5 3.5 0 017.5 4h9A3.5 3.5 0 0120 7.5v9a3.5 3.5 0 01-3.5 3.5h-9A3.5 3.5 0 014 16.5v-9z'/><path d='M7 15l3.5-3.5 2.5 2.5 2-2 2 3'/><circle cx='9' cy='8.8' r='1.2'/></svg>">
 <link rel="stylesheet" href="/static/landing.css">
 </head>
 <body>
 
-<div class="ambient-bg" aria-hidden="true"></div>
+<div class="progress-bar" id="progressBar" aria-hidden="true"></div>
+
+<div class="ambient-bg" aria-hidden="true">
+  <div class="ambient-blob blob-a"></div>
+  <div class="ambient-blob blob-b"></div>
+  <div class="ambient-blob blob-c"></div>
+  <div class="ambient-grain"></div>
+</div>
 
 <nav class="nav" id="nav">
   <div class="nav-inner">
-    <div class="nav-left">
+    <a href="#hero" class="nav-left" aria-label="LumaShrink home">
       <div class="logo-mark" aria-hidden="true">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7.5A3.5 3.5 0 017.5 4h9A3.5 3.5 0 0120 7.5v9a3.5 3.5 0 01-3.5 3.5h-9A3.5 3.5 0 014 16.5v-9z"/><path d="M7 15l3.5-3.5 2.5 2.5 2-2 2 3"/><circle cx="9" cy="8.8" r="1.2"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A3.5 3.5 0 017.5 4h9A3.5 3.5 0 0120 7.5v9a3.5 3.5 0 01-3.5 3.5h-9A3.5 3.5 0 014 16.5v-9z"/><path d="M7 15l3.5-3.5 2.5 2.5 2-2 2 3"/><circle cx="9" cy="8.8" r="1.2"/></svg>
       </div>
       <span class="nav-title">LumaShrink</span>
-    </div>
+    </a>
     <div class="nav-center">
       <a href="#features" class="nav-link">Features</a>
       <a href="#showcase" class="nav-link">Showcase</a>
@@ -27,7 +42,7 @@
     </div>
     <div class="nav-right">
       <a href="/app" class="btn btn-ghost">Open App</a>
-      <a href="#download" class="btn btn-primary">Download for macOS</a>
+      <a href="/app" class="btn btn-primary">Start Free</a>
     </div>
   </div>
 </nav>
@@ -35,18 +50,17 @@
 <section class="hero" id="hero">
   <div class="hero-grid">
     <div class="hero-content">
-      <div class="hero-badge">Now in public beta</div>
-      <h1 class="hero-title">Compress images<br>without destroying<br>quality.</h1>
-      <p class="hero-sub">Premium local compression for creators, portfolios, AI artwork, and fast web launches.</p>
+      <div class="hero-badge"><span class="dot"></span> Now in public beta</div>
+      <h1 class="hero-title">Shrink images.<br><span class="quiet">Keep the quality.</span></h1>
+      <p class="hero-sub">Local compression that hits your target size — and keeps your work looking exactly as you made it. Drop a folder, get the smallest, sharpest version back.</p>
       <div class="hero-actions">
-        <a href="#download" class="btn btn-primary btn-lg">Download for macOS</a>
-        <a href="#demo" class="btn btn-ghost btn-lg">Watch Demo</a>
+        <a href="/app" class="btn btn-primary btn-lg">Start Compressing Free</a>
+        <a href="#showcase" class="btn btn-ghost btn-lg">Watch the demo</a>
       </div>
       <div class="hero-trust">
-        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Local processing</span>
-        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> No uploads</span>
-        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Privacy-first</span>
-        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Lightning fast</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Runs locally</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Nothing uploaded</span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Built for speed</span>
       </div>
     </div>
     <div class="hero-showcase" id="heroShowcase">
@@ -68,11 +82,11 @@
           </div>
           <div class="panel-metric" id="panelMetric">
             <span class="metric-value">99.4%</span>
-            <span class="metric-label">reduction</span>
+            <span class="metric-label">smaller — same image</span>
           </div>
           <div class="panel-badge" id="panelBadge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Compressed locally
+            Compressed on your Mac
           </div>
         </div>
       </div>
@@ -82,7 +96,7 @@
           <span class="queue-panel-count">6 files</span>
         </div>
         <div class="queue-panel-item">
-          <div class="q-item-icon" style="background:#f0e6ff;color:#8b5cf6">
+          <div class="q-item-icon" style="--c:#8b5cf6;--bg:rgba(139,92,246,.14)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8.5" r="1.5"/><path d="M21 15l-5-5L6 21"/></svg>
           </div>
           <div class="q-item-info">
@@ -92,7 +106,7 @@
           <div class="q-item-status done">Done</div>
         </div>
         <div class="queue-panel-item">
-          <div class="q-item-icon" style="background:#e6f0ff;color:#3b82f6">
+          <div class="q-item-icon" style="--c:#3b82f6;--bg:rgba(59,130,246,.14)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8.5" r="1.5"/><path d="M21 15l-5-5L6 21"/></svg>
           </div>
           <div class="q-item-info">
@@ -102,7 +116,7 @@
           <div class="q-item-status done">Done</div>
         </div>
         <div class="queue-panel-item processing">
-          <div class="q-item-icon" style="background:#fee6e6;color:#ef4444">
+          <div class="q-item-icon" style="--c:#ef4444;--bg:rgba(239,68,68,.14)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8.5" r="1.5"/><path d="M21 15l-5-5L6 21"/></svg>
           </div>
           <div class="q-item-info">
@@ -132,11 +146,15 @@
       </div>
     </div>
   </div>
+  <a href="#features" class="hero-scroll" aria-label="Scroll to features">
+    <span>See what it does</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>
+  </a>
 </section>
 
 <section class="logos" id="logos">
   <div class="logos-inner">
-    <span class="logos-label">Trusted by creators using</span>
+    <span class="logos-label">Works with the tools you already use</span>
     <div class="logos-track">
       <span class="logo-item">Framer</span>
       <span class="logo-item">Webflow</span>
@@ -148,106 +166,68 @@
   </div>
 </section>
 
-<section class="section problem" id="problem">
-  <div class="section-header">
-    <span class="section-label">The problem</span>
-    <h2 class="section-title">Creators shouldn't have to choose between quality and speed.</h2>
-    <p class="section-desc">Modern creative workflows generate massive files. AI artwork, high-res portfolios, and web assets balloon in size — slowing down everything.</p>
-  </div>
-  <div class="problem-grid">
-    <div class="problem-card">
-      <div class="problem-icon" style="background:rgba(239,68,68,.1);color:#ef4444">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      </div>
-      <h3>AI images are massive</h3>
-      <p>Midjourney, DALL·E, and Stable Diffusion output 10-40 MB files that choke websites and eat storage.</p>
-    </div>
-    <div class="problem-card">
-      <div class="problem-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-      <h3>Portfolios become slow</h3>
-      <p>Unoptimized images destroy page speed scores, hurt SEO, and make case studies painful to load.</p>
-    </div>
-    <div class="problem-card">
-      <div class="problem-icon" style="background:rgba(59,130,246,.1);color:#3b82f6">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
-      </div>
-      <h3>Traditional compressors ruin quality</h3>
-      <p>Legacy tools destroy fine detail, introduce artifacts, and strip metadata you need to keep.</p>
-    </div>
-    <div class="problem-card">
-      <div class="problem-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-      </div>
-      <h3>Upload anxiety is real</h3>
-      <p>Sending assets to cloud compressors means waiting, trusting strangers with your work, and privacy risk.</p>
-    </div>
-  </div>
-</section>
-
 <section class="section features" id="features">
   <div class="section-header">
     <span class="section-label">Features</span>
     <h2 class="section-title">Everything a creator needs.</h2>
-    <p class="section-desc">Built for modern workflows — from AI artwork to production websites.</p>
+    <p class="section-desc">From AI artwork to production websites — one app, fully offline.</p>
   </div>
   <div class="features-grid">
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(59,130,246,.1);color:#3b82f6">
+      <div class="feature-icon" style="--c:#3b82f6;--bg:rgba(59,130,246,.14)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       </div>
-      <h3>Batch Compression</h3>
-      <p>Drop entire folders. LumaShrink processes everything in parallel with adaptive worker scaling.</p>
+      <h3>Batch everything</h3>
+      <p>Drop whole folders. LumaShrink runs them in parallel and scales its workers to your Mac.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6">
+      <div class="feature-icon" style="--c:#8b5cf6;--bg:rgba(139,92,246,.14)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
       </div>
-      <h3>Creator Presets</h3>
-      <p>Optimized modes for Website Ready, AI Artwork, Social Media, Framer/Webflow, Portfolio, and more.</p>
+      <h3>Creator presets</h3>
+      <p>Website Ready, AI Artwork, Social, Framer, Portfolio — tuned defaults for how you actually ship.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(34,197,94,.1);color:#22c55e">
+      <div class="feature-icon" style="--c:#22c55e;--bg:rgba(34,197,94,.14)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <h3>Local Processing</h3>
-      <p>Everything runs on your machine. Zero uploads. Maximum privacy. Works completely offline.</p>
+      <h3>Stays on your Mac</h3>
+      <p>No uploads, ever. Every byte processed locally — private by design, works offline.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">
+      <div class="feature-icon" style="--c:#f59e0b;--bg:rgba(245,158,11,.14)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
-      <h3>Real-Time Preview</h3>
-      <p>See exactly how compression affects quality before exporting. Interactive before/after slider.</p>
+      <h3>See it before you ship</h3>
+      <p>A live before/after slider shows exactly what compression costs — no surprises after export.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(236,72,153,.1);color:#ec4899">
+      <div class="feature-icon" style="--c:#ec4899;--bg:rgba(236,72,153,.14)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
       </div>
-      <h3>Portfolio Ready</h3>
-      <p>Case-study ready exports that preserve every detail while slashing file sizes 80-95%.</p>
+      <h3>Portfolio-ready</h3>
+      <p>Preserve every detail of case studies while cutting file sizes 80–95%.</p>
     </div>
     <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(59,130,246,.1);color:#3b82f6">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 17 10 11 13 14 18 7"/><path d="M2 4v16a2 2 0 002 2h16a2 2 0 002-2V4a2 2 0 00-2-2H4a2 2 0 00-2 2z"/></svg>
-      </div>
-      <h3>Framer / Webflow Optimized</h3>
-      <p>Export assets perfectly sized for your landing page builder. Tiny files, zero quality loss.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(168,85,247,.1);color:#a855f7">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      </div>
-      <h3>AI Artwork Compression</h3>
-      <p>Specialized for painterly detail. Up to 98% reduction on Midjourney, DALL·E, and SD outputs.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon" style="background:rgba(34,197,94,.1);color:#22c55e">
+      <div class="feature-icon" style="--c:#16885a;--bg:rgba(22,136,90,.14)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       </div>
-      <h3>Ultra Fast Export</h3>
-      <p>Adaptive parallel processing. Most files compress in under 200ms. Export entire batches in seconds.</p>
+      <h3>Fast export</h3>
+      <p>Most files finish in under 200ms. Entire folders done in seconds, not minutes.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="--c:#0ea5e9;--bg:rgba(14,165,233,.14)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 17l6-6 3 3 5-7"/><path d="M2 4v16a2 2 0 002 2h16a2 2 0 002-2V4a2 2 0 00-2-2H4a2 2 0 00-2 2z"/></svg>
+      </div>
+      <h3>Smart WebP</h3>
+      <p>WebP by default for the best size-to-quality ratio — keep your format if you'd rather not.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="--c:#a855f7;--bg:rgba(168,85,247,.14)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      </div>
+      <h3>Respects your files</h3>
+      <p>Fixes EXIF orientation, keeps metadata when you want it, skips files already under target.</p>
     </div>
   </div>
 </section>
@@ -256,7 +236,7 @@
   <div class="section-header">
     <span class="section-label">Before / After</span>
     <h2 class="section-title">See the difference.</h2>
-    <p class="section-desc">Dramatic size reduction without sacrificing visual fidelity.</p>
+    <p class="section-desc">Dramatic size reduction. No visible quality loss. Drag to compare.</p>
   </div>
   <div class="showcase-compare" id="compareSection">
     <div class="compare-examples">
@@ -319,57 +299,57 @@
 <section class="section workflows" id="workflows">
   <div class="section-header">
     <span class="section-label">Use cases</span>
-    <h2 class="section-title">Built for your workflow.</h2>
-    <p class="section-desc">However you create, LumaShrink fits seamlessly into your process.</p>
+    <h2 class="section-title">Fits the way you ship.</h2>
+    <p class="section-desc">However you create, LumaShrink slots in without changing your process.</p>
   </div>
   <div class="workflows-grid">
-    <div class="workflow-card" style="background:linear-gradient(145deg,rgba(139,92,246,.08),rgba(139,92,246,.02))">
-      <div class="workflow-icon" style="background:rgba(139,92,246,.15);color:#8b5cf6">
+    <div class="workflow-card" style="--c:#8b5cf6;--bg:rgba(139,92,246,.1)">
+      <div class="workflow-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       </div>
       <h3>AI Artwork</h3>
-      <p>Midjourney, DALL·E, and Stable Diffusion outputs compressed 90-98% while preserving painterly detail.</p>
-      <span class="workflow-tag">Up to 98% reduction</span>
+      <p>Midjourney, DALL·E, Stable Diffusion outputs compressed up to 98% — painterly detail intact.</p>
+      <span class="workflow-tag">Up to 98% smaller</span>
     </div>
-    <div class="workflow-card" style="background:linear-gradient(145deg,rgba(59,130,246,.08),rgba(59,130,246,.02))">
-      <div class="workflow-icon" style="background:rgba(59,130,246,.15);color:#3b82f6">
+    <div class="workflow-card" style="--c:#3b82f6;--bg:rgba(59,130,246,.1)">
+      <div class="workflow-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="4 17 10 11 13 14 18 7"/><path d="M2 4v16a2 2 0 002 2h16a2 2 0 002-2V4a2 2 0 00-2-2H4a2 2 0 00-2 2z"/></svg>
       </div>
-      <h3>Framer</h3>
-      <p>Ship production assets at 350 KB or less. Lightning-fast page loads with zero visual compromise.</p>
-      <span class="workflow-tag">Framer optimized</span>
+      <h3>Framer &amp; Webflow</h3>
+      <p>Ship production assets at 350 KB or less. Fast page loads with zero visual compromise.</p>
+      <span class="workflow-tag">Landing-page ready</span>
     </div>
-    <div class="workflow-card" style="background:linear-gradient(145deg,rgba(16,185,129,.08),rgba(16,185,129,.02))">
-      <div class="workflow-icon" style="background:rgba(16,185,129,.15);color:#10b981">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <div class="workflow-card" style="--c:#10b981;--bg:rgba(16,185,129,.1)">
+      <div class="workflow-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7"/><path d="M5 9v11h14V9"/></svg>
       </div>
-      <h3>Webflow</h3>
-      <p>Export WebP assets perfectly sized for your CMS. Keep your Lighthouse scores perfect.</p>
-      <span class="workflow-tag">Webflow ready</span>
-    </div>
-    <div class="workflow-card" style="background:linear-gradient(145deg,rgba(236,72,153,.08),rgba(236,72,153,.02))">
-      <div class="workflow-icon" style="background:rgba(236,72,153,.15);color:#ec4899">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-      </div>
-      <h3>Portfolio Design</h3>
-      <p>Case studies, photo galleries, and design portfolios that load instantly without sacrificing quality.</p>
+      <h3>Portfolio design</h3>
+      <p>Case studies and galleries that load instantly without softening the work that got you hired.</p>
       <span class="workflow-tag">Portfolio mode</span>
     </div>
-    <div class="workflow-card" style="background:linear-gradient(145deg,rgba(245,158,11,.08),rgba(245,158,11,.02))">
-      <div class="workflow-icon" style="background:rgba(245,158,11,.15);color:#f59e0b">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <h3>Social Media</h3>
-      <p>Clean feed exports optimized for every platform. Instagram, Twitter, LinkedIn — all from one queue.</p>
-      <span class="workflow-tag">Social ready</span>
-    </div>
-    <div class="workflow-card" style="background:linear-gradient(145deg,rgba(168,85,247,.08),rgba(168,85,247,.02))">
-      <div class="workflow-icon" style="background:rgba(168,85,247,.15);color:#a855f7">
+    <div class="workflow-card" style="--c:#ec4899;--bg:rgba(236,72,153,.1)">
+      <div class="workflow-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
       </div>
-      <h3>Product Design</h3>
-      <p>Design systems, UI assets, and product screenshots compressed for documentation and handoff.</p>
+      <h3>Social media</h3>
+      <p>One queue for Instagram, Twitter, LinkedIn — clean exports sized for each platform.</p>
+      <span class="workflow-tag">Social ready</span>
+    </div>
+    <div class="workflow-card" style="--c:#f59e0b;--bg:rgba(245,158,11,.1)">
+      <div class="workflow-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Product &amp; docs</h3>
+      <p>UI assets and screenshots compressed for documentation, handoff, and help centers.</p>
       <span class="workflow-tag">Design ready</span>
+    </div>
+    <div class="workflow-card" style="--c:#a855f7;--bg:rgba(168,85,247,.1)">
+      <div class="workflow-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+      </div>
+      <h3>Build &amp; ship</h3>
+      <p>Bundle-friendly WebP that keeps your Lighthouse scores perfect and your stores slim.</p>
+      <span class="workflow-tag">Web ready</span>
     </div>
   </div>
 </section>
@@ -401,9 +381,9 @@
 
 <section class="section preview-section" id="preview">
   <div class="section-header">
-    <span class="section-label">Preview</span>
-    <h2 class="section-title">Beautiful by design.</h2>
-    <p class="section-desc">Every pixel of LumaShrink is crafted for a premium creator experience.</p>
+    <span class="section-label">The app</span>
+    <h2 class="section-title">Native macOS. Studio polish.</h2>
+    <p class="section-desc">Every pixel designed to feel like it belongs on your Mac — fast, calm, transparent.</p>
   </div>
   <div class="preview-mockups">
     <div class="mac-window">
@@ -434,7 +414,7 @@
           <div class="mockup-main">
             <div class="mockup-queue">
               <div class="mockup-queue-item">
-                <div class="mq-icon" style="background:#e6f0ff;color:#3b82f6">
+                <div class="mq-icon" style="--c:#3b82f6;--bg:rgba(59,130,246,.14)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8.5" r="1.5"/><path d="M21 15l-5-5L6 21"/></svg>
                 </div>
                 <div class="mq-info">
@@ -444,7 +424,7 @@
                 <span class="mq-status done">Done</span>
               </div>
               <div class="mockup-queue-item">
-                <div class="mq-icon" style="background:#f0e6ff;color:#8b5cf6">
+                <div class="mq-icon" style="--c:#8b5cf6;--bg:rgba(139,92,246,.14)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8.5" r="1.5"/><path d="M21 15l-5-5L6 21"/></svg>
                 </div>
                 <div class="mq-info">
@@ -454,7 +434,7 @@
                 <span class="mq-status processing">~</span>
               </div>
               <div class="mockup-queue-item">
-                <div class="mq-icon" style="background:#fef2e6;color:#f59e0b">
+                <div class="mq-icon" style="--c:#f59e0b;--bg:rgba(245,158,11,.14)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8.5" r="1.5"/><path d="M21 15l-5-5L6 21"/></svg>
                 </div>
                 <div class="mq-info">
@@ -473,15 +453,15 @@
         </div>
       </div>
     </div>
-    <p class="preview-caption">Studio-quality compression in a native macOS experience.</p>
+    <p class="preview-caption">Studio-grade compression in a native macOS experience.</p>
   </div>
 </section>
 
 <section class="section pricing" id="pricing">
   <div class="section-header">
     <span class="section-label">Pricing</span>
-    <h2 class="section-title">Start free. Upgrade when you need more.</h2>
-    <p class="section-desc">No hidden fees. No upload limits. No subscriptions that surprise you.</p>
+    <h2 class="section-title">Free to start. Yours forever.</h2>
+    <p class="section-desc">No subscriptions, no upload limits, no surprise fees. Upgrade once when you need more.</p>
   </div>
   <div class="pricing-grid">
     <div class="pricing-card">
@@ -491,25 +471,13 @@
           <span class="amount">$0</span>
           <span class="period">forever</span>
         </div>
-        <p>Perfect for trying out LumaShrink and occasional compression.</p>
+        <p>For trying LumaShrink and occasional compression.</p>
       </div>
       <ul class="pricing-features">
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Basic compression
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Limited queue (3 files)
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Standard presets
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Local processing
-        </li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Full compression engine</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Queue up to 3 files</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Standard presets</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 100% local processing</li>
       </ul>
       <a href="/app" class="btn btn-ghost btn-full">Get Started</a>
     </div>
@@ -521,53 +489,35 @@
           <span class="amount">$19</span>
           <span class="period">one-time</span>
         </div>
-        <p>For creators who need unlimited power and professional features.</p>
+        <p>For creators who need unlimited power and professional presets.</p>
       </div>
       <ul class="pricing-features">
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Unlimited compression
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Unlimited queue
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          All creator presets
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Batch processing
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Premium export modes
-        </li>
-        <li>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Priority updates
-        </li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlimited compression</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlimited queue</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> All creator presets</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Batch processing</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Premium export modes</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Priority updates</li>
       </ul>
       <a href="#download" class="btn btn-primary btn-full">Buy Pro</a>
     </div>
   </div>
 </section>
 
-<section class="section cta" id="cta">
+<section class="section cta" id="download">
   <div class="cta-card">
     <div class="cta-glow" aria-hidden="true"></div>
-    <h2 class="cta-title">Stop uploading massive assets.</h2>
-    <p class="cta-sub">Compress smarter. Preserve quality. Ship faster.</p>
+    <h2 class="cta-title">Ship smaller. Ship sharper.</h2>
+    <p class="cta-sub">Compress smarter, keep the quality, and get your files to load like they should.</p>
     <div class="cta-actions">
-      <a href="#download" class="btn btn-primary btn-lg">Download LumaShrink</a>
-      <a href="/app" class="btn btn-ghost btn-lg">Try Free</a>
+      <a href="/app" class="btn btn-primary btn-lg">Start Compressing Free</a>
+      <a href="#pricing" class="btn btn-ghost btn-lg">Compare plans</a>
     </div>
     <div class="cta-trust">
       <span>macOS 13+</span>
-      <span>·</span>
-      <span>Apple Silicon & Intel</span>
-      <span>·</span>
+      <span aria-hidden="true">·</span>
+      <span>Apple Silicon &amp; Intel</span>
+      <span aria-hidden="true">·</span>
       <span>Free to start</span>
     </div>
   </div>
@@ -582,7 +532,7 @@
         </div>
         <span>LumaShrink</span>
       </div>
-      <p class="footer-desc">Premium local image compression for creators who care about quality.</p>
+      <p class="footer-desc">Local image compression for people who care about quality.</p>
     </div>
     <div class="footer-links">
       <div class="footer-col">
@@ -610,6 +560,10 @@
   </div>
 </footer>
 
-<script src="/static/landing.js"></script>
+<div class="sticky-cta" id="stickyCta">
+  <a href="/app" class="btn btn-primary btn-lg">Start Compressing Free</a>
+</div>
+
+<script src="/static/landing.js" defer></script>
 </body>
 </html>

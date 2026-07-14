@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  const ease = [0.16, 1, 0.3, 1];
+  const easeCubic = (t) => 1 - Math.pow(1 - t, 3);
 
   const revealElements = () => {
     document.querySelectorAll('.reveal').forEach(el => {
       const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.85) el.classList.add('visible');
+      if (rect.top < window.innerHeight * 0.88) el.classList.add('visible');
     });
   };
 
@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
       el.classList.add('reveal');
       observer.observe(el);
     });
-
     document.querySelectorAll('.stat-card').forEach(el => observer.observe(el));
   };
 
@@ -35,8 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const start = performance.now();
     const update = (now) => {
       const t = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      el.textContent = Math.round(eased * target);
+      el.textContent = Math.round(easeCubic(t) * target);
       if (t < 1) requestAnimationFrame(update);
       else el.textContent = target;
     };
@@ -48,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const range = container.querySelector('.compare-range');
       const before = container.querySelector('.compare-before-image');
       const handle = container.querySelector('.compare-handle');
-
       if (!range || !before || !handle) return;
 
       const sync = (val) => {
@@ -56,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
         before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
         handle.style.left = `${pct}%`;
       };
-
       range.addEventListener('input', () => sync(range.value));
       sync(range.value);
     });
@@ -64,28 +60,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const navScroll = () => {
     const nav = document.getElementById('nav');
+    const bar = document.getElementById('progressBar');
+    const links = document.querySelectorAll('.nav-link');
+    const sections = [];
+    links.forEach(l => {
+      const id = l.getAttribute('href');
+      if (id?.startsWith('#')) sections.push(document.getElementById(id.slice(1)));
+    });
     if (!nav) return;
     let lastScroll = 0;
     window.addEventListener('scroll', () => {
       const curr = window.scrollY;
+      const dh = document.documentElement;
+      const scrollPct = curr / (dh.scrollHeight - dh.clientHeight);
+      if (bar) bar.style.width = `${Math.min(scrollPct * 100, 100)}%`;
+
       if (curr > 120) {
-        nav.style.transform = curr > lastScroll ? 'translateY(-120%)' : 'translateY(0)';
+        nav.style.transform = curr > lastScroll ? 'translateY(-140%)' : 'translateY(0)';
       } else {
         nav.style.transform = 'translateY(0)';
       }
       lastScroll = curr;
+
+      sections.forEach((sec, i) => {
+        if (!sec) return;
+        const rect = sec.getBoundingClientRect();
+        links[i].style.color = rect.top < 200 && rect.bottom > 100 ? 'var(--text)' : '';
+        links[i].style.background = rect.top < 200 && rect.bottom > 100 ? 'rgba(255,255,255,.5)' : '';
+      });
     }, { passive: true });
   };
 
   const heroParallax = () => {
     const showcase = document.getElementById('heroShowcase');
     if (!showcase) return;
+    let ticking = false;
     window.addEventListener('scroll', () => {
-      const rect = showcase.getBoundingClientRect();
-      const center = rect.top + rect.height / 2;
-      const viewCenter = window.innerHeight / 2;
-      const offset = (center - viewCenter) * 0.03;
-      showcase.style.transform = `translateY(${offset}px)`;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const rect = showcase.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const viewCenter = window.innerHeight / 2;
+          const offset = (center - viewCenter) * 0.03;
+          showcase.style.transform = `translateY(${offset}px)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
     }, { passive: true });
   };
 
@@ -95,33 +116,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const metricValue = document.getElementById('panelMetric')?.querySelector('.metric-value');
     const panelBadge = document.getElementById('panelBadge');
     const barFill = document.querySelector('.after-row .bar-fill');
-
     if (!beforeSize) return;
 
     const animate = () => {
       beforeSize.textContent = '24 MB';
-      if (afterSize) {
-        let current = 24;
-        const target = 0.14;
-        const duration = 2000;
-        const start = performance.now();
-        const update = (now) => {
-          const t = Math.min((now - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - t, 3);
-          current = 24 - (24 - target) * eased;
-          afterSize.textContent = current >= 1 ? `${Math.round(current)} MB` : `${Math.round(current * 10)} KB`;
-          if (metricValue) metricValue.textContent = `${((1 - current / 24) * 100).toFixed(1)}%`;
-          if (barFill) barFill.style.width = `${current / 24 * 100}%`;
-          if (t < 1) requestAnimationFrame(update);
-          else {
-            afterSize.textContent = '140 KB';
-            if (metricValue) metricValue.textContent = '99.4%';
-            if (barFill) barFill.style.width = '0.6%';
-            if (panelBadge) panelBadge.style.opacity = '1';
-          }
-        };
-        requestAnimationFrame(update);
-      }
+      if (!afterSize) return;
+      let current = 24;
+      const target = 0.14;
+      const duration = 2000;
+      const start = performance.now();
+      const update = (now) => {
+        const t = Math.min((now - start) / duration, 1);
+        const eased = easeCubic(t);
+        current = 24 - (24 - target) * eased;
+        afterSize.textContent = current >= 1 ? `${Math.round(current)} MB` : `${Math.round(current * 1000)} KB`;
+        if (metricValue) metricValue.textContent = `${((1 - current / 24) * 100).toFixed(1)}%`;
+        if (barFill) barFill.style.width = `${(current / 24 * 100)}%`;
+        if (t < 1) requestAnimationFrame(update);
+        else {
+          afterSize.textContent = '140 KB';
+          if (metricValue) metricValue.textContent = '99.4%';
+          if (barFill) barFill.style.width = '0.6%';
+          if (panelBadge) panelBadge.style.opacity = '1';
+        }
+      };
+      requestAnimationFrame(update);
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -137,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', (e) => {
         const id = a.getAttribute('href');
-        if (id === '#') return;
+        if (id === '#' || id.length < 2) return;
         const target = document.querySelector(id);
         if (target) {
           e.preventDefault();
@@ -165,14 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       idx++;
     }, 2500);
-  };
-
-  const initMacDots = () => {
-    const dots = document.querySelectorAll('.mac-dots span');
-    if (!dots.length) return;
-    setInterval(() => {
-      dots[0].style.opacity = Math.random() > 0.5 ? '1' : '1';
-    }, 3000);
   };
 
   observeSections();
