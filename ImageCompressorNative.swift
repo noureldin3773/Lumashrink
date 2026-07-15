@@ -2859,6 +2859,14 @@ private func makeVideoPresetButton(title: String, subtitle: String, target: Stri
 
 // MARK: - Sidebar
 
+private final class SidebarCellView: NSTableCellView {
+    var onClick: (() -> Void)?
+
+    override func mouseDown(with event: NSEvent) {
+        onClick?()
+    }
+}
+
 private final class SidebarViewController: NSViewController, NSOutlineViewDataSource, NSOutlineViewDelegate {
     enum Section: Int, CaseIterable {
         case studio = 0
@@ -2974,7 +2982,7 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
     }
 
     func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
-        let cell = NSTableCellView()
+        let cell = SidebarCellView()
         let label = NSTextField(labelWithString: "")
         label.font = Typography.bodyMedium
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -3010,14 +3018,20 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
         } else if let leaf = item as? Item {
             switch leaf {
             case .studioStudio:
+                cell.identifier = NSUserInterfaceItemIdentifier("studioStudio")
+                cell.onClick = { [weak self, weak cell] in self?.activate(.studioStudio, cell: cell) }
                 label.stringValue = "Optimize"
                 icon.image = NSImage(systemSymbolName: "wand.and.stars", accessibilityDescription: nil)
                 icon.contentTintColor = Palette.accent
             case .studioVideo:
+                cell.identifier = NSUserInterfaceItemIdentifier("studioVideo")
+                cell.onClick = { [weak self, weak cell] in self?.activate(.studioVideo, cell: cell) }
                 label.stringValue = "Compress videos"
                 icon.image = NSImage(systemSymbolName: "film.stack", accessibilityDescription: nil)
                 icon.contentTintColor = Palette.accent
             case .studioRename:
+                cell.identifier = NSUserInterfaceItemIdentifier("studioRename")
+                cell.onClick = { [weak self, weak cell] in self?.activate(.studioRename, cell: cell) }
                 label.stringValue = "Rename"
                 icon.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: nil)
                 icon.contentTintColor = Palette.textSecondary
@@ -3034,10 +3048,61 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
         onSelect(item)
     }
 
+    private func activate(_ item: Item, cell: NSView?) {
+        guard let cell else { return }
+        let row = outline.row(for: cell)
+        if row >= 0 { outline.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
+        onSelect(item)
+    }
+
     func selectItem(_ item: Item) {
         outline.deselectAll(nil)
         let row = outline.row(forItem: item)
         if row >= 0 { outline.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
+    }
+}
+
+// MARK: - Detail Container
+
+private final class DetailContainerViewController: NSViewController {
+    private let controllers: [NSViewController]
+    private var visibleController: NSViewController?
+
+    init(controllers: [NSViewController]) {
+        self.controllers = controllers
+        super.init(nibName: nil, bundle: nil)
+        controllers.forEach(addChild)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func loadView() {
+        let host = NSView(frame: NSRect(x: 0, y: 0, width: 1100, height: 760))
+        host.wantsLayer = true
+        host.layer?.backgroundColor = Palette.window.cgColor
+        view = host
+    }
+
+    func show(at index: Int) {
+        guard controllers.indices.contains(index) else { return }
+        loadViewIfNeeded()
+
+        let next = controllers[index]
+        guard visibleController !== next else { return }
+
+        visibleController?.view.removeFromSuperview()
+        let nextView = next.view
+        nextView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nextView)
+        NSLayoutConstraint.activate([
+            nextView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            nextView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            nextView.topAnchor.constraint(equalTo: view.topAnchor),
+            nextView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        visibleController = next
+        view.needsLayout = true
+        view.layoutSubtreeIfNeeded()
     }
 }
 
@@ -3059,22 +3124,10 @@ private final class AppSplitViewController: NSSplitViewController {
 
         addSplitViewItem(NSSplitViewItem(sidebarWithViewController: sidebar))
 
-        let tabView = NSTabView()
-        tabView.autoresizingMask = [.width, .height]
-        tabView.tabViewType = .noTabsNoBorder
-        tabView.drawsBackground = false
+        let controllers = [studio, video, rename]
+        let detailController = DetailContainerViewController(controllers: controllers)
 
-        for (i, vc) in [studio, video, rename].enumerated() {
-            let tab = NSTabViewItem(viewController: vc)
-            tab.label = ["Optimize", "Compress Videos", "Rename"][i]
-            tabView.addTabViewItem(tab)
-        }
-        tabView.selectTabViewItem(at: 0)
-
-        let wrapper = NSViewController()
-        wrapper.view = tabView
-
-        let detailItem = NSSplitViewItem(viewController: wrapper)
+        let detailItem = NSSplitViewItem(viewController: detailController)
         detailItem.minimumThickness = 800
         addSplitViewItem(detailItem)
 
@@ -3086,9 +3139,9 @@ private final class AppSplitViewController: NSSplitViewController {
             case .studioRename: index = 2
             case .section: return
             }
-            guard tabView.tabViewItems.indices.contains(index) else { return }
-            tabView.selectTabViewItem(at: index)
+            detailController.show(at: index)
         }
+        detailController.show(at: 0)
         sidebar.selectItem(.studioStudio)
     }
 }
