@@ -48,6 +48,7 @@ mkdir -p "$TEMP_APP_PATH/Contents/MacOS" "$TEMP_APP_PATH/Contents/Resources" "$R
 
 cp "$PROJECT_DIR/compress_image.py" "$RUNTIME_DIR/compress_image.py"
 cp "$PROJECT_DIR/compress_video.py" "$RUNTIME_DIR/compress_video.py"
+cp -R "$PROJECT_DIR/Icons" "$TEMP_APP_PATH/Contents/Resources/Icons"
 if [ ! -x "$PYINSTALLER" ]; then
   echo "Missing build dependency: PyInstaller"
   echo "Run: $VENV_SOURCE/bin/python -m pip install -r $PROJECT_DIR/requirements-build.txt"

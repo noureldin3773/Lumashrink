@@ -173,10 +173,22 @@ private func makeSymbol(_ name: String, size: CGFloat = 14, weight: NSFont.Weigh
     return view
 }
 
+private func bundledIcon(named name: String) -> NSImage? {
+    guard let resources = Bundle.main.resourceURL else { return nil }
+    let url = resources.appendingPathComponent("Icons", isDirectory: true)
+        .appendingPathComponent(name)
+        .appendingPathExtension("svg")
+    guard let image = NSImage(contentsOf: url) else { return nil }
+    image.isTemplate = true
+    return image
+}
+
 // MARK: - Background
 
 private final class AppBackgroundView: NSView {
     private let gradient = CAGradientLayer()
+    var acceptsWorkspaceDrops = false
+    var onDropURLs: (([URL]) -> Void)?
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -190,6 +202,7 @@ private final class AppBackgroundView: NSView {
         gradient.startPoint = CGPoint(x: 0, y: 1)
         gradient.endPoint = CGPoint(x: 1, y: 0)
         layer?.addSublayer(gradient)
+        registerForDraggedTypes([.fileURL])
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -197,6 +210,41 @@ private final class AppBackgroundView: NSView {
     override func layout() {
         super.layout()
         gradient.frame = bounds
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard acceptsWorkspaceDrops else { return [] }
+        layer?.borderWidth = 3
+        layer?.borderColor = Palette.accent.cgColor
+        return .copy
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        acceptsWorkspaceDrops ? .copy : []
+    }
+
+    override func draggingExited(_ sender: NSDraggingInfo?) { clearDropHighlight() }
+    override func draggingEnded(_ sender: NSDraggingInfo) { clearDropHighlight() }
+
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        acceptsWorkspaceDrops
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        defer { clearDropHighlight() }
+        guard acceptsWorkspaceDrops,
+              let urls = sender.draggingPasteboard.readObjects(
+                forClasses: [NSURL.self],
+                options: [.urlReadingFileURLsOnly: true]
+              ) as? [URL],
+              !urls.isEmpty else { return false }
+        onDropURLs?(urls)
+        return true
+    }
+
+    private func clearDropHighlight() {
+        layer?.borderWidth = 0
+        layer?.borderColor = NSColor.clear.cgColor
     }
 }
 
@@ -507,11 +555,12 @@ private final class ModeButton: NSButton {
     private let textLabel = NSTextField(labelWithString: "")
     var isActive = false { didSet { needsDisplay = true; needsLayout = true } }
 
-    init(title: String, symbol: String) {
+    init(title: String, symbol: String, assetName: String? = nil) {
         super.init(frame: .zero)
         self.title = ""
         translatesAutoresizingMaskIntoConstraints = false
         bezelStyle = .regularSquare
+        setButtonType(.momentaryChange)
         isBordered = false
         wantsLayer = true
         layer?.cornerRadius = 18
@@ -519,7 +568,8 @@ private final class ModeButton: NSButton {
         focusRingType = .exterior
         setAccessibilityLabel(title)
 
-        iconView.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+        iconView.image = assetName.flatMap(bundledIcon(named:))
+            ?? NSImage(systemSymbolName: symbol, accessibilityDescription: title)
         iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 15, weight: .medium)
         iconView.imageScaling = .scaleProportionallyDown
         iconView.translatesAutoresizingMaskIntoConstraints = false
@@ -555,7 +605,23 @@ private final class ModeButton: NSButton {
         textLabel.textColor = color
     }
 
-    override func hitTest(_ point: NSPoint) -> NSView? { bounds.contains(point) ? self : nil }
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        // The icon and label are real subviews. Always return the button for any
+        // hit in its hierarchy so those decorative views cannot consume clicks.
+        guard isEnabled, super.hitTest(point) != nil else { return nil }
+        return self
+    }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func mouseDown(with event: NSEvent) {
+        guard isEnabled, let action else { return }
+        isHighlighted = true
+        needsDisplay = true
+        NSApp.sendAction(action, to: target, from: self)
+        isHighlighted = false
+        needsDisplay = true
+    }
 }
 
 private final class PaddedActionButton: NSButton {
@@ -564,7 +630,7 @@ private final class PaddedActionButton: NSButton {
     private let labelFont: NSFont
     private let requestedIconSize: CGFloat
 
-    init(title: String, symbol: String, tint: NSColor, fontSize: CGFloat = 15, iconSize: CGFloat = 24) {
+    init(title: String, symbol: String, tint: NSColor, fontSize: CGFloat = 15, iconSize: CGFloat = 16, assetName: String? = nil) {
         self.tint = tint
         self.labelText = title
         self.labelFont = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
@@ -579,7 +645,9 @@ private final class PaddedActionButton: NSButton {
         layer?.cornerCurve = .continuous
         focusRingType = .exterior
         setAccessibilityLabel(title)
-        let baseSymbol = NSImage(systemSymbolName: symbol, accessibilityDescription: title) ?? NSImage()
+        let baseSymbol = assetName.flatMap(bundledIcon(named:))
+            ?? NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+            ?? NSImage()
         let configuration = NSImage.SymbolConfiguration(pointSize: min(iconSize, 16), weight: .medium)
         let symbolImage = baseSymbol.withSymbolConfiguration(configuration) ?? baseSymbol
         let spacedImage = NSImage(size: NSSize(width: iconSize + 4, height: iconSize))
@@ -686,10 +754,11 @@ private final class TrafficLightButton: NSButton {
 }
 
 private final class HeaderIconButton: NSButton {
-    init(symbol: String, accessibilityLabel: String) {
+    init(symbol: String, accessibilityLabel: String, assetName: String? = nil) {
         super.init(frame: .zero)
         title = ""
-        image = NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityLabel)
+        image = assetName.flatMap(bundledIcon(named:))
+            ?? NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityLabel)
         imageScaling = .scaleProportionallyDown
         symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         contentTintColor = Palette.textSecondary
@@ -980,9 +1049,9 @@ private final class ComparisonPreviewView: NSView {
 private struct CompressionSettings {
     var maxSize: String = "150kb"
     var outputFormat: String = "webp"
-    var nameMode: String = "suffix"
+    var nameMode: String = "same-name"
     var outputFolder: URL? = nil
-    var isBestQuality: Bool = false
+    var isBestQuality: Bool = true
     var minQuality: Int = 20
     var maxQuality: Int = 100
     var minSide: Int = 320
@@ -1009,7 +1078,7 @@ private final class DropZoneView: NSView {
     private let titleLabel = NSTextField(labelWithString: "Drop Media to begin")
     private let subtitleLabel = NSTextField(wrappingLabelWithString: "Images and videos stay private on your Mac. Choose an intent when you’re ready.")
     private let actionRow = NSStackView()
-    private let addFilesButton = PaddedActionButton(title: "Add Images", symbol: "photo.badge.plus", tint: Palette.accent)
+    private let addFilesButton = PaddedActionButton(title: "Add Images", symbol: "photo.badge.plus", tint: Palette.accent, assetName: "Generate Image")
     private let addFolderButton = PaddedActionButton(title: "Add Folder", symbol: "folder.badge.plus", tint: Palette.textSecondary)
     private let empty = true
     private var heightConstraint: NSLayoutConstraint!
@@ -1468,6 +1537,12 @@ private func mediaToolEnvironment() -> [String: String] {
 // MARK: - Studio View Controller
 
 private final class StudioViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
+    private enum Mode {
+        case imageCompression
+        case videoCompression
+        case rename
+    }
+
     private let inspectorPanel = NSView()
     private var inspectorWidthConstraint: NSLayoutConstraint?
     private var queueWidthConstraint: NSLayoutConstraint?
@@ -1504,7 +1579,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     private let queueQueuedPill = PillLabel(text: "0 B queued", tint: Palette.textTertiary)
     private let queueEstimatedPill = PillLabel(text: "0 B Estimated", tint: Palette.textTertiary)
     private let queueSavedPill = PillLabel(text: "0 B Saved", tint: Palette.textTertiary)
-    private let queueAddButton = PaddedActionButton(title: "Add Images", symbol: "photo.badge.plus", tint: Palette.accent, fontSize: 12, iconSize: 16)
+    private let queueAddButton = PaddedActionButton(title: "Add Images", symbol: "photo.badge.plus", tint: Palette.accent, fontSize: 12, iconSize: 16, assetName: "Generate Image")
     private let headerBrandLeft = NSStackView()
     private let headerBrandCenter = NSTextField(labelWithString: "LumaShrink")
     private let headerActions = NSStackView()
@@ -1538,9 +1613,14 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     private let statusBanner = NSTextField(labelWithString: "Drop a few images to begin, or pick a creator preset below.")
     private let workspaceTitleLabel = makeLabel("Compression queue", font: NSFont.systemFont(ofSize: 23, weight: .semibold), color: Palette.text)
     private let workspaceSubtitleLabel = makeLabel("Add images, review savings, and export polished assets.", font: Typography.body, color: Palette.textSecondary)
-    private let imageModeButton = ModeButton(title: "Image Compressing", symbol: "photo.badge.arrow.down")
-    private let videoModeButton = ModeButton(title: "Video Compressing", symbol: "play.rectangle")
-    private let formatModeButton = ModeButton(title: "Change Format", symbol: "pencil.and.outline")
+    private let imageModeButton = ModeButton(title: "Image Compressing", symbol: "photo.badge.arrow.down", assetName: "Compress Image")
+    private let videoModeButton = ModeButton(title: "Video Compressing", symbol: "play.rectangle", assetName: "Compress Video")
+    private let formatModeButton = ModeButton(title: "Renaming", symbol: "pencil.and.outline", assetName: "Change Format")
+    private let videoController = VideoCompressViewController()
+    private let renameController = RenameViewController()
+    private var activeMode: Mode = .imageCompression
+    private weak var imageWorkspaceView: NSView?
+    private weak var appBackgroundView: AppBackgroundView?
 
     private var queue: [QueueFile] = []
     private var settings = CompressionSettings()
@@ -1579,12 +1659,15 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
 
     override func loadView() {
         let root = AppBackgroundView(frame: NSRect(x: 0, y: 0, width: 1280, height: 800))
+        appBackgroundView = root
+        root.onDropURLs = { [weak self] urls in self?.addURLs(urls) }
         view = root
 
         let header = buildHero()
         let modeSwitcher = buildModeSwitcher()
         let content = NSView()
         content.translatesAutoresizingMaskIntoConstraints = false
+        imageWorkspaceView = content
         root.addSubview(header)
         root.addSubview(modeSwitcher)
         root.addSubview(content)
@@ -1620,6 +1703,21 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         inspectorDivider.layer?.backgroundColor = NSColor(calibratedWhite: 0.76, alpha: 1).cgColor
         inspectorPanel.addSubview(inspectorDivider)
         content.addSubview(inspectorPanel)
+
+        addChild(videoController)
+        addChild(renameController)
+        for controller in [videoController, renameController] {
+            let modeView = controller.view
+            modeView.translatesAutoresizingMaskIntoConstraints = false
+            modeView.isHidden = true
+            root.addSubview(modeView)
+            NSLayoutConstraint.activate([
+                modeView.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+                modeView.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+                modeView.topAnchor.constraint(equalTo: content.topAnchor),
+                modeView.bottomAnchor.constraint(equalTo: content.bottomAnchor)
+            ])
+        }
 
         inspectorWidthConstraint = inspectorPanel.widthAnchor.constraint(equalToConstant: FigmaLayout.inspectorWidth)
         queueWidthConstraint = queueSection.widthAnchor.constraint(equalToConstant: FigmaLayout.queueWidth)
@@ -1689,6 +1787,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         workspacePhase = phase
         let empty = phase == .empty
         let complete = phase == .complete
+        appBackgroundView?.acceptsWorkspaceDrops = !empty && activeMode == .imageCompression
         dropZone.setExpanded(empty)
         dropZone.isHidden = !empty
         queueCard.isHidden = empty || queuePanelCollapsed
@@ -1743,7 +1842,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         minimizeDot.action = #selector(minimizeWindow)
         zoomDot.target = self
         zoomDot.action = #selector(zoomWindow)
-        let leftSidebarIcon = HeaderIconButton(symbol: "sidebar.left", accessibilityLabel: "Show or hide compression queue")
+        let leftSidebarIcon = HeaderIconButton(symbol: "sidebar.left", accessibilityLabel: "Show or hide compression queue", assetName: "Sidebar")
         leftSidebarIcon.target = self
         leftSidebarIcon.action = #selector(toggleQueuePanel)
         let windowChrome = NSStackView(views: [closeDot, minimizeDot, zoomDot, leftSidebarIcon])
@@ -1753,7 +1852,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         windowChrome.setCustomSpacing(16, after: zoomDot)
         windowChrome.translatesAutoresizingMaskIntoConstraints = false
 
-        let rightSidebarIcon = HeaderIconButton(symbol: "sidebar.right", accessibilityLabel: "Show or hide creator presets")
+        let rightSidebarIcon = HeaderIconButton(symbol: "sidebar.right", accessibilityLabel: "Show or hide creator presets", assetName: "Sidebar")
         rightSidebarIcon.target = self
         rightSidebarIcon.action = #selector(toggleInspectorPanel)
 
@@ -1781,7 +1880,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         headerActions.spacing = Spacing.xs
         headerActions.alignment = .centerY
         headerActions.translatesAutoresizingMaskIntoConstraints = false
-        [compressButton, stopButton, clearButton, exportButton].forEach(headerActions.addArrangedSubview)
+        [compressButton, stopButton, clearButton].forEach(headerActions.addArrangedSubview)
 
         hero.addSubview(headerBrandLeft)
         hero.addSubview(headerBrandCenter)
@@ -1862,33 +1961,67 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         shell.widthAnchor.constraint(equalToConstant: 520).isActive = true
         imageModeButton.target = self
         imageModeButton.action = #selector(showImageMode)
+        imageModeButton.toolTip = "Image Compressing (Command-1)"
         videoModeButton.target = self
         videoModeButton.action = #selector(showVideoMode)
+        videoModeButton.toolTip = "Video Compressing (Command-2)"
         formatModeButton.target = self
         formatModeButton.action = #selector(showFormatMode)
+        formatModeButton.toolTip = "Renaming (Command-3)"
         imageModeButton.isActive = true
         return shell
     }
 
     @objc private func showImageMode() {
-        imageModeButton.isActive = true
-        videoModeButton.isActive = false
-        formatModeButton.isActive = false
-        activateWorkspace("optimize")
+        showMode(.imageCompression)
     }
 
     @objc private func showVideoMode() {
-        imageModeButton.isActive = false
-        videoModeButton.isActive = true
-        formatModeButton.isActive = false
-        activateWorkspace("video")
+        showMode(.videoCompression)
     }
 
     @objc private func showFormatMode() {
-        imageModeButton.isActive = false
-        videoModeButton.isActive = false
-        formatModeButton.isActive = true
-        activateWorkspace("convert")
+        showMode(.rename)
+    }
+
+    @objc func selectImageMode() { showMode(.imageCompression) }
+
+    @objc func selectVideoMode() { showMode(.videoCompression) }
+
+    @objc func selectRenameMode() { showMode(.rename) }
+
+    @objc func selectPreviousMode() {
+        switch activeMode {
+        case .imageCompression: showMode(.rename)
+        case .videoCompression: showMode(.imageCompression)
+        case .rename: showMode(.videoCompression)
+        }
+    }
+
+    @objc func selectNextMode() {
+        switch activeMode {
+        case .imageCompression: showMode(.videoCompression)
+        case .videoCompression: showMode(.rename)
+        case .rename: showMode(.imageCompression)
+        }
+    }
+
+    @objc func toggleQueuePanelFromMenu() { toggleQueuePanel() }
+
+    @objc func toggleInspectorPanelFromMenu() { toggleInspectorPanel() }
+
+    private func showMode(_ mode: Mode) {
+        activeMode = mode
+        appBackgroundView?.acceptsWorkspaceDrops = workspacePhase != .empty && mode == .imageCompression
+        imageModeButton.isActive = mode == .imageCompression
+        videoModeButton.isActive = mode == .videoCompression
+        formatModeButton.isActive = mode == .rename
+        imageWorkspaceView?.isHidden = mode != .imageCompression
+        videoController.view.isHidden = mode != .videoCompression
+        renameController.view.isHidden = mode != .rename
+        if mode == .imageCompression { activateWorkspace("optimize") }
+        view.window?.makeFirstResponder(nil)
+        view.needsLayout = true
     }
 
     func activateWorkspace(_ workspace: String) {
@@ -2108,7 +2241,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     }
 
     private func setupAdvancedControls() {
-        formatPopup.addItems(withTitles: ["Smart WebP", "Auto", "Keep original", "JPEG", "PNG"])
+        formatPopup.addItems(withTitles: ["Best Quality", "Smart WebP", "Auto", "Keep original", "JPEG", "PNG"])
         formatPopup.selectItem(at: 0)
         smallestDimPopup.addItems(withTitles: ["160 px", "320 px", "480 px", "640 px", "800 px"])
         smallestDimPopup.selectItem(at: 1)
@@ -2117,7 +2250,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         qualityMaxPopup.addItems(withTitles: ["80", "90", "95", "100"])
         qualityMaxPopup.selectItem(at: 3)
         namingPopup.addItems(withTitles: ["Same name", "Suffix", "Overwrite"])
-        namingPopup.selectItem(at: 1)
+        namingPopup.selectItem(at: 0)
         keepMetadataCheck.state = .off
         keepMetadataCheck.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
         chooseOutputFolderButton.target = self
@@ -2394,6 +2527,16 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     }
 
     func addURLs(_ urls: [URL]) {
+        switch activeMode {
+        case .videoCompression:
+            videoController.addURLs(urls)
+            return
+        case .rename:
+            renameController.addURLs(urls)
+            return
+        case .imageCompression:
+            break
+        }
         var added = 0
         for url in urls {
             let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
@@ -2547,10 +2690,14 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         settings.minSide = Int(dimTitle.replacingOccurrences(of: " px", with: "")) ?? 320
         settings.minQuality = Int(qualityMinPopup.titleOfSelectedItem ?? "20") ?? 20
         settings.maxQuality = Int(qualityMaxPopup.titleOfSelectedItem ?? "100") ?? 100
-        let fmtTitle = formatPopup.titleOfSelectedItem ?? "Smart WebP"
-        let formatMap = ["Smart WebP": "webp", "Auto": "auto", "Keep original": "keep", "JPEG": "jpeg", "PNG": "png"]
-        settings.outputFormat = formatMap[fmtTitle] ?? "webp"
-        settings.isBestQuality = false
+        let fmtTitle = formatPopup.titleOfSelectedItem ?? "Best Quality"
+        let formatValues = ["best_quality", "webp", "auto", "keep", "jpeg", "png"]
+        let selectedFormatIndex = formatPopup.indexOfSelectedItem
+        settings.outputFormat = formatValues.indices.contains(selectedFormatIndex)
+            ? formatValues[selectedFormatIndex]
+            : "best_quality"
+        settings.isBestQuality = (settings.outputFormat == "best_quality")
+        appendLog("[SETTINGS] Output format: \(fmtTitle) (\(settings.outputFormat)); naming: \(namingPopup.titleOfSelectedItem ?? "Same name")")
         let namingMap = ["Same name": "same-name", "Suffix": "suffix", "Overwrite": "overwrite"]
         settings.nameMode = namingMap[namingPopup.titleOfSelectedItem ?? "Same name"] ?? "same-name"
         settings.keepMetadata = (keepMetadataCheck.state == .on)
@@ -2573,6 +2720,28 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.runCompression()
+        }
+    }
+
+    @objc func performPrimaryAction() {
+        switch activeMode {
+        case .imageCompression:
+            startCompression()
+        case .videoCompression:
+            videoController.startCompression()
+        case .rename:
+            renameController.applyRename()
+        }
+    }
+
+    @objc func clearCurrentMode() {
+        switch activeMode {
+        case .imageCompression:
+            clearAll()
+        case .videoCompression:
+            videoController.clearAll()
+        case .rename:
+            renameController.clearAll()
         }
     }
 
@@ -2675,19 +2844,44 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         }
         let stdout = String(data: outPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
         let stderr = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-        let lines = (stdout + "\n" + stderr).split(separator: "\n").map(String.init)
+        var lines = (stdout + "\n" + stderr).split(separator: "\n").map(String.init)
         var outputPath: URL? = nil
         for line in lines {
             if line.contains("->") && (line.contains(".webp") || line.contains(".jpg") || line.contains(".png")) {
                 let parts = line.components(separatedBy: "->")
                 if let last = parts.last {
-                    let cleaned = last.trimmingCharacters(in: .whitespaces)
-                    let url = cleaned.hasPrefix("/") ? URL(fileURLWithPath: cleaned) : URL(string: cleaned)
-                    if let url, FileManager.default.fileExists(atPath: url.path) { outputPath = url }
+                    let cleaned = last.components(separatedBy: "|").first?
+                        .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    let url = cleaned.hasPrefix("/")
+                        ? URL(fileURLWithPath: cleaned)
+                        : outputDir.appendingPathComponent(cleaned)
+                    if FileManager.default.fileExists(atPath: url.path) { outputPath = url }
                 }
             }
         }
-        let isError = process.terminationStatus != 0 || lines.contains(where: { $0.contains("[ERROR]") })
+        var legacyRenameFailed = false
+        if settings.isBestQuality, let webPPath = outputPath, webPPath.pathExtension.lowercased() == "webp" {
+            let manager = FileManager.default
+            let baseURL = webPPath.deletingPathExtension()
+            var pngPath = baseURL.appendingPathExtension("png")
+            if pngPath.standardizedFileURL == file.url.standardizedFileURL {
+                pngPath = baseURL.deletingLastPathComponent()
+                    .appendingPathComponent("\(baseURL.lastPathComponent)-optimized")
+                    .appendingPathExtension("png")
+            }
+            do {
+                if manager.fileExists(atPath: pngPath.path) {
+                    try manager.removeItem(at: pngPath)
+                }
+                try manager.moveItem(at: webPPath, to: pngPath)
+                outputPath = pngPath
+                lines.append("[RENAMED] \(webPPath.path) -> \(pngPath.path)")
+            } catch {
+                legacyRenameFailed = true
+                lines.append("[ERROR] Could not rename Best Quality output to .png: \(error.localizedDescription)")
+            }
+        }
+        let isError = legacyRenameFailed || process.terminationStatus != 0 || lines.contains(where: { $0.contains("[ERROR]") })
         let isBest = lines.contains(where: { $0.contains("[BEST EFFORT]") })
         return CompressionRunResult(lines: lines, hadError: isError, bestEffort: isBest, outputPath: outputPath)
     }
@@ -2900,27 +3094,12 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
             scroll.topAnchor.constraint(equalTo: root.topAnchor),
             scroll.bottomAnchor.constraint(equalTo: root.bottomAnchor),
             document.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
-            main.leadingAnchor.constraint(equalTo: document.leadingAnchor, constant: Spacing.xl),
-            main.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -Spacing.xl),
-            main.topAnchor.constraint(equalTo: document.topAnchor, constant: Spacing.xl),
+            main.leadingAnchor.constraint(equalTo: document.leadingAnchor),
+            main.trailingAnchor.constraint(equalTo: document.trailingAnchor),
+            main.topAnchor.constraint(equalTo: document.topAnchor),
             main.bottomAnchor.constraint(equalTo: document.bottomAnchor, constant: -Spacing.xl)
         ])
 
-        // Hero
-        let titleStack = NSStackView(views: [titleLabel, subtitleLabel])
-        titleStack.orientation = .vertical
-        titleStack.spacing = 4
-        titleStack.alignment = .leading
-        titleStack.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = NSFont.systemFont(ofSize: 26, weight: .semibold)
-        titleLabel.textColor = Palette.text
-        subtitleLabel.font = Typography.body
-        subtitleLabel.textColor = Palette.textSecondary
-        let hero = NSStackView(views: [titleStack, NSView(), statusBadge])
-        hero.alignment = .centerY
-        hero.spacing = Spacing.md
-        hero.translatesAutoresizingMaskIntoConstraints = false
-        main.addArrangedSubview(hero)
         main.addArrangedSubview(successBanner)
         successBanner.isHidden = true
         successBanner.exportButton.isHidden = true
@@ -2981,7 +3160,16 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
         // Drop zone
         dropZone.onAddFiles = { [weak self] in self?.chooseFiles() }
         dropZone.onDrop = { [weak self] urls in self?.addURLs(urls) }
-        main.addArrangedSubview(dropZone)
+        let dropZoneWrapper = NSView()
+        dropZoneWrapper.translatesAutoresizingMaskIntoConstraints = false
+        dropZoneWrapper.addSubview(dropZone)
+        NSLayoutConstraint.activate([
+            dropZone.centerXAnchor.constraint(equalTo: dropZoneWrapper.centerXAnchor),
+            dropZone.widthAnchor.constraint(equalToConstant: FigmaLayout.emptyDropWidth),
+            dropZone.topAnchor.constraint(equalTo: dropZoneWrapper.topAnchor),
+            dropZone.bottomAnchor.constraint(equalTo: dropZoneWrapper.bottomAnchor)
+        ])
+        main.addArrangedSubview(dropZoneWrapper)
 
         // Queue
         let queueHeader = NSTextField(labelWithString: "Queue")
@@ -3072,21 +3260,38 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
     }
 
     @objc func applyRename() {
+        guard !files.isEmpty else {
+            NSSound.beep()
+            statusBadge.setText("Add files first")
+            return
+        }
         let ext = formatPopup.titleOfSelectedItem ?? "jpg"
         var renamed = 0
+        var failed: [URL] = []
         for url in files {
             let base = url.deletingPathExtension()
             let dest = base.appendingPathExtension(ext)
+            if dest.standardizedFileURL == url.standardizedFileURL {
+                renamed += 1
+                continue
+            }
             do {
+                guard !FileManager.default.fileExists(atPath: dest.path) else {
+                    failed.append(url)
+                    continue
+                }
                 try FileManager.default.moveItem(at: url, to: dest)
                 renamed += 1
-            } catch {}
+            } catch {
+                failed.append(url)
+            }
         }
-        files.removeAll()
-        listTable.reloadData()
-        successBanner.setDetail("\(renamed) file\(renamed == 1 ? "" : "s") renamed successfully")
+        files = failed
+        refresh()
+        let failureDetail = failed.isEmpty ? "" : "; \(failed.count) skipped because the destination exists or could not be written"
+        successBanner.setDetail("\(renamed) file\(renamed == 1 ? "" : "s") renamed successfully\(failureDetail)")
         successBanner.isHidden = false
-        statusBadge.setText("Complete")
+        statusBadge.setText(failed.isEmpty ? "Complete" : "Needs attention")
         updateState()
     }
 
@@ -4205,8 +4410,15 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         // ── Actions ──
         let actionItem = NSMenuItem(); main.addItem(actionItem)
         let actionMenu = NSMenu(title: "Actions"); actionItem.submenu = actionMenu
-        addMenu("Optimize Now", to: actionMenu, key: "\r", target: split.studio, action: #selector(StudioViewController.startCompression))
-        addMenu("Clear Queue", to: actionMenu, key: "\u{8}", modifiers: [.command, .shift], target: split.studio, action: #selector(StudioViewController.clearAll))
+        addMenu("Run Current Mode", to: actionMenu, key: "\r", target: split.studio, action: #selector(StudioViewController.performPrimaryAction))
+        addMenu("Clear Current Queue", to: actionMenu, key: "\u{8}", modifiers: [.command, .shift], target: split.studio, action: #selector(StudioViewController.clearCurrentMode))
+        actionMenu.addItem(.separator())
+        addMenu("Image Compressing", to: actionMenu, key: "1", target: split.studio, action: #selector(StudioViewController.selectImageMode))
+        addMenu("Video Compressing", to: actionMenu, key: "2", target: split.studio, action: #selector(StudioViewController.selectVideoMode))
+        addMenu("Renaming", to: actionMenu, key: "3", target: split.studio, action: #selector(StudioViewController.selectRenameMode))
+        actionMenu.addItem(.separator())
+        addMenu("Previous Mode", to: actionMenu, key: String(UnicodeScalar(NSLeftArrowFunctionKey)!), target: split.studio, action: #selector(StudioViewController.selectPreviousMode))
+        addMenu("Next Mode", to: actionMenu, key: String(UnicodeScalar(NSRightArrowFunctionKey)!), target: split.studio, action: #selector(StudioViewController.selectNextMode))
 
         // ── Edit ──
         let editItem = NSMenuItem(); main.addItem(editItem)
@@ -4224,6 +4436,9 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         // ── View ──
         let viewItem = NSMenuItem(); main.addItem(viewItem)
         let viewMenu = NSMenu(title: "View"); viewItem.submenu = viewMenu
+        addMenu("Toggle Queue Sidebar", to: viewMenu, key: "l", modifiers: [.command, .control], target: split.studio, action: #selector(StudioViewController.toggleQueuePanelFromMenu))
+        addMenu("Toggle Presets Sidebar", to: viewMenu, key: "r", modifiers: [.command, .control], target: split.studio, action: #selector(StudioViewController.toggleInspectorPanelFromMenu))
+        viewMenu.addItem(.separator())
         viewMenu.addItem(withTitle: "Enter Full Screen", action: #selector(NSWindow.toggleFullScreen(_:)), keyEquivalent: "f")
 
         // ── Window ──
