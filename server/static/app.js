@@ -7,6 +7,8 @@ const API = {
   previewDebounce: null,
   objectUrls: new Map(),
   lastPreviewUrl: null,
+  freeFileLimit: 3,
+  maxUploadMb: 50,
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -16,14 +18,30 @@ const VIDEO_EXTS = new Set(["mp4", "mov", "avi", "mkv", "webm", "m4v", "wmv", "f
 const IMAGE_EXTS = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "tif", "heic", "heif"]);
 
 async function init() {
-  const res = await fetch("/api/session", { method: "POST" });
-  const data = await res.json();
-  API.session = data.session_id;
-  $("#sessionBadge").textContent = `Session ${API.session}`;
-  connectWS();
-  bindEvents();
-  saveSettings();
-  updateAllMetrics();
+  try {
+    const configRes = await fetch("/api/config");
+    if (configRes.ok) {
+      const config = await configRes.json();
+      API.freeFileLimit = config.free_file_limit || API.freeFileLimit;
+      API.maxUploadMb = config.max_upload_mb || API.maxUploadMb;
+    }
+    const res = await fetch("/api/session", { method: "POST" });
+    if (!res.ok) throw new Error("Could not start a trial session.");
+    const data = await res.json();
+    API.session = data.session_id;
+    $("#sessionBadge").textContent = `Trial session ${API.session}`;
+    connectWS();
+    bindEvents();
+    saveSettings();
+    updateAllMetrics();
+  } catch (error) {
+    $("#sessionBadge").textContent = "Trial unavailable";
+    toast(error.message || "Could not start the trial.", "error");
+  }
+}
+
+function apiError(data, fallback) {
+  return data?.detail || data?.error || fallback;
 }
 
 function toast(msg, type = "info") {
@@ -70,13 +88,19 @@ function handleWSMessage(msg) {
 
 async function addFilesToQueue(fileList) {
   const files = [...fileList];
+  const available = API.freeFileLimit - API.files.length;
+  if (files.length > available) {
+    return toast(`The free trial allows ${API.freeFileLimit} files per session. Remove a file or get the Mac app for unlimited queues.`, "error");
+  }
+  const oversized = files.find((file) => file.size > API.maxUploadMb * 1024 * 1024);
+  if (oversized) return toast(`${oversized.name} is larger than the ${API.maxUploadMb} MB trial limit.`, "error");
   const formData = new FormData();
   for (const f of files) formData.append("files", f);
 
   try {
     const res = await fetch(`/api/session/${API.session}/upload`, { method: "POST", body: formData });
     const data = await res.json();
-    if (data.error) return toast(data.error, "error");
+    if (!res.ok || data.error || data.detail) return toast(apiError(data, "Upload failed"), "error");
 
     data.files.forEach((file, index) => {
       const source = files[index];
@@ -419,12 +443,12 @@ async function startCompression() {
   saveSettings();
   const res = await fetch(`/api/session/${API.session}/compress`, { method: "POST" });
   const data = await res.json();
-  if (data.error) {
+  if (!res.ok || data.error || data.detail) {
     API.compressing = false;
     $("#compressBtn").innerHTML = `<span aria-hidden="true">▶</span> Compress Queue`;
     $("#stopBtn").disabled = true;
     updateCompressBtn();
-    toast(data.error, "error");
+    toast(apiError(data, "Compression could not start."), "error");
   }
 }
 
@@ -466,6 +490,10 @@ function bindEvents() {
     if (e.target.files.length) addFilesToQueue(e.target.files);
     e.target.value = "";
   });
+  $("#chooseFilesBtn").addEventListener("click", (event) => {
+    event.stopPropagation();
+    $("#fileInput").click();
+  });
   $("#dropZone").addEventListener("click", () => $("#fileInput").click());
 
   let dragCounter = 0;
@@ -496,8 +524,12 @@ function bindEvents() {
 
   $$(".preset").forEach((btn) => {
     btn.addEventListener("click", () => {
-      $$(".preset").forEach((b) => b.classList.remove("active"));
+      $$(".preset").forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
       btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
       $("#customSizeRow").hidden = btn.dataset.value !== "";
       saveSettings();
     });
@@ -571,9 +603,8 @@ function updateSmartHint() {
   const active = document.querySelector(".preset.active");
   const mode = active?.dataset.mode || "Website Ready";
   const quality = active?.dataset.quality || "High";
-  const savings = active?.dataset.savings || "75-92%";
   const exts = API.files.map((f) => extensionOf(f.filename));
-  let context = `${mode}: ${quality} quality, ${savings} expected savings.`;
+  let context = `${mode}: ${quality} quality target. Actual savings depend on the source file.`;
   if (exts.includes("png")) context = `Optimized for AI artwork and PNG detail. ${context}`;
   else if (API.files.length >= 8) context = `Batch export detected. ${context}`;
   $("#smartHint").textContent = context;
@@ -632,3 +663,6 @@ function escapeHtml(s) {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+window.addEventListener("pagehide", () => {
+  if (API.session) fetch(`/api/session/${API.session}`, { method: "DELETE", keepalive: true }).catch(() => {});
+});

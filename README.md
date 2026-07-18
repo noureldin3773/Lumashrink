@@ -1,6 +1,6 @@
-# Image Compressor
+# LumaShrink
 
-This project gives you a small local tool that compresses images to a target size like `150 KB`.
+LumaShrink is a native macOS media optimizer plus a three-file web trial. It compresses images and videos toward a target size while preserving as much visual quality as the target allows.
 
 Important note: compressing a `12 MB` image to `150 KB` with *exactly the same* quality is not always possible. What this tool does is aim for the best visual quality it can while staying under the target size. It reduces compression quality first, and only shrinks image dimensions if that is necessary.
 
@@ -39,6 +39,46 @@ cd "/Users/nour/Downloads/Compressing Image"
 
 The app stays local on your machine. It does not upload your images anywhere.
 The first launch may take a little longer because it creates a local `.venv` and installs the GUI dependencies.
+
+## Launch the website and free trial
+
+```bash
+./launch_web.command
+```
+
+Before a paid launch, configure the checkout and signed desktop download URLs shown in `.env.example`. The website uses `/buy` and `/download` as stable handoff routes, so providers can be changed without editing landing-page links.
+
+```bash
+cp .env.example .env
+# Replace every example value in .env, then:
+./launch_web.command
+```
+
+The web trial accepts up to three files per session. Files are processed by the server running the trial and removed within two hours. The native Mac app processes files locally.
+
+Run the launch smoke test before each deployment:
+
+```bash
+./scripts/verify_launch.sh
+./scripts/verify_release_media.sh
+```
+
+## Build a release archive
+
+```bash
+./.venv/bin/python -m pip install -r requirements-build.txt
+./create_desktop_launcher.sh
+```
+
+This creates `dist/LumaShrink-macOS.zip`. The development script uses ad-hoc signing; public distribution still requires Developer ID signing and Apple notarization. See `LAUNCH_CHECKLIST.md`.
+
+After configuring the real URLs, Developer ID identity, notarization profile, DNS, and support mailbox in `.env`, build the public artifact with:
+
+```bash
+./scripts/build_public_release.sh
+```
+
+That command fails before building if any public-launch prerequisite is missing, then signs, notarizes, staples, verifies, and checksums the release.
 
 If the Desktop launcher ever fails, check:
 

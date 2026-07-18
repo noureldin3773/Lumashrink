@@ -11,9 +11,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
+
+_OUTPUT_PATH_LOCK = threading.Lock()
+_RESERVED_OUTPUT_PATHS: set[Path] = set()
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _venv_site = sorted(_SCRIPT_DIR.glob(".venv/lib/python*/site-packages"))
@@ -193,6 +197,30 @@ def load_source_image(path: Path) -> SourceImage:
                 detected_format=(raw_image.format or path.suffix.lstrip(".")).upper(),
             )
     except UnidentifiedImageError as error:
+        if SIPS_AVAILABLE and path.suffix.lower() in {".heic", ".heif"}:
+            with tempfile.TemporaryDirectory(prefix="lumashrink-heic-") as tmp_name:
+                converted = Path(tmp_name) / "source.png"
+                result = subprocess.run(
+                    ["sips", "-s", "format", "png", str(path), "--out", str(converted)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                if result.returncode == 0 and converted.exists():
+                    with Image.open(converted) as raw_image:
+                        exif = raw_image.info.get("exif")
+                        icc_profile = raw_image.info.get("icc_profile")
+                        image = ImageOps.exif_transpose(raw_image)
+                        image.load()
+                        return SourceImage(
+                            image=image.copy(),
+                            exif=exif,
+                            icc_profile=icc_profile,
+                            path=path,
+                            width=image.width,
+                            height=image.height,
+                            detected_format="HEIC",
+                        )
         raise ValueError(f"'{path}' is not a supported image file.") from error
 
 
@@ -894,9 +922,21 @@ def build_output_path(
                 "Saving with the same name in the same folder would overwrite the original. "
                 "Choose --name-mode overwrite or pick a different output folder."
             )
-        return output_path
+        return reserve_unique_output_path(output_path)
 
-    return destination_directory / f"{input_path.stem}{suffix}{extension}"
+    return reserve_unique_output_path(destination_directory / f"{input_path.stem}{suffix}{extension}")
+
+
+def reserve_unique_output_path(candidate: Path) -> Path:
+    """Reserve a collision-free path across sequential and parallel batches."""
+    with _OUTPUT_PATH_LOCK:
+        chosen = candidate
+        index = 2
+        while chosen.exists() or chosen in _RESERVED_OUTPUT_PATHS:
+            chosen = candidate.with_name(f"{candidate.stem}-{index}{candidate.suffix}")
+            index += 1
+        _RESERVED_OUTPUT_PATHS.add(chosen)
+        return chosen
 
 
 def can_passthrough_original(input_path: Path, output_path: Path) -> bool:
@@ -1209,7 +1249,7 @@ def main() -> int:
         return exit_code
 
     except Exception as error:
-        print(f"Error: {error}", file=sys.stderr)
+        print(f"[ERROR] {error}", file=sys.stderr)
         return 1
 
 

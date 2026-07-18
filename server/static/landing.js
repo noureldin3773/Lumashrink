@@ -110,48 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   };
 
-  const initBadgeAnimation = () => {
-    const beforeSize = document.getElementById('beforeSize');
-    const afterSize = document.getElementById('afterSize');
-    const metricValue = document.getElementById('panelMetric')?.querySelector('.metric-value');
-    const panelBadge = document.getElementById('panelBadge');
-    const barFill = document.querySelector('.after-row .bar-fill');
-    if (!beforeSize) return;
-
-    const animate = () => {
-      beforeSize.textContent = '24 MB';
-      if (!afterSize) return;
-      let current = 24;
-      const target = 0.14;
-      const duration = 2000;
-      const start = performance.now();
-      const update = (now) => {
-        const t = Math.min((now - start) / duration, 1);
-        const eased = easeCubic(t);
-        current = 24 - (24 - target) * eased;
-        afterSize.textContent = current >= 1 ? `${Math.round(current)} MB` : `${Math.round(current * 1000)} KB`;
-        if (metricValue) metricValue.textContent = `${((1 - current / 24) * 100).toFixed(1)}%`;
-        if (barFill) barFill.style.width = `${(current / 24 * 100)}%`;
-        if (t < 1) requestAnimationFrame(update);
-        else {
-          afterSize.textContent = '140 KB';
-          if (metricValue) metricValue.textContent = '99.4%';
-          if (barFill) barFill.style.width = '0.6%';
-          if (panelBadge) panelBadge.style.opacity = '1';
-        }
-      };
-      requestAnimationFrame(update);
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        setTimeout(animate, 500);
-        observer.disconnect();
-      }
-    }, { threshold: 0.3 });
-    observer.observe(document.getElementById('mainPanel') || document.getElementById('hero'));
-  };
-
   const smoothAnchors = () => {
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', (e) => {
@@ -186,14 +144,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2500);
   };
 
+  const initCommerce = async () => {
+    try {
+      const response = await fetch('/api/config', { headers: { Accept: 'application/json' } });
+      if (!response.ok) return;
+      const config = await response.json();
+      if (!config.checkout_ready) {
+        document.querySelectorAll('[data-checkout]').forEach(link => {
+          link.href = '/support?topic=purchase-interest';
+          link.textContent = 'Get launch access';
+          link.title = 'Checkout opens as soon as the signed Mac build is published';
+        });
+      }
+    } catch {}
+  };
+
   observeSections();
   revealElements();
   setupComparisons();
   navScroll();
   heroParallax();
-  initBadgeAnimation();
   smoothAnchors();
   initQueuePanel();
+  initCommerce();
 
   window.addEventListener('scroll', revealElements, { passive: true });
   window.addEventListener('resize', revealElements, { passive: true });

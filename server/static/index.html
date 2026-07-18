@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LumaShrink - Creator Image Compressor</title>
-<link rel="stylesheet" href="/static/style.css">
+<title>LumaShrink Free Trial — Compress up to 3 files</title>
+<meta name="description" content="Try LumaShrink on up to three images or videos. Trial files are deleted within two hours.">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
+<a class="skip-link" href="#mainContent">Skip to compressor</a>
 <div class="ambient" aria-hidden="true"></div>
 <div id="app">
   <header class="header glass-nav">
@@ -16,18 +19,24 @@
       </div>
       <div>
         <h1 class="title">LumaShrink</h1>
-        <span class="subtitle">Premium local compression for creators, portfolios, and fast web launches.</span>
+        <span class="subtitle">Free web trial · 3 files per session · temporary server processing</span>
       </div>
     </div>
     <div class="header-right">
-      <span class="session-badge" id="sessionBadge">Starting session</span>
+      <span class="session-badge" id="sessionBadge" role="status" aria-live="polite" aria-atomic="true">Starting session</span>
+      <a class="btn btn-upgrade" href="/buy">Get the private Mac app — $19</a>
       <button class="btn btn-ghost" id="clearSessionBtn" title="New session">
         <span aria-hidden="true">↺</span> New
       </button>
     </div>
   </header>
 
-  <main class="layout">
+  <main class="layout" id="mainContent">
+    <section class="trial-notice" aria-label="Trial privacy notice">
+      <strong>This is the web trial.</strong>
+      <span>Files are temporarily sent to this server and deleted within two hours. The paid Mac app processes files locally.</span>
+      <a href="/privacy">How file handling works</a>
+    </section>
     <section class="col-primary">
       <section class="hero-drop glass-panel drop-zone" id="dropZone">
         <div class="drop-particles" aria-hidden="true"></div>
@@ -36,9 +45,9 @@
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 15v2.5A2.5 2.5 0 007.5 20h9a2.5 2.5 0 002.5-2.5V15"/></svg>
           </div>
           <p class="drop-title">Drop files anywhere</p>
-          <p class="drop-sub">Images and videos stay local while LumaShrink prepares creator-ready exports.</p>
+          <p class="drop-sub">Choose up to three images or videos. Trial files are removed automatically within two hours.</p>
           <div class="drop-actions">
-            <label class="btn btn-primary" for="fileInput" tabindex="0" role="button">Upload files</label>
+            <button class="btn btn-primary" type="button" id="chooseFilesBtn">Choose files</button>
             <span class="drop-note" id="smartHint">Website Ready is recommended for balanced web exports.</span>
           </div>
         </div>
@@ -78,7 +87,7 @@
           </div>
           <div class="queue-tools">
             <span class="badge" id="fileCount">0 files</span>
-            <label class="btn btn-secondary btn-sm" for="fileInput" tabindex="0" role="button">Upload</label>
+            <label class="btn btn-secondary btn-sm" for="fileInput" tabindex="0" role="button">Add files</label>
           </div>
         </div>
         <div class="queue-metrics">
@@ -105,18 +114,17 @@
           </div>
         </div>
         <div class="preset-grid" id="sizePresets">
-          <button class="preset active" data-value="150kb" data-mode="Fast Export" data-quality="Balanced" data-savings="88-98%"><span>⚡</span><strong>Fast Export</strong><small>Tiny shareable files</small></button>
-          <button class="preset" data-value="2mb" data-mode="AI Artwork" data-quality="Ultra" data-savings="45-70%"><span>✦</span><strong>AI Artwork</strong><small>Preserve painterly detail</small></button>
-          <button class="preset" data-value="900kb" data-mode="Social Media" data-quality="High" data-savings="65-85%"><span>◐</span><strong>Social Media</strong><small>Clean feed exports</small></button>
-          <button class="preset" data-value="4mb" data-mode="Ultra Quality" data-quality="Ultra" data-savings="25-55%"><span>◆</span><strong>Ultra Quality</strong><small>Gentle compression</small></button>
-          <button class="preset" data-value="1.5mb" data-mode="Portfolio Mode" data-quality="Premium" data-savings="55-80%"><span>▣</span><strong>Portfolio Mode</strong><small>Case-study ready</small></button>
-          <button class="preset" data-value="350kb" data-mode="Framer/Webflow" data-quality="High" data-savings="80-95%"><span>⌘</span><strong>Framer/Webflow</strong><small>Landing page assets</small></button>
-          <button class="preset" data-value="150kb" data-mode="Fast Export" data-quality="Balanced" data-savings="88-98%"><span>⚡</span><strong>Fast Export</strong><small>Tiny shareable files</small></button>
-          <button class="preset custom-preset" data-value="" data-mode="Custom" data-quality="Manual" data-savings="Varies"><span>⋯</span><strong>Custom</strong><small>Set your own target</small></button>
+          <button class="preset active" aria-pressed="true" data-value="150kb" data-mode="Fast Export" data-quality="Balanced"><span aria-hidden="true">⚡</span><strong>Fast Export</strong><small>Tiny shareable files</small></button>
+          <button class="preset" aria-pressed="false" data-value="2mb" data-mode="AI Artwork" data-quality="Ultra"><span aria-hidden="true">✦</span><strong>AI Artwork</strong><small>Preserve painterly detail</small></button>
+          <button class="preset" aria-pressed="false" data-value="900kb" data-mode="Social Media" data-quality="High"><span aria-hidden="true">◐</span><strong>Social Media</strong><small>Clean feed exports</small></button>
+          <button class="preset" aria-pressed="false" data-value="4mb" data-mode="Ultra Quality" data-quality="Ultra"><span aria-hidden="true">◆</span><strong>Ultra Quality</strong><small>Gentle compression</small></button>
+          <button class="preset" aria-pressed="false" data-value="1.5mb" data-mode="Portfolio Mode" data-quality="Premium"><span aria-hidden="true">▣</span><strong>Portfolio Mode</strong><small>Case-study ready</small></button>
+          <button class="preset" aria-pressed="false" data-value="350kb" data-mode="Framer/Webflow" data-quality="High"><span aria-hidden="true">⌘</span><strong>Framer/Webflow</strong><small>Landing page assets</small></button>
+          <button class="preset custom-preset" aria-pressed="false" data-value="" data-mode="Custom" data-quality="Manual"><span aria-hidden="true">⋯</span><strong>Custom</strong><small>Set your own target</small></button>
         </div>
         <div class="custom-size" id="customSizeRow" hidden>
-          <input type="text" id="customSizeInput" placeholder="e.g. 300" class="input">
-          <select id="customSizeUnit" class="input compact">
+          <input type="text" id="customSizeInput" placeholder="e.g. 300" class="input" aria-label="Custom target size">
+          <select id="customSizeUnit" class="input compact" aria-label="Custom target size unit">
             <option value="b">B</option>
             <option value="kb" selected>KB</option>
             <option value="mb">MB</option>
@@ -125,18 +133,17 @@
 
         <div class="settings-grid">
           <div class="field">
-            <label>Output Format</label>
+            <label for="outputFormat">Output Format</label>
             <select id="outputFormat" class="input">
               <option value="auto">Auto</option>
               <option value="keep">Keep original</option>
               <option value="jpeg">JPEG</option>
               <option value="png">PNG</option>
-              <option value="webp">WebP</option>
-              <option value="best_quality" selected>Best Quality</option>
+              <option value="webp" selected>Smart WebP</option>
             </select>
           </div>
           <div class="field">
-            <label>Min Side</label>
+            <label for="minSide">Min Side</label>
             <select id="minSide" class="input">
               <option value="160">160 px</option>
               <option value="320" selected>320 px</option>
@@ -146,26 +153,26 @@
             </select>
           </div>
           <div class="field full">
-            <label>Quality Range</label>
+            <span class="field-label">Quality Range</span>
             <div class="range-row">
-              <input type="range" id="minQuality" min="1" max="100" value="20">
+              <input type="range" id="minQuality" min="1" max="100" value="20" aria-label="Minimum quality">
               <span class="range-label" id="minQualityLabel">20</span>
               <span class="range-sep">-</span>
-              <input type="range" id="maxQuality" min="1" max="100" value="100">
+              <input type="range" id="maxQuality" min="1" max="100" value="100" aria-label="Maximum quality">
               <span class="range-label" id="maxQualityLabel">100</span>
             </div>
           </div>
           <div class="field">
-            <label>Naming</label>
+            <label for="nameMode">Naming</label>
             <select id="nameMode" class="input">
               <option value="suffix">Suffix</option>
-              <option value="same-name" selected>Same name</option>
+              <option value="same-name">Same name</option>
               <option value="overwrite">Overwrite</option>
             </select>
           </div>
           <div class="field checkbox-row">
             <label>
-              <input type="checkbox" id="keepMetadata" checked>
+              <input type="checkbox" id="keepMetadata">
               <span>Keep metadata</span>
             </label>
           </div>
@@ -184,12 +191,12 @@
           <p class="preview-placeholder">Preview will appear here</p>
         </div>
         <div class="preview-slider-row" id="previewSliderRow" hidden>
-          <label>Reveal</label>
+          <label for="compareSlider">Reveal</label>
           <input type="range" id="compareSlider" min="0" max="100" value="56">
           <span id="compareLabel">56%</span>
         </div>
         <div class="preview-slider-row" id="previewQualityRow" hidden>
-          <label>Quality</label>
+          <label for="previewQuality">Quality</label>
           <input type="range" id="previewQuality" min="10" max="100" value="100">
           <span id="previewQualityLabel">100</span>
         </div>
@@ -199,7 +206,7 @@
         <div class="card-header">
           <div>
             <h2>Progress</h2>
-            <p id="progressCaption">Preparing the queue.</p>
+            <p id="progressCaption" role="status" aria-live="polite">Preparing the queue.</p>
           </div>
         </div>
         <div class="batch-progress">
@@ -235,7 +242,7 @@
           </div>
           <button class="btn btn-ghost btn-sm" id="clearLogBtn">Clear</button>
         </div>
-        <div class="log-area" id="logArea">
+        <div class="log-area" id="logArea" role="log" aria-live="polite" aria-relevant="additions">
           <div class="log-empty">Ready to compress</div>
         </div>
       </section>
@@ -243,12 +250,12 @@
   </main>
 </div>
 
-<dialog class="preview-dialog" id="previewDialog">
+<dialog class="preview-dialog" id="previewDialog" aria-label="Expanded image preview">
   <button class="dialog-close" id="closePreviewDialog" aria-label="Close preview">×</button>
   <img id="zoomPreviewImage" alt="Expanded preview">
 </dialog>
 
-<div class="toast-container" id="toastContainer"></div>
-<script src="/static/app.js"></script>
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+<script src="/static/app.js?v=4"></script>
 </body>
 </html>

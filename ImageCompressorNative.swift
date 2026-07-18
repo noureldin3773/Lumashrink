@@ -54,31 +54,31 @@ private final class AppLogger {
 
 private enum Palette {
     // Window
-    static let window = NSColor(calibratedRed: 0.043, green: 0.047, blue: 0.055, alpha: 1.0)
-    static let sidebar = NSColor(calibratedRed: 0.063, green: 0.071, blue: 0.082, alpha: 1.0)
+    static let window = NSColor(calibratedWhite: 0.898, alpha: 1.0)
+    static let sidebar = NSColor(calibratedWhite: 0.898, alpha: 1.0)
 
     // Surfaces
-    static let surface = NSColor(calibratedRed: 0.070, green: 0.075, blue: 0.086, alpha: 0.96)
-    static let surfaceElevated = NSColor(calibratedRed: 0.095, green: 0.101, blue: 0.114, alpha: 1.0)
-    static let surfaceTinted = NSColor(calibratedRed: 0.105, green: 0.113, blue: 0.129, alpha: 0.92)
-    static let surfaceInset = NSColor(calibratedRed: 0.057, green: 0.061, blue: 0.070, alpha: 1.0)
+    static let surface = NSColor(calibratedWhite: 0.94, alpha: 0.78)
+    static let surfaceElevated = NSColor(calibratedWhite: 0.975, alpha: 0.88)
+    static let surfaceTinted = NSColor(calibratedRed: 0.94, green: 0.92, blue: 0.99, alpha: 0.96)
+    static let surfaceInset = NSColor(calibratedWhite: 0.82, alpha: 0.78)
 
     // Borders
-    static let border = NSColor(calibratedRed: 0.185, green: 0.195, blue: 0.215, alpha: 1.0)
-    static let borderSubtle = NSColor(calibratedRed: 0.135, green: 0.145, blue: 0.162, alpha: 1.0)
+    static let border = NSColor.white.withAlphaComponent(0.92)
+    static let borderSubtle = NSColor.white.withAlphaComponent(0.72)
 
     // Text
-    static let text = NSColor(calibratedWhite: 0.94, alpha: 1.0)
-    static let textSecondary = NSColor(calibratedWhite: 0.66, alpha: 1.0)
-    static let textTertiary = NSColor(calibratedWhite: 0.44, alpha: 1.0)
+    static let text = NSColor(calibratedWhite: 0.09, alpha: 1.0)
+    static let textSecondary = NSColor(calibratedWhite: 0.28, alpha: 1.0)
+    static let textTertiary = NSColor(calibratedWhite: 0.58, alpha: 1.0)
     static let textOnAccent = NSColor.white
 
     // Accent
-    static let accent = NSColor(calibratedRed: 0.20, green: 0.55, blue: 0.98, alpha: 1.0)
-    static let accentHover = NSColor(calibratedRed: 0.28, green: 0.61, blue: 1.0, alpha: 1.0)
-    static let accentPressed = NSColor(calibratedRed: 0.14, green: 0.45, blue: 0.87, alpha: 1.0)
-    static let accentSoft = NSColor(calibratedRed: 0.20, green: 0.55, blue: 0.98, alpha: 0.14)
-    static let accentSoftPressed = NSColor(calibratedRed: 0.20, green: 0.55, blue: 0.98, alpha: 0.24)
+    static let accent = NSColor(calibratedRed: 0.267, green: 0.133, blue: 0.631, alpha: 1.0)
+    static let accentHover = NSColor(calibratedRed: 0.31, green: 0.17, blue: 0.70, alpha: 1.0)
+    static let accentPressed = NSColor(calibratedRed: 0.21, green: 0.09, blue: 0.52, alpha: 1.0)
+    static let accentSoft = NSColor(calibratedRed: 0.31, green: 0.14, blue: 0.82, alpha: 0.08)
+    static let accentSoftPressed = NSColor(calibratedRed: 0.31, green: 0.14, blue: 0.82, alpha: 0.15)
 
     // Status
     static let success = NSColor(calibratedRed: 0.08, green: 0.62, blue: 0.38, alpha: 1.0)
@@ -114,15 +114,26 @@ private enum Radius {
 
 private enum Typography {
     static let heroTitle = NSFont.systemFont(ofSize: 28, weight: .semibold)
-    static let sectionTitle = NSFont.systemFont(ofSize: 20, weight: .semibold)
+    static let sectionTitle = NSFont.systemFont(ofSize: 18, weight: .semibold)
     static let cardTitle = NSFont.systemFont(ofSize: 15, weight: .semibold)
-    static let body = NSFont.systemFont(ofSize: 13, weight: .regular)
-    static let bodyMedium = NSFont.systemFont(ofSize: 13, weight: .medium)
+    static let body = NSFont.systemFont(ofSize: 14, weight: .regular)
+    static let bodyMedium = NSFont.systemFont(ofSize: 14, weight: .medium)
     static let caption = NSFont.systemFont(ofSize: 12, weight: .regular)
     static let captionMedium = NSFont.systemFont(ofSize: 12, weight: .medium)
     static let micro = NSFont.systemFont(ofSize: 11, weight: .medium)
     static let monoSmall = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
-    static let display = NSFont.systemFont(ofSize: 34, weight: .semibold)
+    static let display = NSFont.systemFont(ofSize: 28, weight: .semibold)
+}
+
+private enum FigmaLayout {
+    static let canvasWidth: CGFloat = 1280
+    static let canvasHeight: CGFloat = 832
+    static let pageInset: CGFloat = 40
+    static let emptyDropWidth: CGFloat = 640
+    static let emptyDropHeight: CGFloat = 240
+    static let compactDropHeight: CGFloat = 140
+    static let queueWidth: CGFloat = 330
+    static let inspectorWidth: CGFloat = 350
 }
 
 private enum MotionTokens {
@@ -171,9 +182,9 @@ private final class AppBackgroundView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         gradient.colors = [
-            NSColor(calibratedRed: 0.055, green: 0.060, blue: 0.070, alpha: 1.0).cgColor,
-            NSColor(calibratedRed: 0.039, green: 0.043, blue: 0.051, alpha: 1.0).cgColor,
-            NSColor(calibratedRed: 0.027, green: 0.030, blue: 0.036, alpha: 1.0).cgColor
+            Palette.window.cgColor,
+            Palette.window.cgColor,
+            Palette.window.cgColor
         ]
         gradient.locations = [0, 0.5, 1]
         gradient.startPoint = CGPoint(x: 0, y: 1)
@@ -208,15 +219,15 @@ private final class GlassCard: NSVisualEffectView {
         blendingMode = .withinWindow
         state = .active
         wantsLayer = true
-        layer?.cornerRadius = cornerRadius
+        layer?.cornerRadius = min(cornerRadius, Radius.lg)
         layer?.cornerCurve = .continuous
         layer?.borderWidth = 0.5
         layer?.borderColor = Palette.borderSubtle.cgColor
         layer?.backgroundColor = Palette.surface.cgColor
         layer?.shadowColor = NSColor.black.withAlphaComponent(0.32).cgColor
         layer?.shadowOffset = CGSize(width: 0, height: -1)
-        layer?.shadowRadius = 14
-        layer?.shadowOpacity = 1
+        layer?.shadowRadius = 8
+        layer?.shadowOpacity = 0.55
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -241,7 +252,6 @@ private final class PillLabel: NSView {
         stack.alignment = .centerY
         stack.spacing = 6
         stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.edgeInsets = NSEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         addSubview(stack)
 
         if let symbol {
@@ -258,10 +268,10 @@ private final class PillLabel: NSView {
         stack.addArrangedSubview(label)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: 6),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6)
         ])
     }
 
@@ -297,44 +307,67 @@ private final class StatTile: NSView {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.backgroundColor = Palette.surfaceElevated.cgColor
+        layer?.cornerRadius = Radius.xl
+        layer?.cornerCurve = .continuous
+        layer?.borderWidth = 0.7
+        layer?.borderColor = Palette.border.cgColor
 
         titleLabel.stringValue = title
-        titleLabel.font = Typography.micro
+        titleLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         titleLabel.textColor = Palette.textTertiary
+        titleLabel.alignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         valueLabel.stringValue = value
-        valueLabel.font = Typography.display
+        valueLabel.font = NSFont.systemFont(ofSize: 16, weight: .semibold)
         valueLabel.textColor = valueColor
+        valueLabel.alignment = .center
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
+        valueLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         detailLabel.stringValue = detail
         detailLabel.font = Typography.caption
         detailLabel.textColor = Palette.textSecondary
         detailLabel.translatesAutoresizingMaskIntoConstraints = false
+        detailLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         addSubview(titleLabel)
         addSubview(valueLabel)
-        addSubview(detailLabel)
+        detailLabel.isHidden = true
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: topAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            valueLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: Spacing.xs),
-            valueLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            valueLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            detailLabel.topAnchor.constraint(equalTo: valueLabel.bottomAnchor, constant: Spacing.xxs),
-            detailLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            detailLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            detailLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 5),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            valueLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            valueLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            valueLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            valueLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5),
+            heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 
     required init?(coder: NSCoder) { fatalError() }
 
-    func setValue(_ value: String) { valueLabel.stringValue = value }
+    func setValue(_ value: String) {
+        guard valueLabel.stringValue != value else { return }
+        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            valueLabel.stringValue = value
+            return
+        }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = MotionTokens.quick
+            valueLabel.animator().alphaValue = 0.35
+        } completionHandler: { [weak self] in
+            self?.valueLabel.stringValue = value
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = MotionTokens.quick
+                self?.valueLabel.animator().alphaValue = 1
+            }
+        }
+    }
     func setDetail(_ detail: String) { detailLabel.stringValue = detail }
     func setValueColor(_ color: NSColor) { valueLabel.textColor = color }
 }
@@ -349,6 +382,7 @@ private final class PrimaryButton: NSButton {
     convenience init(title: String, symbol: String? = nil) {
         self.init(frame: .zero)
         self.title = title
+        self.toolTip = title
         if let symbol { configureSymbol(symbol) }
     }
     required init?(coder: NSCoder) { fatalError() }
@@ -358,6 +392,7 @@ private final class PrimaryButton: NSButton {
         bezelStyle = .regularSquare
         isBordered = false
         wantsLayer = true
+        focusRingType = .exterior
         layer?.cornerRadius = Radius.md
         layer?.cornerCurve = .continuous
         contentTintColor = Palette.textOnAccent
@@ -368,7 +403,7 @@ private final class PrimaryButton: NSButton {
                 .foregroundColor: Palette.textOnAccent
             ]
         )
-        heightAnchor.constraint(equalToConstant: 40).isActive = true
+        heightAnchor.constraint(equalToConstant: 44).isActive = true
     }
 
     private func configureSymbol(_ name: String) {
@@ -392,6 +427,12 @@ private final class PrimaryButton: NSButton {
     override func hitTest(_ point: NSPoint) -> NSView? {
         isEnabled ? super.hitTest(point) : nil
     }
+
+    override func mouseDown(with event: NSEvent) {
+        layer?.setAffineTransform(CGAffineTransform(scaleX: 0.97, y: 0.97))
+        super.mouseDown(with: event)
+        layer?.setAffineTransform(.identity)
+    }
 }
 
 private final class SecondaryButton: NSButton {
@@ -402,6 +443,7 @@ private final class SecondaryButton: NSButton {
     convenience init(title: String, symbol: String? = nil, tint: NSColor = Palette.text) {
         self.init(frame: .zero)
         self.title = title
+        self.toolTip = title
         self.tint = tint
         if let symbol { configureSymbol(symbol) }
     }
@@ -414,17 +456,18 @@ private final class SecondaryButton: NSButton {
         bezelStyle = .regularSquare
         isBordered = false
         wantsLayer = true
+        focusRingType = .exterior
         layer?.cornerRadius = Radius.md
         layer?.cornerCurve = .continuous
         layer?.borderWidth = 0.5
         attributedTitle = NSAttributedString(
             string: title,
             attributes: [
-                .font: Typography.bodyMedium,
+                .font: NSFont.systemFont(ofSize: 15, weight: .semibold),
                 .foregroundColor: tint
             ]
         )
-        heightAnchor.constraint(equalToConstant: 40).isActive = true
+        heightAnchor.constraint(equalToConstant: 48).isActive = true
     }
 
     private func configureSymbol(_ name: String) {
@@ -450,6 +493,223 @@ private final class SecondaryButton: NSButton {
             : Palette.borderSubtle.withAlphaComponent(0.5).cgColor
         contentTintColor = isEnabled ? tint : Palette.textTertiary
     }
+
+    override func mouseDown(with event: NSEvent) {
+        layer?.setAffineTransform(CGAffineTransform(scaleX: 0.97, y: 0.97))
+        super.mouseDown(with: event)
+        layer?.setAffineTransform(.identity)
+    }
+}
+
+private final class ModeButton: NSButton {
+    private let tint: NSColor = Palette.accent
+    private let iconView = NSImageView()
+    private let textLabel = NSTextField(labelWithString: "")
+    var isActive = false { didSet { needsDisplay = true; needsLayout = true } }
+
+    init(title: String, symbol: String) {
+        super.init(frame: .zero)
+        self.title = ""
+        translatesAutoresizingMaskIntoConstraints = false
+        bezelStyle = .regularSquare
+        isBordered = false
+        wantsLayer = true
+        layer?.cornerRadius = 18
+        layer?.cornerCurve = .continuous
+        focusRingType = .exterior
+        setAccessibilityLabel(title)
+
+        iconView.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 15, weight: .medium)
+        iconView.imageScaling = .scaleProportionallyDown
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        iconView.heightAnchor.constraint(equalToConstant: 24).isActive = true
+
+        textLabel.stringValue = title
+        textLabel.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let content = NSStackView(views: [iconView, textLabel])
+        content.orientation = .horizontal
+        content.alignment = .centerY
+        content.spacing = 8
+        content.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(content)
+        NSLayoutConstraint.activate([
+            content.centerXAnchor.constraint(equalTo: centerXAnchor),
+            content.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 16),
+            content.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+            content.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            content.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = (isActive ? Palette.accentSoft : NSColor.clear).cgColor
+        let color = isActive ? tint : Palette.textSecondary
+        iconView.contentTintColor = color
+        textLabel.textColor = color
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { bounds.contains(point) ? self : nil }
+}
+
+private final class PaddedActionButton: NSButton {
+    private let tint: NSColor
+    private let labelText: String
+    private let labelFont: NSFont
+    private let requestedIconSize: CGFloat
+
+    init(title: String, symbol: String, tint: NSColor, fontSize: CGFloat = 15, iconSize: CGFloat = 24) {
+        self.tint = tint
+        self.labelText = title
+        self.labelFont = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
+        self.requestedIconSize = iconSize
+        super.init(frame: .zero)
+        self.title = title
+        translatesAutoresizingMaskIntoConstraints = false
+        bezelStyle = .regularSquare
+        isBordered = false
+        wantsLayer = true
+        layer?.cornerRadius = 20
+        layer?.cornerCurve = .continuous
+        focusRingType = .exterior
+        setAccessibilityLabel(title)
+        let baseSymbol = NSImage(systemSymbolName: symbol, accessibilityDescription: title) ?? NSImage()
+        let configuration = NSImage.SymbolConfiguration(pointSize: min(iconSize, 16), weight: .medium)
+        let symbolImage = baseSymbol.withSymbolConfiguration(configuration) ?? baseSymbol
+        let spacedImage = NSImage(size: NSSize(width: iconSize + 4, height: iconSize))
+        spacedImage.lockFocus()
+        symbolImage.draw(in: NSRect(x: 0, y: 0, width: iconSize, height: iconSize))
+        spacedImage.unlockFocus()
+        spacedImage.isTemplate = true
+        image = spacedImage
+        imagePosition = .imageLeading
+        imageScaling = .scaleProportionallyDown
+        imageHugsTitle = true
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = (isHighlighted ? Palette.surfaceInset : Palette.surfaceElevated).cgColor
+        contentTintColor = tint
+        attributedTitle = NSAttributedString(string: labelText, attributes: [
+            .font: labelFont,
+            .foregroundColor: tint
+        ])
+    }
+
+    override var intrinsicContentSize: NSSize {
+        let textSize = (labelText as NSString).size(withAttributes: [.font: labelFont])
+        return NSSize(
+            width: ceil(textSize.width) + requestedIconSize + 8 + 32,
+            height: max(ceil(textSize.height), requestedIconSize) + 16
+        )
+    }
+}
+
+private final class CompactToolbarButton: NSButton {
+    private let tint: NSColor
+    private let labelText: String
+    private let labelFont = NSFont.systemFont(ofSize: 12, weight: .medium)
+
+    init(title: String, symbol: String? = nil, tint: NSColor = Palette.textSecondary) {
+        self.tint = tint
+        self.labelText = title
+        super.init(frame: .zero)
+        self.title = title
+        translatesAutoresizingMaskIntoConstraints = false
+        bezelStyle = .regularSquare
+        isBordered = false
+        wantsLayer = true
+        focusRingType = .exterior
+        layer?.cornerRadius = 16
+        layer?.cornerCurve = .continuous
+        setAccessibilityLabel(title)
+        if let symbol {
+            image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+            imagePosition = .imageLeading
+            imageScaling = .scaleProportionallyDown
+            symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+        }
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = (isHighlighted ? Palette.surfaceInset : Palette.surfaceElevated).cgColor
+        let color = isEnabled ? tint : Palette.textTertiary.withAlphaComponent(0.55)
+        contentTintColor = color
+        attributedTitle = NSAttributedString(string: labelText, attributes: [
+            .font: labelFont,
+            .foregroundColor: color
+        ])
+    }
+
+    override var intrinsicContentSize: NSSize {
+        let textSize = (labelText as NSString).size(withAttributes: [.font: labelFont])
+        let iconWidth: CGFloat = image == nil ? 0 : 20
+        return NSSize(width: ceil(textSize.width) + 32 + iconWidth, height: ceil(textSize.height) + 16)
+    }
+}
+
+private final class TrafficLightButton: NSButton {
+    private let fillColor: NSColor
+
+    init(color: NSColor, accessibilityLabel: String) {
+        self.fillColor = color
+        super.init(frame: .zero)
+        title = ""
+        translatesAutoresizingMaskIntoConstraints = false
+        bezelStyle = .regularSquare
+        isBordered = false
+        wantsLayer = true
+        layer?.cornerRadius = 7
+        setAccessibilityLabel(accessibilityLabel)
+        widthAnchor.constraint(equalToConstant: 14).isActive = true
+        heightAnchor.constraint(equalToConstant: 14).isActive = true
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = (isHighlighted ? fillColor.withAlphaComponent(0.65) : fillColor).cgColor
+    }
+}
+
+private final class HeaderIconButton: NSButton {
+    init(symbol: String, accessibilityLabel: String) {
+        super.init(frame: .zero)
+        title = ""
+        image = NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityLabel)
+        imageScaling = .scaleProportionallyDown
+        symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        contentTintColor = Palette.textSecondary
+        toolTip = accessibilityLabel
+        translatesAutoresizingMaskIntoConstraints = false
+        bezelStyle = .regularSquare
+        isBordered = false
+        wantsLayer = true
+        layer?.cornerRadius = 7
+        widthAnchor.constraint(equalToConstant: 28).isActive = true
+        heightAnchor.constraint(equalToConstant: 28).isActive = true
+        setAccessibilityLabel(accessibilityLabel)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = (isHighlighted ? Palette.surfaceInset : NSColor.clear).cgColor
+    }
 }
 
 // MARK: - Domain Models
@@ -462,6 +722,7 @@ private enum CreatorPreset: String, CaseIterable {
     case portfolio = "Portfolio Mode"
     case framerWebflow = "Framer / Webflow"
     case websiteReady = "Website Ready"
+    case custom = "Custom"
 
     var targetSize: String {
         switch self {
@@ -472,6 +733,7 @@ private enum CreatorPreset: String, CaseIterable {
         case .portfolio: return "1.5mb"
         case .framerWebflow: return "350kb"
         case .websiteReady: return "500kb"
+        case .custom: return "750kb"
         }
     }
 
@@ -484,6 +746,7 @@ private enum CreatorPreset: String, CaseIterable {
         case .portfolio: return "Crisp case studies"
         case .framerWebflow: return "Landing page assets"
         case .websiteReady: return "Fast pages, sharp visuals"
+        case .custom: return "Tune every output detail"
         }
     }
 
@@ -496,18 +759,20 @@ private enum CreatorPreset: String, CaseIterable {
         case .portfolio: return "square.inset.filled"
         case .framerWebflow: return "rectangle.compress.vertical"
         case .websiteReady: return "globe"
+        case .custom: return "slider.horizontal.3"
         }
     }
 
     var savings: String {
         switch self {
-        case .fastExport: return "Saves ~95%"
-        case .aiArtwork: return "Saves ~60%"
-        case .socialMedia: return "Saves ~75%"
-        case .ultraQuality: return "Saves ~40%"
-        case .portfolio: return "Saves ~70%"
-        case .framerWebflow: return "Saves ~88%"
-        case .websiteReady: return "Saves ~85%"
+        case .fastExport: return "Smallest target"
+        case .aiArtwork: return "Detail first"
+        case .socialMedia: return "Balanced target"
+        case .ultraQuality: return "Gentle target"
+        case .portfolio: return "Case-study target"
+        case .framerWebflow: return "Web target"
+        case .websiteReady: return "Web balanced"
+        case .custom: return "Your settings"
         }
     }
 }
@@ -542,14 +807,182 @@ private struct QueueFile {
     var actualOutputSize: Int64? = nil
     var thumbnail: NSImage? = nil
     var error: String? = nil
+    var outputURL: URL? = nil
+}
+
+private enum WorkspacePhase {
+    case empty, imported, optimizing, complete
+}
+
+private final class MilestoneRailView: NSView {
+    private let rows = NSStackView()
+    private let titles = ["Files imported", "Intent selected", "Optimization started", "Optimization finished", "Ready to export"]
+    private var icons: [NSImageView] = []
+    private var labels: [NSTextField] = []
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+        rows.orientation = .vertical
+        rows.alignment = .width
+        rows.spacing = 12
+        rows.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(rows)
+        for title in titles {
+            let icon = makeSymbol("circle", size: 13, weight: .medium, color: Palette.textTertiary)
+            let label = makeLabel(title, font: Typography.body, color: Palette.textTertiary)
+            let row = NSStackView(views: [icon, label, NSView()])
+            row.orientation = .horizontal
+            row.alignment = .centerY
+            row.spacing = 10
+            rows.addArrangedSubview(row)
+            icons.append(icon)
+            labels.append(label)
+        }
+        NSLayoutConstraint.activate([
+            rows.leadingAnchor.constraint(equalTo: leadingAnchor), rows.trailingAnchor.constraint(equalTo: trailingAnchor),
+            rows.topAnchor.constraint(equalTo: topAnchor), rows.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    func setCompleted(_ count: Int, active: Int? = nil) {
+        for index in titles.indices {
+            let done = index < count
+            let isActive = active == index
+            let name = done ? "checkmark.circle.fill" : (isActive ? "circle.dotted" : "circle")
+            icons[index].image = NSImage(systemSymbolName: name, accessibilityDescription: titles[index])
+            icons[index].contentTintColor = done ? Palette.success : (isActive ? Palette.accent : Palette.textTertiary)
+            labels[index].textColor = done ? Palette.text : (isActive ? Palette.textSecondary : Palette.textTertiary)
+            labels[index].font = isActive ? Typography.bodyMedium : Typography.body
+        }
+    }
+}
+
+private final class SuccessBannerView: NSView {
+    let exportButton = PrimaryButton(title: "Export optimized files", symbol: "square.and.arrow.down")
+    private let titleLabel = makeLabel("Your media is ready", font: NSFont.systemFont(ofSize: 24, weight: .semibold), color: Palette.text)
+    private let detailLabel = makeLabel("Smaller files. Same creative impact.", font: Typography.body, color: Palette.textSecondary)
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+        wantsLayer = true
+        layer?.cornerRadius = Radius.lg
+        layer?.cornerCurve = .continuous
+        layer?.backgroundColor = Palette.successSoft.cgColor
+        let symbol = makeSymbol("checkmark.seal.fill", size: 31, weight: .medium, color: Palette.success)
+        let copy = NSStackView(views: [titleLabel, detailLabel])
+        copy.orientation = .vertical; copy.alignment = .leading; copy.spacing = 4
+        let row = NSStackView(views: [symbol, copy, NSView(), exportButton])
+        row.orientation = .horizontal; row.alignment = .centerY; row.spacing = 16
+        row.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(row)
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20), row.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            row.topAnchor.constraint(equalTo: topAnchor, constant: 18), row.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -18)
+        ])
+        setAccessibilityRole(.group)
+        setAccessibilityLabel("Optimization complete")
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+    func setDetail(_ text: String) { detailLabel.stringValue = text }
+}
+
+private final class ComparisonPreviewView: NSView {
+    private let originalView = NSImageView()
+    private let optimizedClip = NSView()
+    private let optimizedView = NSImageView()
+    private let divider = NSView()
+    private let slider = NSSlider(value: 0.52, minValue: 0, maxValue: 1, target: nil, action: nil)
+    private let originalLabel = PillLabel(text: "Original")
+    private let optimizedLabel = PillLabel(text: "Optimized", tint: Palette.success)
+    private var clipWidth: NSLayoutConstraint!
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        translatesAutoresizingMaskIntoConstraints = false
+        wantsLayer = true
+        layer?.cornerRadius = Radius.lg
+        layer?.cornerCurve = .continuous
+        layer?.masksToBounds = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+
+        [originalView, optimizedView].forEach {
+            $0.imageScaling = .scaleProportionallyUpOrDown
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            $0.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            $0.setContentHuggingPriority(.defaultLow, for: .vertical)
+            $0.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        }
+        optimizedClip.translatesAutoresizingMaskIntoConstraints = false
+        optimizedClip.wantsLayer = true
+        optimizedClip.layer?.masksToBounds = true
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.wantsLayer = true
+        divider.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.9).cgColor
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        slider.controlSize = .small
+        slider.target = self
+        slider.action = #selector(revealChanged)
+
+        addSubview(originalView)
+        addSubview(optimizedClip)
+        optimizedClip.addSubview(optimizedView)
+        addSubview(divider)
+        addSubview(originalLabel)
+        addSubview(optimizedLabel)
+        addSubview(slider)
+        clipWidth = optimizedClip.widthAnchor.constraint(equalToConstant: 0)
+        NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: 370),
+            originalView.leadingAnchor.constraint(equalTo: leadingAnchor), originalView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            originalView.topAnchor.constraint(equalTo: topAnchor), originalView.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -10),
+            optimizedClip.leadingAnchor.constraint(equalTo: leadingAnchor), optimizedClip.topAnchor.constraint(equalTo: topAnchor),
+            optimizedClip.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -10), clipWidth,
+            optimizedView.leadingAnchor.constraint(equalTo: leadingAnchor), optimizedView.widthAnchor.constraint(equalTo: widthAnchor),
+            optimizedView.topAnchor.constraint(equalTo: topAnchor), optimizedView.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -10),
+            divider.leadingAnchor.constraint(equalTo: optimizedClip.trailingAnchor, constant: -1), divider.widthAnchor.constraint(equalToConstant: 2),
+            divider.topAnchor.constraint(equalTo: topAnchor, constant: 12), divider.bottomAnchor.constraint(equalTo: slider.topAnchor, constant: -22),
+            originalLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12), originalLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            optimizedLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12), optimizedLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            slider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16), slider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            slider.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10)
+        ])
+        setAccessibilityRole(.group)
+        setAccessibilityLabel("Original and optimized image comparison")
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func layout() {
+        super.layout()
+        clipWidth.constant = max(0, bounds.width * CGFloat(slider.doubleValue))
+    }
+
+    @objc private func revealChanged() {
+        clipWidth.constant = max(0, bounds.width * CGFloat(slider.doubleValue))
+        needsLayout = true
+    }
+
+    func set(original: NSImage?, optimized: NSImage?) {
+        originalView.image = original
+        optimizedView.image = optimized ?? original
+        optimizedLabel.isHidden = optimized == nil
+        divider.isHidden = optimized == nil
+        slider.isEnabled = optimized != nil
+    }
 }
 
 private struct CompressionSettings {
     var maxSize: String = "150kb"
-    var outputFormat: String = "best_quality"
-    var nameMode: String = "same-name"
+    var outputFormat: String = "webp"
+    var nameMode: String = "suffix"
     var outputFolder: URL? = nil
-    var isBestQuality: Bool = true
+    var isBestQuality: Bool = false
     var minQuality: Int = 20
     var maxQuality: Int = 100
     var minSide: Int = 320
@@ -573,36 +1006,40 @@ private final class DropZoneView: NSView {
 
     private let stack = NSStackView()
     private let orbView = NSImageView()
-    private let titleLabel = NSTextField(labelWithString: "Drop images to begin")
-    private let subtitleLabel = NSTextField(wrappingLabelWithString: "LumaShrink keeps every pixel on your Mac while preparing creator-ready exports.")
+    private let titleLabel = NSTextField(labelWithString: "Drop Media to begin")
+    private let subtitleLabel = NSTextField(wrappingLabelWithString: "Images and videos stay private on your Mac. Choose an intent when you’re ready.")
     private let actionRow = NSStackView()
-    private let addFilesButton = SecondaryButton(title: "Choose images", symbol: "square.and.arrow.up", tint: Palette.accent)
-    private let addFolderButton = SecondaryButton(title: "Choose folder", symbol: "folder", tint: Palette.textSecondary)
+    private let addFilesButton = PaddedActionButton(title: "Add Images", symbol: "photo.badge.plus", tint: Palette.accent)
+    private let addFolderButton = PaddedActionButton(title: "Add Folder", symbol: "folder.badge.plus", tint: Palette.textSecondary)
     private let empty = true
+    private var heightConstraint: NSLayoutConstraint!
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.cornerRadius = Radius.xxl
+        layer?.cornerRadius = Radius.xl
         layer?.cornerCurve = .continuous
-        layer?.borderWidth = 1.5
+        layer?.borderWidth = 1
         layer?.borderColor = Palette.border.cgColor
         layer?.backgroundColor = Palette.surface.cgColor
         registerForDraggedTypes([.fileURL])
+        setAccessibilityRole(.group)
+        setAccessibilityLabel("Media import area")
+        setAccessibilityHelp("Drop images or videos here, or choose files and folders from your Mac")
 
-        orbView.image = NSImage(systemSymbolName: "square.and.arrow.down", accessibilityDescription: nil)
+        orbView.image = NSImage(systemSymbolName: "photo.stack", accessibilityDescription: nil)
         orbView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 32, weight: .regular)
         orbView.contentTintColor = Palette.accent
         orbView.translatesAutoresizingMaskIntoConstraints = false
         orbView.heightAnchor.constraint(equalToConstant: 56).isActive = true
 
-        titleLabel.font = Typography.heroTitle
+        titleLabel.font = NSFont.systemFont(ofSize: 15, weight: .bold)
         titleLabel.textColor = Palette.text
         titleLabel.alignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        subtitleLabel.font = Typography.body
+        subtitleLabel.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
         subtitleLabel.textColor = Palette.textSecondary
         subtitleLabel.alignment = .center
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -614,27 +1051,31 @@ private final class DropZoneView: NSView {
         addFolderButton.action = #selector(handleAddFolder)
 
         actionRow.orientation = .horizontal
-        actionRow.spacing = Spacing.sm
+        actionRow.spacing = Spacing.md
         actionRow.translatesAutoresizingMaskIntoConstraints = false
         actionRow.addArrangedSubview(addFilesButton)
         actionRow.addArrangedSubview(addFolderButton)
 
         stack.orientation = .vertical
         stack.alignment = .centerX
-        stack.spacing = Spacing.md
+        stack.spacing = Spacing.lg
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
-        stack.addArrangedSubview(orbView)
-        stack.addArrangedSubview(titleLabel)
-        stack.addArrangedSubview(subtitleLabel)
+        let textStack = NSStackView(views: [titleLabel, subtitleLabel])
+        textStack.orientation = .vertical
+        textStack.alignment = .centerX
+        textStack.spacing = Spacing.xs
+        textStack.translatesAutoresizingMaskIntoConstraints = false
+        stack.addArrangedSubview(textStack)
         stack.addArrangedSubview(actionRow)
 
+        heightConstraint = heightAnchor.constraint(equalToConstant: FigmaLayout.emptyDropHeight)
         NSLayoutConstraint.activate([
             stack.centerXAnchor.constraint(equalTo: centerXAnchor),
             stack.centerYAnchor.constraint(equalTo: centerYAnchor),
             stack.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: Spacing.xl),
             stack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -Spacing.xl),
-            heightAnchor.constraint(equalToConstant: 280)
+            heightConstraint
         ])
     }
 
@@ -643,10 +1084,22 @@ private final class DropZoneView: NSView {
     @objc private func handleAddFiles() { onAddFiles?() }
     @objc private func handleAddFolder() { onAddFolder?() }
 
+    func setExpanded(_ expanded: Bool) {
+        heightConstraint.constant = expanded ? FigmaLayout.emptyDropHeight : FigmaLayout.compactDropHeight
+        titleLabel.font = NSFont.systemFont(ofSize: 15, weight: .bold)
+        titleLabel.stringValue = "Drop Media to begin"
+        subtitleLabel.stringValue = "Images and videos stay private on your Mac. Choose an intent when you’re ready."
+    }
+
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         NSAnimationContext.runAnimationGroup { _ in
+            NSAnimationContext.current.duration = MotionTokens.quick
             layer?.borderColor = Palette.accent.cgColor
             layer?.backgroundColor = Palette.accentSoft.cgColor
+            layer?.shadowColor = Palette.accent.withAlphaComponent(0.45).cgColor
+            layer?.shadowRadius = 24
+            layer?.shadowOpacity = 1
+            layer?.setAffineTransform(CGAffineTransform(scaleX: 1.008, y: 1.008))
         }
         return .copy
     }
@@ -654,11 +1107,15 @@ private final class DropZoneView: NSView {
     override func draggingExited(_ sender: NSDraggingInfo?) {
         layer?.borderColor = Palette.border.cgColor
         layer?.backgroundColor = Palette.surface.cgColor
+        layer?.shadowOpacity = 0
+        layer?.setAffineTransform(.identity)
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         layer?.borderColor = Palette.border.cgColor
         layer?.backgroundColor = Palette.surface.cgColor
+        layer?.shadowOpacity = 0
+        layer?.setAffineTransform(.identity)
         guard let items = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] else { return false }
         onDrop?(items)
         return true
@@ -682,11 +1139,10 @@ private final class QueueItemView: NSView {
         super.init(frame: frameRect)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.cornerRadius = Radius.lg
+        layer?.cornerRadius = Radius.sm
         layer?.cornerCurve = .continuous
-        layer?.backgroundColor = Palette.surfaceElevated.cgColor
-        layer?.borderWidth = 0.5
-        layer?.borderColor = Palette.borderSubtle.cgColor
+        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.borderWidth = 0
 
         thumbBg.wantsLayer = true
         thumbBg.layer?.cornerRadius = 14
@@ -737,10 +1193,10 @@ private final class QueueItemView: NSView {
         addSubview(progressBar)
 
         NSLayoutConstraint.activate([
-            thumbBg.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            thumbBg.leadingAnchor.constraint(equalTo: leadingAnchor),
             thumbBg.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-            thumbBg.widthAnchor.constraint(equalToConstant: 88),
-            thumbBg.heightAnchor.constraint(equalToConstant: 88),
+            thumbBg.widthAnchor.constraint(equalToConstant: 56),
+            thumbBg.heightAnchor.constraint(equalToConstant: 56),
             thumbBg.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -12),
 
             thumbView.leadingAnchor.constraint(equalTo: thumbBg.leadingAnchor),
@@ -770,6 +1226,37 @@ private final class QueueItemView: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self))
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard window != nil, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        alphaValue = 0
+        layer?.setAffineTransform(CGAffineTransform(translationX: 0, y: -7))
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = MotionTokens.standard
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            animator().alphaValue = 1
+            layer?.setAffineTransform(.identity)
+        }
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        layer?.backgroundColor = Palette.surfaceTinted.withAlphaComponent(0.55).cgColor
+        layer?.shadowColor = NSColor.black.withAlphaComponent(0.3).cgColor
+        layer?.shadowRadius = 10
+        layer?.shadowOpacity = 0.65
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.shadowOpacity = 0
+    }
+
     private func configure() {
         guard let file else { return }
         nameLabel.stringValue = file.url.lastPathComponent
@@ -793,6 +1280,8 @@ private final class QueueItemView: NSView {
         case .processing: progressBar.doubleValue = 0.6
         case .done, .bestEffort, .skipped, .failed: progressBar.doubleValue = 1
         }
+        setAccessibilityRole(.group)
+        setAccessibilityLabel("\(file.url.lastPathComponent), \(sizeLabel.stringValue), \(file.status.displayText)")
     }
 }
 
@@ -807,21 +1296,32 @@ private final class PresetCardView: NSButton {
     private let iconView = NSImageView()
 
     var isSelectedPreset: Bool = false {
-        didSet { updateAppearance() }
+        didSet {
+            updateAppearance()
+            guard isSelectedPreset, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+            layer?.setAffineTransform(CGAffineTransform(scaleX: 0.985, y: 0.985))
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = MotionTokens.quick
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                layer?.setAffineTransform(.identity)
+            }
+        }
     }
 
     init(preset: CreatorPreset) {
         self.preset = preset
         super.init(frame: .zero)
+        title = ""
         translatesAutoresizingMaskIntoConstraints = false
         bezelStyle = .regularSquare
         isBordered = false
         wantsLayer = true
-        layer?.cornerRadius = Radius.lg
+        focusRingType = .exterior
+        layer?.cornerRadius = 10
         layer?.cornerCurve = .continuous
         layer?.borderWidth = 1
         titleLabel.stringValue = preset.rawValue
-        titleLabel.font = Typography.cardTitle
+        titleLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         titleLabel.textColor = Palette.text
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -842,7 +1342,7 @@ private final class PresetCardView: NSButton {
         savingsLabel.alignment = .right
 
         iconView.image = NSImage(systemSymbolName: preset.symbol, accessibilityDescription: nil)
-        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        iconView.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
         iconView.contentTintColor = Palette.accent
         iconView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -859,7 +1359,7 @@ private final class PresetCardView: NSButton {
         metrics.distribution = .fillEqually
         metrics.translatesAutoresizingMaskIntoConstraints = false
 
-        let stack = NSStackView(views: [header, blurbLabel, metrics])
+        let stack = NSStackView(views: [header])
         stack.orientation = .vertical
         stack.spacing = 6
         stack.alignment = .width
@@ -867,13 +1367,14 @@ private final class PresetCardView: NSButton {
         addSubview(stack)
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 14),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
-            stack.topAnchor.constraint(equalTo: topAnchor, constant: 14),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14)
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
         ])
 
         updateAppearance()
+        setAccessibilityLabel("\(preset.rawValue), \(preset.blurb), target \(preset.targetSize), \(preset.savings)")
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -897,9 +1398,24 @@ private final class PresetCardView: NSButton {
     }
 
     override func mouseDown(with event: NSEvent) {
+        layer?.setAffineTransform(CGAffineTransform(scaleX: 0.975, y: 0.975))
         super.mouseDown(with: event)
+        layer?.setAffineTransform(.identity)
         updateAppearance()
     }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach(removeTrackingArea)
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self))
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        guard !isSelectedPreset else { return }
+        layer?.backgroundColor = Palette.surfaceTinted.cgColor
+    }
+
+    override func mouseExited(with event: NSEvent) { updateAppearance() }
 }
 
 // MARK: - Format Helpers
@@ -932,37 +1448,72 @@ private func parseSize(_ text: String) -> Int64? {
     return Int64(value * multiplier)
 }
 
+private let mediaToolPath = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+private let videoFileExtensions: Set<String> = ["mp4", "mov", "m4v", "avi", "mkv", "webm", "wmv", "flv"]
+
+private func videoToolsAvailable() -> Bool {
+    let manager = FileManager.default
+    let paths = mediaToolPath.split(separator: ":").map(String.init)
+    return ["ffmpeg", "ffprobe"].allSatisfy { tool in
+        paths.contains { manager.isExecutableFile(atPath: "\($0)/\(tool)") }
+    }
+}
+
+private func mediaToolEnvironment() -> [String: String] {
+    var environment = ProcessInfo.processInfo.environment
+    environment["PATH"] = mediaToolPath
+    return environment
+}
+
 // MARK: - Studio View Controller
 
 private final class StudioViewController: NSViewController, NSTableViewDataSource, NSTableViewDelegate {
+    private let inspectorPanel = NSView()
+    private var inspectorWidthConstraint: NSLayoutConstraint?
+    private var queueWidthConstraint: NSLayoutConstraint?
+    private var middleWidthConstraint: NSLayoutConstraint?
+    private var inspectorIsCompact = false
     private let tableView = NSTableView()
     private let scrollView = NSScrollView()
+    private var queueHeightConstraint: NSLayoutConstraint?
     private let tableContainer = NSView()
     private let tableStack = NSStackView()
-    private let headerLabel = NSTextField(labelWithString: "Queue")
+    private let headerLabel = NSTextField(labelWithString: "Compression Queue")
     private let queueSubtitle = NSTextField(labelWithString: "Files appear here as you add them.")
     private let queueMetrics = NSStackView()
-    private let metricSaved = StatTile(title: "SAVED", value: "0 B", detail: "0%", valueColor: Palette.success)
-    private let metricRatio = StatTile(title: "COMPRESSION", value: "0%", detail: "of original size", valueColor: Palette.accent)
-    private let metricFiles = StatTile(title: "FILES", value: "0 / 0", detail: "ready to export", valueColor: Palette.text)
-    private let metricTime = StatTile(title: "ESTIMATED TIME", value: "Ready", detail: "0 files / s", valueColor: Palette.warning)
+    private let metricSaved = StatTile(title: "Total Saved", value: "0 B", detail: "0%", valueColor: Palette.textTertiary)
+    private let metricRatio = StatTile(title: "COMPRESSION RATIO", value: "0%", detail: "of original size", valueColor: Palette.textTertiary)
+    private let metricFiles = StatTile(title: "FILES PROCESSED", value: "0 / 0", detail: "ready to export", valueColor: Palette.textTertiary)
+    private let metricTime = StatTile(title: "ESTIMATED TIME", value: "0 Sec", detail: "0 files / s", valueColor: Palette.textTertiary)
+    private let metricSpeed = StatTile(title: "PROCESSING SPEED", value: "—", detail: "files per second", valueColor: Palette.textSecondary)
     private let metricsRow = NSStackView()
 
     private let progressCard = GlassCard(cornerRadius: Radius.xl)
     private let progressCaption = NSTextField(labelWithString: "Ready when you are.")
     private let progressBar = NSProgressIndicator()
     private let progressActionRow = NSStackView()
-    private let compressButton = PrimaryButton(title: "Optimize Queue", symbol: "play.fill")
-    private let stopButton = SecondaryButton(title: "Stop", symbol: "stop.fill", tint: Palette.danger)
-    private let clearButton = SecondaryButton(title: "Clear all", tint: Palette.textSecondary)
-    private let exportButton = SecondaryButton(title: "Export all", symbol: "square.and.arrow.down", tint: Palette.textSecondary)
+    private let compressButton = CompactToolbarButton(title: "Compress Queue")
+    private let stopButton = CompactToolbarButton(title: "Stop", tint: Palette.danger)
+    private let clearButton = CompactToolbarButton(title: "Clear All")
+    private let exportButton = CompactToolbarButton(title: "Download All")
+    private let toolbarOpenButton = SecondaryButton(title: "Open", symbol: "folder", tint: Palette.textSecondary)
+    private let toolbarSaveButton = PrimaryButton(title: "Save all", symbol: "square.and.arrow.down")
 
     private let dropZone = DropZoneView()
-    private let queueCard = GlassCard(cornerRadius: Radius.xxl)
+    private let queueCard = NSView()
+    private let queueQueuedPill = PillLabel(text: "0 B queued", tint: Palette.textTertiary)
+    private let queueEstimatedPill = PillLabel(text: "0 B Estimated", tint: Palette.textTertiary)
+    private let queueSavedPill = PillLabel(text: "0 B Saved", tint: Palette.textTertiary)
+    private let queueAddButton = PaddedActionButton(title: "Add Images", symbol: "photo.badge.plus", tint: Palette.accent, fontSize: 12, iconSize: 16)
+    private let headerBrandLeft = NSStackView()
+    private let headerBrandCenter = NSTextField(labelWithString: "LumaShrink")
+    private let headerActions = NSStackView()
 
-    private let presetsSectionTitle = NSTextField(labelWithString: "Choose your intent")
-    private let presetsSubtitle = NSTextField(labelWithString: "Pick the look you want. LumaShrink does the rest.")
+    private let presetsSectionTitle = NSTextField(labelWithString: "Creator Presets")
+    private let presetsSubtitle = NSTextField(labelWithString: "")
     private let presetsGrid = NSStackView()
+    private let customSizeField = NSTextField(string: "750 KB")
+    private let customSizeRow = NSStackView()
     private let presetCards: [CreatorPreset: PresetCardView] = {
         var map: [CreatorPreset: PresetCardView] = [:]
         for preset in CreatorPreset.allCases {
@@ -974,17 +1525,22 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     private let previewCard = GlassCard(cornerRadius: Radius.xl)
     private let previewTitle = NSTextField(labelWithString: "Preview")
     private let previewSubtitle = NSTextField(labelWithString: "Select a queued image to inspect compression detail.")
-    private let previewImageView = NSImageView()
+    private let comparisonPreview = ComparisonPreviewView()
     private let previewDetailLabel = NSTextField(wrappingLabelWithString: "")
     private let previewEmpty = NSTextField(labelWithString: "No image selected")
 
     private let logCard = GlassCard(cornerRadius: Radius.xl)
-    private let logTitle = NSTextField(labelWithString: "Activity")
-    private let logTextView = NSTextView()
-    private let logScroll = NSScrollView()
+    private let logTitle = NSTextField(labelWithString: "Milestones")
+    private let milestoneRail = MilestoneRailView()
+    private let successBanner = SuccessBannerView()
 
     private let statusBadge = PillLabel(text: "Ready", symbol: "checkmark.circle.fill", tint: Palette.success)
     private let statusBanner = NSTextField(labelWithString: "Drop a few images to begin, or pick a creator preset below.")
+    private let workspaceTitleLabel = makeLabel("Compression queue", font: NSFont.systemFont(ofSize: 23, weight: .semibold), color: Palette.text)
+    private let workspaceSubtitleLabel = makeLabel("Add images, review savings, and export polished assets.", font: Typography.body, color: Palette.textSecondary)
+    private let imageModeButton = ModeButton(title: "Image Compressing", symbol: "photo.badge.arrow.down")
+    private let videoModeButton = ModeButton(title: "Video Compressing", symbol: "play.rectangle")
+    private let formatModeButton = ModeButton(title: "Change Format", symbol: "pencil.and.outline")
 
     private var queue: [QueueFile] = []
     private var settings = CompressionSettings()
@@ -1003,7 +1559,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     private let qualityMaxPopup = NSPopUpButton()
     private let namingLabel = NSTextField(labelWithString: "Naming")
     private let namingPopup = NSPopUpButton()
-    private let keepMetadataCheck = NSButton(checkboxWithTitle: "Keep file info (EXIF, IPTC)", target: nil, action: nil)
+    private let keepMetadataCheck = NSButton(radioButtonWithTitle: "Yes", target: nil, action: nil)
     private let chooseOutputFolderButton = SecondaryButton(title: "Choose output folder", symbol: "folder", tint: Palette.accent)
     private let outputFolderPathLabel = NSTextField(labelWithString: "Save next to originals")
     private var isRunning = false
@@ -1017,126 +1573,416 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     private var runOutputBytes: Int64 = 0
     private var lastOutputFolder: URL?
     private var selectedFileIndex: Int? = nil
+    private var workspacePhase: WorkspacePhase = .empty
+    private var queuePanelCollapsed = false
+    private var inspectorPanelCollapsed = false
 
     override func loadView() {
-        let root = AppBackgroundView(frame: NSRect(x: 0, y: 0, width: 1100, height: 760))
-        root.translatesAutoresizingMaskIntoConstraints = false
+        let root = AppBackgroundView(frame: NSRect(x: 0, y: 0, width: 1280, height: 800))
         view = root
 
-        let scroll = NSScrollView()
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.drawsBackground = false
-        scroll.hasVerticalScroller = true
-        scroll.autohidesScrollers = true
-        scroll.scrollerStyle = .overlay
-        scroll.borderType = .noBorder
-        root.addSubview(scroll)
+        let header = buildHero()
+        let modeSwitcher = buildModeSwitcher()
+        let content = NSView()
+        content.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(header)
+        root.addSubview(modeSwitcher)
+        root.addSubview(content)
 
-        let document = FlippedView()
-        document.translatesAutoresizingMaskIntoConstraints = false
-        scroll.documentView = document
+        let queueSection = buildQueueSection()
+        content.addSubview(queueSection)
 
-        let main = NSStackView()
-        main.orientation = .vertical
-        main.alignment = .width
-        main.spacing = Spacing.xl
-        main.translatesAutoresizingMaskIntoConstraints = false
-        document.addSubview(main)
+        let middle = NSStackView()
+        middle.orientation = .vertical
+        middle.alignment = .width
+        middle.spacing = Spacing.md
+        middle.translatesAutoresizingMaskIntoConstraints = false
+        middle.addArrangedSubview(buildMetricsRow())
+        middle.addArrangedSubview(buildPreviewCard())
+        middle.addArrangedSubview(dropZone)
+        middle.addArrangedSubview(successBanner)
+        content.addSubview(middle)
 
+        inspectorPanel.translatesAutoresizingMaskIntoConstraints = false
+        inspectorPanel.wantsLayer = true
+        inspectorPanel.layer?.backgroundColor = NSColor.clear.cgColor
+        inspectorPanel.layer?.borderWidth = 0
+        let inspectorStack = NSStackView()
+        inspectorStack.orientation = .vertical
+        inspectorStack.alignment = .width
+        inspectorStack.spacing = Spacing.md
+        inspectorStack.translatesAutoresizingMaskIntoConstraints = false
+        inspectorStack.addArrangedSubview(buildPresetsSection())
+        inspectorPanel.addSubview(inspectorStack)
+        let inspectorDivider = NSView()
+        inspectorDivider.translatesAutoresizingMaskIntoConstraints = false
+        inspectorDivider.wantsLayer = true
+        inspectorDivider.layer?.backgroundColor = NSColor(calibratedWhite: 0.76, alpha: 1).cgColor
+        inspectorPanel.addSubview(inspectorDivider)
+        content.addSubview(inspectorPanel)
+
+        inspectorWidthConstraint = inspectorPanel.widthAnchor.constraint(equalToConstant: FigmaLayout.inspectorWidth)
+        queueWidthConstraint = queueSection.widthAnchor.constraint(equalToConstant: FigmaLayout.queueWidth)
+        middleWidthConstraint = middle.widthAnchor.constraint(equalToConstant: FigmaLayout.emptyDropWidth)
+        inspectorWidthConstraint?.isActive = true
+        queueWidthConstraint?.isActive = true
+        middleWidthConstraint?.isActive = true
         NSLayoutConstraint.activate([
-            scroll.leadingAnchor.constraint(equalTo: root.leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: root.trailingAnchor),
-            scroll.topAnchor.constraint(equalTo: root.topAnchor),
-            scroll.bottomAnchor.constraint(equalTo: root.bottomAnchor),
-            document.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
-            main.leadingAnchor.constraint(equalTo: document.leadingAnchor, constant: Spacing.xl),
-            main.trailingAnchor.constraint(equalTo: document.trailingAnchor, constant: -Spacing.xl),
-            main.topAnchor.constraint(equalTo: document.topAnchor, constant: Spacing.xl),
-            main.bottomAnchor.constraint(equalTo: document.bottomAnchor, constant: -Spacing.xl)
-        ])
+            header.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 40),
+            header.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -40),
+            header.topAnchor.constraint(equalTo: root.topAnchor, constant: 29),
+            header.heightAnchor.constraint(equalToConstant: 50),
 
-        main.addArrangedSubview(buildHero())
-        main.addArrangedSubview(buildMetricsRow())
-        main.addArrangedSubview(dropZone)
-        main.addArrangedSubview(buildQueueSection())
-        main.addArrangedSubview(buildPresetsSection())
-        main.addArrangedSubview(buildPreviewAndProgressRow())
+            modeSwitcher.centerXAnchor.constraint(equalTo: root.centerXAnchor),
+            modeSwitcher.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 18),
+
+            content.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: 40),
+            content.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -40),
+            content.topAnchor.constraint(equalTo: modeSwitcher.bottomAnchor, constant: 32),
+            content.bottomAnchor.constraint(equalTo: root.bottomAnchor, constant: -22),
+
+            queueSection.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            queueSection.topAnchor.constraint(equalTo: content.topAnchor),
+            queueSection.bottomAnchor.constraint(lessThanOrEqualTo: content.bottomAnchor),
+
+            inspectorPanel.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            inspectorPanel.topAnchor.constraint(equalTo: content.topAnchor),
+            inspectorPanel.bottomAnchor.constraint(lessThanOrEqualTo: content.bottomAnchor),
+            inspectorStack.leadingAnchor.constraint(equalTo: inspectorPanel.leadingAnchor, constant: 24),
+            inspectorStack.trailingAnchor.constraint(equalTo: inspectorPanel.trailingAnchor),
+            inspectorStack.topAnchor.constraint(equalTo: inspectorPanel.topAnchor),
+            inspectorStack.bottomAnchor.constraint(lessThanOrEqualTo: inspectorPanel.bottomAnchor),
+            inspectorDivider.leadingAnchor.constraint(equalTo: inspectorPanel.leadingAnchor),
+            inspectorDivider.topAnchor.constraint(equalTo: inspectorPanel.topAnchor),
+            inspectorDivider.bottomAnchor.constraint(equalTo: inspectorPanel.bottomAnchor),
+            inspectorDivider.widthAnchor.constraint(equalToConstant: 1),
+
+            middle.centerXAnchor.constraint(equalTo: content.centerXAnchor),
+            middle.topAnchor.constraint(equalTo: content.topAnchor),
+            middle.leadingAnchor.constraint(greaterThanOrEqualTo: queueSection.trailingAnchor, constant: 28),
+            middle.trailingAnchor.constraint(lessThanOrEqualTo: inspectorPanel.leadingAnchor, constant: -28),
+            dropZone.widthAnchor.constraint(equalTo: middle.widthAnchor)
+        ])
 
         dropZone.onAddFiles = { [weak self] in self?.addFiles() }
         dropZone.onAddFolder = { [weak self] in self?.addFolder() }
         dropZone.onDrop = { [weak self] urls in self?.addURLs(urls) }
+        successBanner.exportButton.target = self
+        successBanner.exportButton.action = #selector(downloadAll)
 
         applyActivePreset()
+        advancedPanel.isHidden = false
+        advancedToggle.isHidden = true
         refreshQueueTable()
+        updateWorkspacePhase(.empty, animated: false)
+    }
+
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        let shouldCompact = view.bounds.width < 1120
+        guard shouldCompact != inspectorIsCompact else { return }
+        inspectorIsCompact = shouldCompact
+        inspectorWidthConstraint?.constant = workspacePhase == .empty || inspectorPanelCollapsed ? 0 : (shouldCompact ? 300 : FigmaLayout.inspectorWidth)
+    }
+
+    private func updateWorkspacePhase(_ phase: WorkspacePhase, animated: Bool = true) {
+        workspacePhase = phase
+        let empty = phase == .empty
+        let complete = phase == .complete
+        dropZone.setExpanded(empty)
+        dropZone.isHidden = !empty
+        queueCard.isHidden = empty || queuePanelCollapsed
+        metricsRow.isHidden = empty
+        previewCard.isHidden = empty
+        successBanner.isHidden = !complete
+        toolbarSaveButton.isHidden = empty
+        toolbarOpenButton.title = empty ? "Import" : "Add media"
+        compressButton.isEnabled = !empty && !isRunning
+        stopButton.isEnabled = isRunning
+        clearButton.isEnabled = !empty && !isRunning
+        exportButton.isEnabled = complete
+        headerBrandLeft.isHidden = empty
+        headerBrandCenter.isHidden = !empty
+        headerActions.isHidden = empty
+        switch phase {
+        case .empty:
+            milestoneRail.setCompleted(0)
+        case .imported:
+            milestoneRail.setCompleted(2)
+        case .optimizing:
+            milestoneRail.setCompleted(2, active: 2)
+        case .complete:
+            milestoneRail.setCompleted(5)
+        }
+        view.needsLayout = true
+        view.layoutSubtreeIfNeeded()
+        let shouldHideInspector = view.bounds.width < 820 || empty || inspectorPanelCollapsed
+        inspectorPanel.isHidden = shouldHideInspector
+        inspectorWidthConstraint?.constant = shouldHideInspector ? 0 : FigmaLayout.inspectorWidth
+        queueWidthConstraint?.constant = empty || queuePanelCollapsed ? 0 : FigmaLayout.queueWidth
+        middleWidthConstraint?.constant = empty ? FigmaLayout.emptyDropWidth : 390
+        guard animated, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        view.alphaValue = 0.94
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = MotionTokens.standard
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            view.animator().alphaValue = 1
+        }
     }
 
     private func buildHero() -> NSView {
-        let hero = NSStackView()
-        hero.orientation = .horizontal
-        hero.alignment = .centerY
-        hero.spacing = Spacing.md
+        let hero = NSView()
         hero.translatesAutoresizingMaskIntoConstraints = false
 
-        let textStack = NSStackView()
-        textStack.orientation = .vertical
-        textStack.spacing = 4
-        textStack.alignment = .leading
-        textStack.translatesAutoresizingMaskIntoConstraints = false
-        let greeting = makeLabel("Studio", font: Typography.captionMedium, color: Palette.textTertiary)
-        let title = makeLabel("Optimize your images, beautifully.", font: NSFont.systemFont(ofSize: 26, weight: .semibold), color: Palette.text)
-        let subtitle = makeLabel("Drop, choose a preset, preview, and export. Everything stays on your Mac.", font: Typography.body, color: Palette.textSecondary)
-        textStack.addArrangedSubview(greeting)
-        textStack.addArrangedSubview(title)
-        textStack.addArrangedSubview(subtitle)
+        let closeDot = TrafficLightButton(color: NSColor(calibratedRed: 1.0, green: 0.37, blue: 0.34, alpha: 1), accessibilityLabel: "Close window")
+        let minimizeDot = TrafficLightButton(color: NSColor(calibratedRed: 1.0, green: 0.74, blue: 0.18, alpha: 1), accessibilityLabel: "Minimize window")
+        let zoomDot = TrafficLightButton(color: NSColor(calibratedRed: 0.12, green: 0.72, blue: 0.29, alpha: 1), accessibilityLabel: "Zoom window")
+        closeDot.target = self
+        closeDot.action = #selector(closeWindow)
+        minimizeDot.target = self
+        minimizeDot.action = #selector(minimizeWindow)
+        zoomDot.target = self
+        zoomDot.action = #selector(zoomWindow)
+        let leftSidebarIcon = HeaderIconButton(symbol: "sidebar.left", accessibilityLabel: "Show or hide compression queue")
+        leftSidebarIcon.target = self
+        leftSidebarIcon.action = #selector(toggleQueuePanel)
+        let windowChrome = NSStackView(views: [closeDot, minimizeDot, zoomDot, leftSidebarIcon])
+        windowChrome.orientation = .horizontal
+        windowChrome.alignment = .centerY
+        windowChrome.spacing = 8
+        windowChrome.setCustomSpacing(16, after: zoomDot)
+        windowChrome.translatesAutoresizingMaskIntoConstraints = false
 
-        hero.addArrangedSubview(textStack)
-        hero.addArrangedSubview(NSView())
-        hero.addArrangedSubview(statusBadge)
+        let rightSidebarIcon = HeaderIconButton(symbol: "sidebar.right", accessibilityLabel: "Show or hide creator presets")
+        rightSidebarIcon.target = self
+        rightSidebarIcon.action = #selector(toggleInspectorPanel)
+
+        let brand = makeLabel("LumaShrink", font: NSFont.systemFont(ofSize: 16, weight: .bold), color: Palette.accent)
+        headerBrandLeft.orientation = .horizontal
+        headerBrandLeft.alignment = .centerY
+        headerBrandLeft.spacing = 12
+        headerBrandLeft.translatesAutoresizingMaskIntoConstraints = false
+        headerBrandLeft.addArrangedSubview(brand)
+
+        headerBrandCenter.font = NSFont.systemFont(ofSize: 16, weight: .bold)
+        headerBrandCenter.textColor = Palette.accent
+        headerBrandCenter.alignment = .center
+        headerBrandCenter.translatesAutoresizingMaskIntoConstraints = false
+
+        compressButton.target = self
+        compressButton.action = #selector(startCompression)
+        stopButton.target = self
+        stopButton.action = #selector(stopCompression)
+        clearButton.target = self
+        clearButton.action = #selector(clearAll)
+        exportButton.target = self
+        exportButton.action = #selector(downloadAll)
+        headerActions.orientation = .horizontal
+        headerActions.spacing = Spacing.xs
+        headerActions.alignment = .centerY
+        headerActions.translatesAutoresizingMaskIntoConstraints = false
+        [compressButton, stopButton, clearButton, exportButton].forEach(headerActions.addArrangedSubview)
+
+        hero.addSubview(headerBrandLeft)
+        hero.addSubview(headerBrandCenter)
+        hero.addSubview(headerActions)
+        hero.addSubview(windowChrome)
+        hero.addSubview(rightSidebarIcon)
+        NSLayoutConstraint.activate([
+            windowChrome.leadingAnchor.constraint(equalTo: hero.leadingAnchor),
+            windowChrome.centerYAnchor.constraint(equalTo: hero.centerYAnchor),
+            rightSidebarIcon.trailingAnchor.constraint(equalTo: hero.trailingAnchor),
+            rightSidebarIcon.centerYAnchor.constraint(equalTo: hero.centerYAnchor),
+            headerBrandLeft.leadingAnchor.constraint(equalTo: windowChrome.trailingAnchor, constant: 16),
+            headerBrandLeft.centerYAnchor.constraint(equalTo: hero.centerYAnchor),
+            headerBrandCenter.centerXAnchor.constraint(equalTo: hero.centerXAnchor),
+            headerBrandCenter.centerYAnchor.constraint(equalTo: hero.centerYAnchor),
+            headerActions.trailingAnchor.constraint(equalTo: rightSidebarIcon.leadingAnchor, constant: -16),
+            headerActions.centerYAnchor.constraint(equalTo: hero.centerYAnchor)
+        ])
         return hero
     }
 
+    @objc private func closeWindow() { view.window?.performClose(nil) }
+    @objc private func minimizeWindow() { view.window?.miniaturize(nil) }
+    @objc private func zoomWindow() { view.window?.zoom(nil) }
+
+    @objc private func toggleQueuePanel() {
+        guard workspacePhase != .empty else { return }
+        queuePanelCollapsed.toggle()
+        queueCard.isHidden = queuePanelCollapsed
+        queueWidthConstraint?.constant = queuePanelCollapsed ? 0 : FigmaLayout.queueWidth
+        animatePanelChange()
+    }
+
+    @objc private func toggleInspectorPanel() {
+        guard workspacePhase != .empty else { return }
+        inspectorPanelCollapsed.toggle()
+        inspectorPanel.isHidden = inspectorPanelCollapsed
+        inspectorWidthConstraint?.constant = inspectorPanelCollapsed ? 0 : FigmaLayout.inspectorWidth
+        animatePanelChange()
+    }
+
+    private func animatePanelChange() {
+        view.needsLayout = true
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
+            view.layoutSubtreeIfNeeded()
+            return
+        }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = MotionTokens.standard
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            view.animator().layoutSubtreeIfNeeded()
+        }
+    }
+
+    private func buildModeSwitcher() -> NSView {
+        let shell = NSView()
+        shell.translatesAutoresizingMaskIntoConstraints = false
+        shell.wantsLayer = true
+        shell.layer?.cornerRadius = 28
+        shell.layer?.cornerCurve = .continuous
+        shell.layer?.backgroundColor = Palette.surfaceElevated.cgColor
+        shell.layer?.borderWidth = 1
+        shell.layer?.borderColor = Palette.border.cgColor
+
+        let sections = NSStackView(views: [imageModeButton, videoModeButton, formatModeButton])
+        sections.orientation = .horizontal
+        sections.alignment = .centerY
+        sections.spacing = 4
+        sections.distribution = .fillEqually
+        sections.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(sections)
+        NSLayoutConstraint.activate([
+            sections.leadingAnchor.constraint(equalTo: shell.leadingAnchor, constant: 8),
+            sections.trailingAnchor.constraint(equalTo: shell.trailingAnchor, constant: -8),
+            sections.topAnchor.constraint(equalTo: shell.topAnchor, constant: 8),
+            sections.bottomAnchor.constraint(equalTo: shell.bottomAnchor, constant: -8)
+        ])
+        shell.widthAnchor.constraint(equalToConstant: 520).isActive = true
+        imageModeButton.target = self
+        imageModeButton.action = #selector(showImageMode)
+        videoModeButton.target = self
+        videoModeButton.action = #selector(showVideoMode)
+        formatModeButton.target = self
+        formatModeButton.action = #selector(showFormatMode)
+        imageModeButton.isActive = true
+        return shell
+    }
+
+    @objc private func showImageMode() {
+        imageModeButton.isActive = true
+        videoModeButton.isActive = false
+        formatModeButton.isActive = false
+        activateWorkspace("optimize")
+    }
+
+    @objc private func showVideoMode() {
+        imageModeButton.isActive = false
+        videoModeButton.isActive = true
+        formatModeButton.isActive = false
+        activateWorkspace("video")
+    }
+
+    @objc private func showFormatMode() {
+        imageModeButton.isActive = false
+        videoModeButton.isActive = false
+        formatModeButton.isActive = true
+        activateWorkspace("convert")
+    }
+
+    func activateWorkspace(_ workspace: String) {
+        switch workspace {
+        case "convert":
+            workspaceTitleLabel.stringValue = "Convert format"
+            workspaceSubtitleLabel.stringValue = "Import media, choose the output format, and optimize in one pass."
+            advancedPanel.isHidden = false
+            formatPopup.becomeFirstResponder()
+        case "resize":
+            workspaceTitleLabel.stringValue = "Resize media"
+            workspaceSubtitleLabel.stringValue = "Resize and optimize without creating another workflow."
+            advancedPanel.isHidden = false
+            smallestDimPopup.becomeFirstResponder()
+        case "metadata":
+            workspaceTitleLabel.stringValue = "Metadata cleaner"
+            workspaceSubtitleLabel.stringValue = "Remove private metadata while optimizing your media."
+            advancedPanel.isHidden = false
+            keepMetadataCheck.state = .off
+        case "video":
+            workspaceTitleLabel.stringValue = "Video compressing"
+            workspaceSubtitleLabel.stringValue = "Add videos and create smaller, shareable exports on your Mac."
+            advancedPanel.isHidden = false
+        default:
+            workspaceTitleLabel.stringValue = "Optimize media"
+            workspaceSubtitleLabel.stringValue = "Import, choose an intent, preview, optimize, and export."
+        }
+        advancedToggle.title = advancedPanel.isHidden ? "Show advanced" : "Hide advanced"
+    }
+
     private func buildMetricsRow() -> NSStackView {
-        metricsRow.orientation = .horizontal
-        metricsRow.spacing = Spacing.lg
+        metricsRow.orientation = .vertical
+        metricsRow.spacing = Spacing.sm
         metricsRow.alignment = .width
-        metricsRow.distribution = .fillEqually
         metricsRow.translatesAutoresizingMaskIntoConstraints = false
-        metricsRow.addArrangedSubview(metricSaved)
-        metricsRow.addArrangedSubview(metricRatio)
-        metricsRow.addArrangedSubview(metricFiles)
-        metricsRow.addArrangedSubview(metricTime)
+        let first = NSStackView(views: [metricSaved, metricRatio])
+        let second = NSStackView(views: [metricFiles, metricTime])
+        for row in [first, second] {
+            row.orientation = .horizontal
+            row.spacing = Spacing.sm
+            row.alignment = .width
+            row.distribution = .fillEqually
+            metricsRow.addArrangedSubview(row)
+            row.widthAnchor.constraint(equalTo: metricsRow.widthAnchor).isActive = true
+        }
+        metricSaved.widthAnchor.constraint(equalTo: first.widthAnchor, multiplier: 0.5, constant: -6).isActive = true
+        metricRatio.widthAnchor.constraint(equalTo: metricSaved.widthAnchor).isActive = true
+        metricFiles.widthAnchor.constraint(equalTo: second.widthAnchor, multiplier: 0.5, constant: -6).isActive = true
+        metricTime.widthAnchor.constraint(equalTo: metricFiles.widthAnchor).isActive = true
         return metricsRow
     }
 
     private func buildQueueSection() -> NSView {
         queueCard.translatesAutoresizingMaskIntoConstraints = false
+        queueCard.wantsLayer = true
+        queueCard.layer?.backgroundColor = NSColor.clear.cgColor
 
-        headerLabel.font = Typography.sectionTitle
+        headerLabel.font = NSFont.systemFont(ofSize: 16, weight: .bold)
         headerLabel.textColor = Palette.text
-        queueSubtitle.font = Typography.caption
-        queueSubtitle.textColor = Palette.textSecondary
-        let headerStack = NSStackView(views: [headerLabel, queueSubtitle])
+        let summaryRow = NSStackView(views: [queueQueuedPill, queueEstimatedPill, queueSavedPill])
+        summaryRow.orientation = .horizontal
+        summaryRow.spacing = Spacing.xs
+        summaryRow.alignment = .centerY
+        summaryRow.translatesAutoresizingMaskIntoConstraints = false
+        queueAddButton.target = self
+        queueAddButton.action = #selector(addFiles)
+        let titleRow = NSStackView(views: [headerLabel, NSView(), queueAddButton])
+        titleRow.orientation = .horizontal
+        titleRow.alignment = .centerY
+        titleRow.spacing = 12
+        titleRow.translatesAutoresizingMaskIntoConstraints = false
+        let headerStack = NSStackView(views: [titleRow, summaryRow])
         headerStack.orientation = .vertical
-        headerStack.spacing = 2
-        headerStack.alignment = .leading
+        headerStack.spacing = 16
+        headerStack.alignment = .width
         headerStack.translatesAutoresizingMaskIntoConstraints = false
-
-        let clearAllButton = SecondaryButton(title: "Clear all", tint: Palette.textTertiary)
-        clearAllButton.target = self
-        clearAllButton.action = #selector(clearAll)
-        let headerRow = NSStackView(views: [headerStack, NSView(), clearAllButton])
-        headerRow.orientation = .horizontal
-        headerRow.alignment = .centerY
-        headerRow.translatesAutoresizingMaskIntoConstraints = false
 
         tableView.headerView = nil
         tableView.usesAlternatingRowBackgroundColors = false
         tableView.backgroundColor = .clear
-        tableView.rowHeight = 112
+        tableView.rowHeight = 74
         tableView.intercellSpacing = NSSize(width: 0, height: 10)
-        tableView.selectionHighlightStyle = .regular
+        tableView.selectionHighlightStyle = .none
         tableView.target = self
         tableView.doubleAction = #selector(revealSelected)
+        let queueMenu = NSMenu(title: "File")
+        let revealItem = queueMenu.addItem(withTitle: "Reveal in Finder", action: #selector(revealSelected), keyEquivalent: "")
+        revealItem.target = self
+        let exportItem = queueMenu.addItem(withTitle: "Show optimized file", action: #selector(showSelectedOutput), keyEquivalent: "")
+        exportItem.target = self
+        queueMenu.addItem(.separator())
+        let removeItem = queueMenu.addItem(withTitle: "Remove from queue", action: #selector(removeSelected), keyEquivalent: "")
+        removeItem.target = self
+        tableView.menu = queueMenu
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("queue"))
         column.title = "Queue"
         tableView.addTableColumn(column)
@@ -1148,19 +1994,28 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         scrollView.borderType = .noBorder
         scrollView.drawsBackground = false
         scrollView.documentView = tableView
-        scrollView.heightAnchor.constraint(greaterThanOrEqualToConstant: 320).isActive = true
+        queueHeightConstraint = scrollView.heightAnchor.constraint(equalToConstant: 140)
+        queueHeightConstraint?.isActive = true
 
-        let inner = NSStackView(views: [headerRow, scrollView])
+        let inner = NSStackView(views: [headerStack, scrollView])
         inner.orientation = .vertical
         inner.spacing = Spacing.md
         inner.translatesAutoresizingMaskIntoConstraints = false
-        inner.edgeInsets = NSEdgeInsets(top: Spacing.lg, left: Spacing.lg, bottom: Spacing.lg, right: Spacing.lg)
+        let divider = NSView()
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.wantsLayer = true
+        divider.layer?.backgroundColor = NSColor(calibratedWhite: 0.76, alpha: 1).cgColor
         queueCard.addSubview(inner)
+        queueCard.addSubview(divider)
         NSLayoutConstraint.activate([
             inner.leadingAnchor.constraint(equalTo: queueCard.leadingAnchor),
-            inner.trailingAnchor.constraint(equalTo: queueCard.trailingAnchor),
+            inner.trailingAnchor.constraint(equalTo: queueCard.trailingAnchor, constant: -24),
             inner.topAnchor.constraint(equalTo: queueCard.topAnchor),
-            inner.bottomAnchor.constraint(equalTo: queueCard.bottomAnchor)
+            inner.bottomAnchor.constraint(equalTo: queueCard.bottomAnchor),
+            divider.trailingAnchor.constraint(equalTo: queueCard.trailingAnchor),
+            divider.topAnchor.constraint(equalTo: queueCard.topAnchor),
+            divider.bottomAnchor.constraint(equalTo: queueCard.bottomAnchor),
+            divider.widthAnchor.constraint(equalToConstant: 1)
         ])
         return queueCard
     }
@@ -1168,7 +2023,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     private func buildPresetsSection() -> NSView {
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
-        presetsSectionTitle.font = Typography.sectionTitle
+        presetsSectionTitle.font = NSFont.systemFont(ofSize: 16, weight: .bold)
         presetsSectionTitle.textColor = Palette.text
         presetsSubtitle.font = Typography.caption
         presetsSubtitle.textColor = Palette.textSecondary
@@ -1179,29 +2034,57 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         headerStack.translatesAutoresizingMaskIntoConstraints = false
 
         presetsGrid.orientation = .vertical
-        presetsGrid.spacing = Spacing.sm
+        presetsGrid.spacing = 8
         presetsGrid.alignment = .width
         presetsGrid.translatesAutoresizingMaskIntoConstraints = false
-        var currentRow: NSStackView?
-        for (index, preset) in CreatorPreset.allCases.enumerated() {
-            if index % 3 == 0 {
-                let row = NSStackView()
-                row.orientation = .horizontal
-                row.spacing = Spacing.md
-                row.distribution = .fillEqually
-                row.alignment = .width
-                row.translatesAutoresizingMaskIntoConstraints = false
-                presetsGrid.addArrangedSubview(row)
-                currentRow = row
-            }
-            if let row = currentRow {
+        let presets = CreatorPreset.allCases.filter { $0 != .websiteReady }
+        for rowStart in stride(from: 0, to: presets.count, by: 2) {
+            let row = NSStackView()
+            row.orientation = .horizontal
+            row.spacing = 8
+            row.distribution = .fillEqually
+            row.alignment = .width
+            row.translatesAutoresizingMaskIntoConstraints = false
+            presetsGrid.addArrangedSubview(row)
+            for index in rowStart..<min(rowStart + 2, presets.count) {
+                let preset = presets[index]
                 let card = presetCards[preset]!
                 card.target = self
                 card.action = #selector(handlePresetTap(_:))
                 row.addArrangedSubview(card)
             }
+            if row.arrangedSubviews.count == 1 { row.addArrangedSubview(NSView()) }
         }
-        let stack = NSStackView(views: [headerStack, presetsGrid])
+        customSizeField.placeholderString = "e.g. 500 KB, 2 MB, or 90000 B"
+        customSizeField.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        customSizeField.isBezeled = false
+        customSizeField.drawsBackground = false
+        customSizeField.target = self
+        customSizeField.action = #selector(customSizeChanged)
+        customSizeField.translatesAutoresizingMaskIntoConstraints = false
+        let customFieldShell = NSView()
+        customFieldShell.translatesAutoresizingMaskIntoConstraints = false
+        customFieldShell.wantsLayer = true
+        customFieldShell.layer?.cornerRadius = 10
+        customFieldShell.layer?.cornerCurve = .continuous
+        customFieldShell.layer?.backgroundColor = Palette.surfaceElevated.cgColor
+        customFieldShell.layer?.borderWidth = 1
+        customFieldShell.layer?.borderColor = Palette.borderSubtle.cgColor
+        customFieldShell.addSubview(customSizeField)
+        NSLayoutConstraint.activate([
+            customSizeField.leadingAnchor.constraint(equalTo: customFieldShell.leadingAnchor, constant: 16),
+            customSizeField.trailingAnchor.constraint(equalTo: customFieldShell.trailingAnchor, constant: -16),
+            customSizeField.topAnchor.constraint(equalTo: customFieldShell.topAnchor, constant: 8),
+            customSizeField.bottomAnchor.constraint(equalTo: customFieldShell.bottomAnchor, constant: -8)
+        ])
+        customSizeRow.orientation = .vertical
+        customSizeRow.alignment = .width
+        customSizeRow.spacing = 8
+        customSizeRow.addArrangedSubview(makeLabel("Target size (B, KB, or MB)", font: NSFont.systemFont(ofSize: 12, weight: .medium), color: Palette.text))
+        customSizeRow.addArrangedSubview(customFieldShell)
+        customSizeRow.isHidden = true
+
+        let stack = NSStackView(views: [headerStack, presetsGrid, customSizeRow])
         stack.orientation = .vertical
         stack.spacing = Spacing.md
         stack.alignment = .width
@@ -1225,76 +2108,62 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     }
 
     private func setupAdvancedControls() {
-        formatLabel.font = Typography.cardTitle
-        formatLabel.textColor = Palette.text
-        formatPopup.addItems(withTitles: ["Best Quality", "Auto", "Keep original", "JPEG", "PNG", "WebP"])
+        formatPopup.addItems(withTitles: ["Smart WebP", "Auto", "Keep original", "JPEG", "PNG"])
         formatPopup.selectItem(at: 0)
-
-        smallestDimLabel.font = Typography.cardTitle
-        smallestDimLabel.textColor = Palette.text
         smallestDimPopup.addItems(withTitles: ["160 px", "320 px", "480 px", "640 px", "800 px"])
         smallestDimPopup.selectItem(at: 1)
-
-        qualityMinLabel.font = Typography.cardTitle
-        qualityMinLabel.textColor = Palette.text
         qualityMinPopup.addItems(withTitles: ["20", "40", "60", "80"])
         qualityMinPopup.selectItem(at: 0)
-
-        qualityMaxLabel.font = Typography.cardTitle
-        qualityMaxLabel.textColor = Palette.text
         qualityMaxPopup.addItems(withTitles: ["80", "90", "95", "100"])
         qualityMaxPopup.selectItem(at: 3)
-
-        namingLabel.font = Typography.cardTitle
-        namingLabel.textColor = Palette.text
         namingPopup.addItems(withTitles: ["Same name", "Suffix", "Overwrite"])
-        namingPopup.selectItem(at: 0)
-
+        namingPopup.selectItem(at: 1)
         keepMetadataCheck.state = .off
-        keepMetadataCheck.font = Typography.body
-
+        keepMetadataCheck.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
         chooseOutputFolderButton.target = self
         chooseOutputFolderButton.action = #selector(chooseOutputFolder)
         outputFolderPathLabel.font = Typography.caption
         outputFolderPathLabel.textColor = Palette.textSecondary
 
-        let formatRow = labeledRow("Output format", formatPopup)
-        let dimRow = labeledRow("Smallest dimension", smallestDimPopup)
-        let qualityRow = NSStackView(views: [
-            labeledColumn("Min quality", qualityMinPopup),
-            labeledColumn("Max quality", qualityMaxPopup)
+        for popup in [formatPopup, smallestDimPopup, namingPopup] {
+            popup.controlSize = .small
+            popup.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        }
+
+        let formatAndSize = NSStackView(views: [
+            labeledColumn("OUTPUT FORMAT", formatPopup),
+            labeledColumn("Min Side", smallestDimPopup)
         ])
-        qualityRow.orientation = .horizontal
-        qualityRow.spacing = Spacing.lg
-        qualityRow.alignment = .width
-        qualityRow.distribution = .fillEqually
-        qualityRow.translatesAutoresizingMaskIntoConstraints = false
+        formatAndSize.orientation = .horizontal
+        formatAndSize.spacing = Spacing.md
+        formatAndSize.alignment = .top
+        formatAndSize.distribution = .fillEqually
+        formatAndSize.translatesAutoresizingMaskIntoConstraints = false
 
-        let namingRow = labeledRow("Naming", namingPopup)
-        let folderRow = NSStackView(views: [
-            NSTextField(labelWithString: "Output folder"),
-            chooseOutputFolderButton
+        let metadataColumn = NSStackView(views: [
+            makeLabel("Keep metadata", font: NSFont.systemFont(ofSize: 12, weight: .semibold), color: Palette.text),
+            keepMetadataCheck
         ])
-        folderRow.orientation = .horizontal
-        folderRow.alignment = .centerY
-        folderRow.spacing = Spacing.md
-        folderRow.translatesAutoresizingMaskIntoConstraints = false
-        let folderLabelContainer = (folderRow.arrangedSubviews[0] as? NSTextField)
-        folderLabelContainer?.font = Typography.cardTitle
-        folderLabelContainer?.textColor = Palette.text
+        metadataColumn.orientation = .vertical
+        metadataColumn.spacing = 8
+        metadataColumn.alignment = .leading
+        metadataColumn.translatesAutoresizingMaskIntoConstraints = false
 
-        let folderPathRow = NSStackView(views: [outputFolderPathLabel])
-        folderPathRow.orientation = .horizontal
-        folderPathRow.alignment = .centerY
-        folderPathRow.translatesAutoresizingMaskIntoConstraints = false
+        let namingAndMetadata = NSStackView(views: [
+            labeledColumn("Naming", namingPopup),
+            metadataColumn
+        ])
+        namingAndMetadata.orientation = .horizontal
+        namingAndMetadata.spacing = Spacing.md
+        namingAndMetadata.alignment = .top
+        namingAndMetadata.distribution = .fillEqually
+        namingAndMetadata.translatesAutoresizingMaskIntoConstraints = false
 
-        advancedPanel.addArrangedSubview(formatRow)
-        advancedPanel.addArrangedSubview(dimRow)
-        advancedPanel.addArrangedSubview(qualityRow)
-        advancedPanel.addArrangedSubview(namingRow)
-        advancedPanel.addArrangedSubview(folderRow)
-        advancedPanel.addArrangedSubview(folderPathRow)
-        advancedPanel.addArrangedSubview(keepMetadataCheck)
+        advancedPanel.addArrangedSubview(formatAndSize)
+        advancedPanel.addArrangedSubview(namingAndMetadata)
+        chooseOutputFolderButton.title = "Output Folder"
+        chooseOutputFolderButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 320).isActive = true
+        advancedPanel.addArrangedSubview(labeledColumn("Save to", chooseOutputFolderButton))
     }
 
     private func labeledRow(_ label: String, _ control: NSView) -> NSView {
@@ -1320,10 +2189,11 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         col.alignment = .leading
         col.translatesAutoresizingMaskIntoConstraints = false
         let l = NSTextField(labelWithString: label)
-        l.font = Typography.micro
-        l.textColor = Palette.textTertiary
+        l.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
+        l.textColor = Palette.text
         col.addArrangedSubview(l)
         col.addArrangedSubview(control)
+        control.widthAnchor.constraint(greaterThanOrEqualToConstant: 145).isActive = true
         return col
     }
 
@@ -1346,23 +2216,15 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     }
 
     private func buildPreviewCard() -> NSView {
+        previewTitle.stringValue = "Live Preview"
         previewTitle.font = Typography.cardTitle
         previewTitle.textColor = Palette.text
-        previewSubtitle.font = Typography.caption
-        previewSubtitle.textColor = Palette.textSecondary
-        let titleStack = NSStackView(views: [previewTitle, previewSubtitle])
+        previewSubtitle.isHidden = true
+        let titleStack = NSStackView(views: [previewTitle])
         titleStack.orientation = .vertical
         titleStack.spacing = 2
         titleStack.alignment = .leading
         titleStack.translatesAutoresizingMaskIntoConstraints = false
-
-        previewImageView.imageScaling = .scaleProportionallyUpOrDown
-        previewImageView.translatesAutoresizingMaskIntoConstraints = false
-        previewImageView.wantsLayer = true
-        previewImageView.layer?.cornerRadius = Radius.md
-        previewImageView.layer?.cornerCurve = .continuous
-        previewImageView.layer?.backgroundColor = Palette.surfaceInset.cgColor
-        previewImageView.heightAnchor.constraint(equalToConstant: 220).isActive = true
 
         previewEmpty.font = Typography.body
         previewEmpty.textColor = Palette.textTertiary
@@ -1374,18 +2236,17 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         previewDetailLabel.translatesAutoresizingMaskIntoConstraints = false
         previewDetailLabel.maximumNumberOfLines = 2
 
-        let stack = NSStackView(views: [titleStack, previewImageView, previewEmpty, previewDetailLabel])
+        let stack = NSStackView(views: [titleStack, comparisonPreview, previewEmpty])
         stack.orientation = .vertical
         stack.spacing = Spacing.sm
         stack.alignment = .width
         stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.edgeInsets = NSEdgeInsets(top: Spacing.lg, left: Spacing.lg, bottom: Spacing.lg, right: Spacing.lg)
         previewCard.addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: previewCard.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: previewCard.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: previewCard.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: previewCard.bottomAnchor)
+            stack.leadingAnchor.constraint(equalTo: previewCard.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: previewCard.trailingAnchor, constant: -16),
+            stack.topAnchor.constraint(equalTo: previewCard.topAnchor, constant: 12),
+            stack.bottomAnchor.constraint(equalTo: previewCard.bottomAnchor, constant: -16)
         ])
         return previewCard
     }
@@ -1455,20 +2316,8 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         titleStack.alignment = .leading
         titleStack.translatesAutoresizingMaskIntoConstraints = false
 
-        logTextView.isEditable = false
-        logTextView.drawsBackground = true
-        logTextView.backgroundColor = Palette.surfaceInset
-        logTextView.textColor = Palette.text
-        logTextView.font = Typography.monoSmall
-        logTextView.textContainerInset = NSSize(width: 12, height: 10)
-        logScroll.translatesAutoresizingMaskIntoConstraints = false
-        logScroll.hasVerticalScroller = true
-        logScroll.borderType = .noBorder
-        logScroll.drawsBackground = false
-        logScroll.documentView = logTextView
-        logScroll.heightAnchor.constraint(equalToConstant: 200).isActive = true
-
-        let stack = NSStackView(views: [titleStack, logScroll])
+        let helper = makeWrappingLabel("LumaShrink keeps you oriented without exposing technical logs.", font: Typography.caption, color: Palette.textSecondary)
+        let stack = NSStackView(views: [titleStack, helper, milestoneRail])
         stack.orientation = .vertical
         stack.spacing = Spacing.sm
         stack.alignment = .width
@@ -1489,6 +2338,14 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     @objc private func handlePresetTap(_ sender: PresetCardView) {
         activePreset = sender.preset
         applyActivePreset()
+        if sender.preset == .custom {
+            advancedPanel.isHidden = false
+            advancedToggle.title = "Hide advanced"
+            customSizeRow.isHidden = false
+            customSizeField.becomeFirstResponder()
+        } else {
+            customSizeRow.isHidden = true
+        }
         refreshQueueTable()
     }
 
@@ -1496,8 +2353,21 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         for (preset, card) in presetCards {
             card.isSelectedPreset = (preset == activePreset)
         }
-        settings.maxSize = activePreset.targetSize
+        settings.maxSize = activePreset == .custom ? customSizeField.stringValue : activePreset.targetSize
+        for index in queue.indices { queue[index].estimatedOutputSize = estimateOutputSize(source: queue[index].sourceSize) }
         updateMetrics()
+    }
+
+    @objc private func customSizeChanged() {
+        let value = customSizeField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard parseSize(value) != nil else {
+            customSizeField.textColor = Palette.danger
+            return
+        }
+        customSizeField.textColor = Palette.text
+        settings.maxSize = value
+        for index in queue.indices { queue[index].estimatedOutputSize = estimateOutputSize(source: queue[index].sourceSize) }
+        refreshQueueTable()
     }
 
     // MARK: - Queue Management
@@ -1526,7 +2396,8 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     func addURLs(_ urls: [URL]) {
         var added = 0
         for url in urls {
-            if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
+            let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
+            if isDirectory, let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
                 for case let fileURL as URL in enumerator {
                     let ext = fileURL.pathExtension.lowercased()
                     let supported = ["jpg","jpeg","png","webp","bmp","tif","tiff","heic","mp4","mov","m4v"]
@@ -1556,6 +2427,14 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         }
         refreshQueueTable()
         statusBanner.stringValue = added > 0 ? "Added \(added) file\(added == 1 ? "" : "s"). Choose a preset and start when ready." : "No supported files found."
+        if !queue.isEmpty {
+            updateWorkspacePhase(.imported)
+            if selectedFileIndex == nil {
+                selectedFileIndex = 0
+                tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+                updatePreview(for: queue[0])
+            }
+        }
     }
 
     private func loadThumbnail(for url: URL, size: NSSize) -> NSImage? {
@@ -1579,12 +2458,28 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         statusBanner.stringValue = "Queue cleared."
         lastOutputFolder = nil
         exportButton.contentTintColor = Palette.textTertiary
+        toolbarSaveButton.isEnabled = false
+        updateWorkspacePhase(.empty)
     }
 
     @objc func revealSelected() {
         let row = tableView.clickedRow >= 0 ? tableView.clickedRow : tableView.selectedRow
         guard row >= 0, row < queue.count else { return }
         NSWorkspace.shared.activateFileViewerSelecting([queue[row].url])
+    }
+
+    @objc private func showSelectedOutput() {
+        let row = tableView.clickedRow >= 0 ? tableView.clickedRow : tableView.selectedRow
+        guard row >= 0, row < queue.count, let output = queue[row].outputURL else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([output])
+    }
+
+    @objc private func removeSelected() {
+        let row = tableView.clickedRow >= 0 ? tableView.clickedRow : tableView.selectedRow
+        guard row >= 0, row < queue.count, !isRunning else { return }
+        queue.remove(at: row)
+        refreshQueueTable()
+        updateWorkspacePhase(queue.isEmpty ? .empty : .imported)
     }
 
     // MARK: - Output Folder
@@ -1636,18 +2531,26 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
             statusBanner.stringValue = "Add some images first."
             return
         }
+        if queue.contains(where: { videoFileExtensions.contains($0.url.pathExtension.lowercased()) }) && !videoToolsAvailable() {
+            let alert = NSAlert()
+            alert.messageText = "Video tools are required"
+            alert.informativeText = "Install FFmpeg and FFprobe, then reopen LumaShrink. Image compression is ready to use without them."
+            alert.alertStyle = .warning
+            alert.runModal()
+            return
+        }
         if settings.outputFolder == nil && namingPopup.titleOfSelectedItem == "Same name" {
             chooseOutputFolder()
         }
-        settings.maxSize = activePreset.targetSize
+        settings.maxSize = activePreset == .custom ? customSizeField.stringValue : activePreset.targetSize
         let dimTitle = smallestDimPopup.titleOfSelectedItem ?? "320 px"
         settings.minSide = Int(dimTitle.replacingOccurrences(of: " px", with: "")) ?? 320
         settings.minQuality = Int(qualityMinPopup.titleOfSelectedItem ?? "20") ?? 20
         settings.maxQuality = Int(qualityMaxPopup.titleOfSelectedItem ?? "100") ?? 100
-        let fmtTitle = formatPopup.titleOfSelectedItem ?? "Best Quality"
-        let formatMap = ["Best Quality": "best_quality", "Auto": "auto", "Keep original": "keep", "JPEG": "jpeg", "PNG": "png", "WebP": "webp"]
-        settings.outputFormat = formatMap[fmtTitle] ?? "best_quality"
-        settings.isBestQuality = (settings.outputFormat == "best_quality")
+        let fmtTitle = formatPopup.titleOfSelectedItem ?? "Smart WebP"
+        let formatMap = ["Smart WebP": "webp", "Auto": "auto", "Keep original": "keep", "JPEG": "jpeg", "PNG": "png"]
+        settings.outputFormat = formatMap[fmtTitle] ?? "webp"
+        settings.isBestQuality = false
         let namingMap = ["Same name": "same-name", "Suffix": "suffix", "Overwrite": "overwrite"]
         settings.nameMode = namingMap[namingPopup.titleOfSelectedItem ?? "Same name"] ?? "same-name"
         settings.keepMetadata = (keepMetadataCheck.state == .on)
@@ -1666,6 +2569,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
         statusBadge.layer?.borderColor = NSColor.clear.cgColor
         compressButton.isEnabled = false
         stopButton.isEnabled = true
+        updateWorkspacePhase(.optimizing)
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.runCompression()
@@ -1711,22 +2615,46 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
 
     private func runOne(at index: Int) -> CompressionRunResult {
         let file = queue[index]
-        guard let resourceURL = Bundle.main.resourceURL,
-              let runtime = URL(string: "\(resourceURL.path)/runtime") else {
+        guard let resourceURL = Bundle.main.resourceURL else {
             return CompressionRunResult(lines: ["[ERROR] Missing runtime."], hadError: true, bestEffort: false, outputPath: nil)
         }
-        let script = runtime.appendingPathComponent("compress_image.py")
-        let python = runtime.appendingPathComponent(".venv/bin/python3").path
-        let pythonPath = FileManager.default.fileExists(atPath: python) ? python : "/usr/bin/python3"
+        let runtime = resourceURL.appendingPathComponent("runtime", isDirectory: true)
+        let imageHelper = runtime.appendingPathComponent("lumashrink-image-helper/lumashrink-image-helper")
+        let videoHelper = runtime.appendingPathComponent("lumashrink-video-helper/lumashrink-video-helper")
         let outputDir = settings.outputFolder ?? file.url.deletingLastPathComponent()
-        let args: [String]
+        let videoExtensions = ["mp4", "mov", "m4v", "avi", "mkv", "webm", "wmv", "flv"]
+        if videoExtensions.contains(file.url.pathExtension.lowercased()) {
+            let targetBytes = max(parseSize(settings.maxSize) ?? 0, 64 * 1024)
+            let outputPath = outputDir.appendingPathComponent(file.url.deletingPathExtension().lastPathComponent + "_optimized.mp4")
+            let process = Process()
+            process.executableURL = videoHelper
+            process.currentDirectoryURL = runtime
+            process.environment = mediaToolEnvironment()
+            process.arguments = [file.url.path, outputPath.path, "-t", String(targetBytes), "--keep-audio", settings.keepMetadata ? "--keep-metadata" : "--no-metadata"]
+            let outPipe = Pipe(); let errPipe = Pipe()
+            process.standardOutput = outPipe; process.standardError = errPipe
+            do {
+                try process.run(); process.waitUntilExit()
+            } catch {
+                return CompressionRunResult(lines: ["[ERROR] \(file.url.lastPathComponent): \(error.localizedDescription)"], hadError: true, bestEffort: false, outputPath: nil)
+            }
+            let stdout = String(data: outPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+            let stderr = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+            let lines = (stdout + "\n" + stderr).split(separator: "\n").map(String.init)
+            let succeeded = process.terminationStatus == 0 && FileManager.default.fileExists(atPath: outputPath.path)
+            return CompressionRunResult(lines: lines, hadError: !succeeded, bestEffort: false, outputPath: succeeded ? outputPath : nil)
+        }
+        var args: [String]
         if settings.nameMode != "overwrite" {
-            args = [script.path, file.url.path, outputDir.path, "-s", settings.maxSize, "--format", settings.isBestQuality ? "webp" : settings.outputFormat, "--name-mode", settings.nameMode, "--min-quality", String(settings.minQuality), "--max-quality", String(settings.maxQuality), "--min-side", String(settings.minSide), "--background", "FFFFFF"]
+            args = [file.url.path, outputDir.path, "-s", settings.maxSize, "--format", settings.isBestQuality ? "webp" : settings.outputFormat, "--name-mode", settings.nameMode, "--min-quality", String(settings.minQuality), "--max-quality", String(settings.maxQuality), "--min-side", String(settings.minSide), "--background", "FFFFFF"]
         } else {
-            args = [script.path, file.url.path, "-s", settings.maxSize, "--format", settings.isBestQuality ? "webp" : settings.outputFormat, "--name-mode", settings.nameMode, "--min-quality", String(settings.minQuality), "--max-quality", String(settings.maxQuality), "--min-side", String(settings.minSide), "--background", "FFFFFF"]
+            args = [file.url.path, "-s", settings.maxSize, "--format", settings.isBestQuality ? "webp" : settings.outputFormat, "--name-mode", settings.nameMode, "--min-quality", String(settings.minQuality), "--max-quality", String(settings.maxQuality), "--min-side", String(settings.minSide), "--background", "FFFFFF"]
+        }
+        if settings.keepMetadata {
+            args.append("--keep-metadata")
         }
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: pythonPath)
+        process.executableURL = imageHelper
         process.currentDirectoryURL = runtime
         process.arguments = args
         let outPipe = Pipe()
@@ -1746,20 +2674,20 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
             return CompressionRunResult(lines: ["[ERROR] \(file.url.lastPathComponent): \(error.localizedDescription)"], hadError: true, bestEffort: false, outputPath: nil)
         }
         let stdout = String(data: outPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
-        let lines = stdout.split(separator: "\n").map(String.init)
+        let stderr = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+        let lines = (stdout + "\n" + stderr).split(separator: "\n").map(String.init)
         var outputPath: URL? = nil
         for line in lines {
             if line.contains("->") && (line.contains(".webp") || line.contains(".jpg") || line.contains(".png")) {
                 let parts = line.components(separatedBy: "->")
                 if let last = parts.last {
                     let cleaned = last.trimmingCharacters(in: .whitespaces)
-                    if let url = URL(string: cleaned), FileManager.default.fileExists(atPath: url.path) {
-                        outputPath = url
-                    }
+                    let url = cleaned.hasPrefix("/") ? URL(fileURLWithPath: cleaned) : URL(string: cleaned)
+                    if let url, FileManager.default.fileExists(atPath: url.path) { outputPath = url }
                 }
             }
         }
-        let isError = lines.contains(where: { $0.contains("[ERROR]") })
+        let isError = process.terminationStatus != 0 || lines.contains(where: { $0.contains("[ERROR]") })
         let isBest = lines.contains(where: { $0.contains("[BEST EFFORT]") })
         return CompressionRunResult(lines: lines, hadError: isError, bestEffort: isBest, outputPath: outputPath)
     }
@@ -1784,6 +2712,7 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
                 self.runSourceBytes += self.queue[index].sourceSize
                 self.runOutputBytes += Int64(size)
                 if self.lastOutputFolder == nil { self.lastOutputFolder = path.deletingLastPathComponent() }
+                self.queue[index].outputURL = path
             }
             self.queue[index].status = result.hadError ? .failed : (result.bestEffort ? .bestEffort : .done)
             self.queue[index].error = result.hadError ? result.lines.first : nil
@@ -1804,9 +2733,14 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
             statusBadge.setText("Ready")
             statusBadge.layer?.backgroundColor = Palette.success.withAlphaComponent(0.12).cgColor
             exportButton.contentTintColor = Palette.accent
+            toolbarSaveButton.isEnabled = true
+            let saved = max(0, runSourceBytes - runOutputBytes)
+            successBanner.setDetail("\(written.count) file\(written.count == 1 ? "" : "s") ready · \(humanSize(saved)) saved")
+            updateWorkspacePhase(.complete)
         } else {
             statusBanner.stringValue = failed > 0 ? "\(failed) file\(failed == 1 ? "" : "s") had issues." : "Nothing to export."
             statusBadge.setText(failed > 0 ? "Needs attention" : "Ready")
+            updateWorkspacePhase(.imported)
         }
         progressBar.doubleValue = runTotalFiles > 0 ? Double(runCompleted) / Double(runTotalFiles) : 0
         updateMetrics()
@@ -1833,6 +2767,16 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
 
     private func refreshQueueTable() {
         tableView.reloadData()
+        queueHeightConstraint?.constant = min(470, max(140, CGFloat(queue.count) * 84))
+        let totalBytes = queue.reduce(Int64(0)) { $0 + $1.sourceSize }
+        let estimatedBytes = queue.reduce(Int64(0)) { $0 + ($1.estimatedOutputSize ?? $1.sourceSize) }
+        let savedBytes = max(0, totalBytes - estimatedBytes)
+        queueQueuedPill.setText("\(humanSize(totalBytes)) queued")
+        queueEstimatedPill.setText("\(humanSize(estimatedBytes)) Estimated")
+        queueSavedPill.setText("\(humanSize(savedBytes)) Saved")
+        queueSubtitle.stringValue = queue.isEmpty
+            ? "0 B queued  ·  0 B estimated  ·  0 B saved"
+            : "\(queue.count) item\(queue.count == 1 ? "" : "s") queued  ·  \(humanSize(totalBytes)) total"
         updateMetrics()
     }
 
@@ -1853,30 +2797,32 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
             let remaining = max(0, runTotalFiles - runCompleted)
             let eta = Int(Double(remaining) / max(rate, 0.001))
             metricTime.setValue("\(eta)s")
-            metricTime.setDetail(String(format: "%.1f files / s", rate))
+            metricTime.setDetail("remaining")
+            metricSpeed.setValue(String(format: "%.1f/s", rate))
+            metricSpeed.setDetail("files per second")
         } else {
-            metricTime.setValue("Ready")
+            metricTime.setValue("0 Sec")
             metricTime.setDetail("\(queue.count) files in queue")
+            metricSpeed.setValue(queue.isEmpty ? "—" : "Ready")
+            metricSpeed.setDetail("files per second")
         }
     }
 
     private func updatePreview(for file: QueueFile) {
-        previewTitle.stringValue = file.url.lastPathComponent
+        previewTitle.stringValue = "Live Preview"
+        previewSubtitle.stringValue = file.url.lastPathComponent
         if file.thumbnail != nil {
-            previewImageView.image = file.thumbnail
             previewEmpty.isHidden = true
         } else {
-            previewImageView.image = NSImage(systemSymbolName: "photo", accessibilityDescription: nil)
             previewEmpty.isHidden = false
         }
+        let optimized = file.outputURL.flatMap(NSImage.init(contentsOf:))
+        comparisonPreview.set(original: NSImage(contentsOf: file.url) ?? file.thumbnail, optimized: optimized)
         if let output = file.actualOutputSize {
-            previewSubtitle.stringValue = "Compressed result ready"
             previewDetailLabel.stringValue = "\(humanSize(file.sourceSize)) → \(humanSize(output)) · \(savingPercent(source: file.sourceSize, output: output))% saved"
         } else if let estimate = file.estimatedOutputSize {
-            previewSubtitle.stringValue = "Estimated output"
             previewDetailLabel.stringValue = "\(humanSize(file.sourceSize)) → ~\(humanSize(estimate))"
         } else {
-            previewSubtitle.stringValue = "Source preview"
             previewDetailLabel.stringValue = "\(humanSize(file.sourceSize))"
         }
     }
@@ -1889,28 +2835,16 @@ private final class StudioViewController: NSViewController, NSTableViewDataSourc
     // MARK: - Log
 
     private func appendLog(_ line: String) {
-        let color: NSColor
-        if line.contains("[ERROR]") { color = Palette.danger }
-        else if line.contains("[BEST EFFORT]") { color = Palette.warning }
-        else if line.contains("[OK]") { color = Palette.success }
-        else { color = Palette.text }
-        let attr = NSAttributedString(string: line + "\n", attributes: [
-            .font: Typography.monoSmall,
-            .foregroundColor: color
-        ])
-        logTextView.textStorage?.append(attr)
+        AppLogger.shared.write(line)
     }
 
     // MARK: - Diagnostics
 
     func startupDiagnosticsReport() -> String? {
-        guard let resourceURL = Bundle.main.resourceURL,
-              let runtime = URL(string: "\(resourceURL.path)/runtime") else { return "Runtime missing" }
-        let script = runtime.appendingPathComponent("compress_image.py").path
-        let venv = runtime.appendingPathComponent(".venv/bin/python3").path
-        let hasScript = FileManager.default.fileExists(atPath: script)
-        let hasVenv = FileManager.default.fileExists(atPath: venv)
-        return hasScript ? (hasVenv ? "Runtime ready" : "Python venv missing") : "compress_image.py missing"
+        guard let resourceURL = Bundle.main.resourceURL else { return "Runtime missing" }
+        let runtime = resourceURL.appendingPathComponent("runtime", isDirectory: true)
+        let helper = runtime.appendingPathComponent("lumashrink-image-helper/lumashrink-image-helper").path
+        return FileManager.default.isExecutableFile(atPath: helper) ? "Runtime ready" : "Image helper missing"
     }
 
     func setStartupStatus(_ report: String) {
@@ -1933,6 +2867,9 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
     private let listScroll = NSScrollView()
     private let statusBadge = PillLabel(text: "Ready", symbol: "checkmark.circle.fill", tint: Palette.success)
     private let fileCountLabel = NSTextField(labelWithString: "0 files")
+    private let settingsCard = GlassCard(cornerRadius: Radius.xl)
+    private let queueCard = GlassCard(cornerRadius: Radius.xl)
+    private let successBanner = SuccessBannerView()
     private var files: [URL] = []
 
     override func loadView() {
@@ -1984,9 +2921,11 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
         hero.spacing = Spacing.md
         hero.translatesAutoresizingMaskIntoConstraints = false
         main.addArrangedSubview(hero)
+        main.addArrangedSubview(successBanner)
+        successBanner.isHidden = true
+        successBanner.exportButton.isHidden = true
 
         // Settings card
-        let settingsCard = GlassCard(cornerRadius: Radius.xl)
         let settingsHeader = NSTextField(labelWithString: "Choose the new extension")
         settingsHeader.font = Typography.sectionTitle
         settingsHeader.textColor = Palette.text
@@ -2045,7 +2984,6 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
         main.addArrangedSubview(dropZone)
 
         // Queue
-        let queueCard = GlassCard(cornerRadius: Radius.xxl)
         let queueHeader = NSTextField(labelWithString: "Queue")
         queueHeader.font = Typography.sectionTitle
         queueHeader.textColor = Palette.text
@@ -2103,6 +3041,7 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
             queueInner.bottomAnchor.constraint(equalTo: queueCard.bottomAnchor)
         ])
         main.addArrangedSubview(queueCard)
+        updateState()
     }
 
     @objc func chooseFiles() {
@@ -2116,12 +3055,15 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
     func addURLs(_ urls: [URL]) {
         for url in urls where !files.contains(url) { files.append(url) }
         refresh()
+        updateState()
     }
 
     @objc func clearAll() {
         files.removeAll()
         refresh()
         statusBadge.setText("Ready")
+        successBanner.isHidden = true
+        updateState()
     }
 
     private func refresh() {
@@ -2142,7 +3084,10 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
         }
         files.removeAll()
         listTable.reloadData()
-        NSSound.beep()
+        successBanner.setDetail("\(renamed) file\(renamed == 1 ? "" : "s") renamed successfully")
+        successBanner.isHidden = false
+        statusBadge.setText("Complete")
+        updateState()
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int { files.count }
@@ -2151,6 +3096,14 @@ private final class RenameViewController: NSViewController, NSTableViewDataSourc
         cell.font = Typography.body
         cell.textColor = Palette.text
         return cell
+    }
+
+    private func updateState() {
+        let empty = files.isEmpty
+        settingsCard.isHidden = empty && successBanner.isHidden
+        queueCard.isHidden = empty
+        dropZone.setExpanded(empty)
+        applyButton.isEnabled = !empty
     }
 }
 
@@ -2626,6 +3579,14 @@ private final class VideoCompressViewController: NSViewController, NSTableViewDa
             appendLog("Add some videos first.")
             return
         }
+        if !videoToolsAvailable() {
+            let alert = NSAlert()
+            alert.messageText = "Video tools are required"
+            alert.informativeText = "Install FFmpeg and FFprobe, then reopen LumaShrink."
+            alert.alertStyle = .warning
+            alert.runModal()
+            return
+        }
         isRunning = true
         stopRequested = false
         runStartedAt = Date()
@@ -2681,23 +3642,22 @@ private final class VideoCompressViewController: NSViewController, NSTableViewDa
             self?.queue[index].status = .processing
             self?.refreshTable()
         }
-        guard let resourceURL = Bundle.main.resourceURL,
-              let runtime = URL(string: "\(resourceURL.path)/runtime") else {
+        guard let resourceURL = Bundle.main.resourceURL else {
             appendLog("[ERROR] Missing runtime")
             markFailed(at: index)
             return
         }
-        let script = runtime.appendingPathComponent("compress_video.py")
-        let python = runtime.appendingPathComponent(".venv/bin/python3").path
-        let pythonPath = FileManager.default.fileExists(atPath: python) ? python : "/usr/bin/python3"
+        let runtime = resourceURL.appendingPathComponent("runtime", isDirectory: true)
+        let videoHelper = runtime.appendingPathComponent("lumashrink-video-helper/lumashrink-video-helper")
         let targetBytes = parseSize(activeTarget) ?? 20 * 1024 * 1024
         let outDir = outputFolder ?? file.url.deletingLastPathComponent()
         let outPath = outDir.appendingPathComponent(file.url.deletingPathExtension().lastPathComponent + "_compressed.mp4")
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: pythonPath)
+        process.executableURL = videoHelper
         process.currentDirectoryURL = runtime
+        process.environment = mediaToolEnvironment()
         process.arguments = [
-            script.path, file.url.path, outPath.path,
+            file.url.path, outPath.path,
             "-t", String(targetBytes),
             keepAudioCheck.state == .on ? "--keep-audio" : "--no-audio",
             keepMetadataCheck.state == .on ? "--keep-metadata" : "--no-metadata"
@@ -2875,9 +3835,9 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
 
     enum Item: Hashable {
         case section(Section)
-        case studioStudio
-        case studioVideo
-        case studioRename
+        case optimize
+        case convertFormat
+        case metadataCleaner
     }
 
     var onSelect: (Item) -> Void
@@ -2969,12 +3929,12 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
         if let section = item as? Section {
             switch section {
             case .studio:
-                return Item.studioStudio
+                return Item.optimize
             case .utilities:
-                return index == 0 ? Item.studioVideo : Item.studioRename
+                return [Item.convertFormat, .metadataCleaner][index]
             }
         }
-        return Item.studioStudio
+        return Item.optimize
     }
 
     func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
@@ -2988,8 +3948,9 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
         label.translatesAutoresizingMaskIntoConstraints = false
         cell.addSubview(label)
         cell.textField = label
+        let labelLeading = label.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 6)
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: cell.leadingAnchor, constant: 6),
+            labelLeading,
             label.centerYAnchor.constraint(equalTo: cell.centerYAnchor),
             label.trailingAnchor.constraint(lessThanOrEqualTo: cell.trailingAnchor, constant: -6)
         ])
@@ -3005,7 +3966,7 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
         if let section = item as? Section {
             switch section {
             case .studio:
-                label.stringValue = "Studio"
+                label.stringValue = "Workspace"
                 label.font = Typography.micro
                 label.textColor = Palette.textTertiary
                 icon.isHidden = true
@@ -3016,24 +3977,23 @@ private final class SidebarViewController: NSViewController, NSOutlineViewDataSo
                 icon.isHidden = true
             }
         } else if let leaf = item as? Item {
+            labelLeading.constant = 44
             switch leaf {
-            case .studioStudio:
-                cell.identifier = NSUserInterfaceItemIdentifier("studioStudio")
-                cell.onClick = { [weak self, weak cell] in self?.activate(.studioStudio, cell: cell) }
+            case .optimize:
+                cell.identifier = NSUserInterfaceItemIdentifier("optimize")
+                cell.onClick = { [weak self, weak cell] in self?.activate(.optimize, cell: cell) }
                 label.stringValue = "Optimize"
                 icon.image = NSImage(systemSymbolName: "wand.and.stars", accessibilityDescription: nil)
                 icon.contentTintColor = Palette.accent
-            case .studioVideo:
-                cell.identifier = NSUserInterfaceItemIdentifier("studioVideo")
-                cell.onClick = { [weak self, weak cell] in self?.activate(.studioVideo, cell: cell) }
-                label.stringValue = "Compress videos"
-                icon.image = NSImage(systemSymbolName: "film.stack", accessibilityDescription: nil)
-                icon.contentTintColor = Palette.accent
-            case .studioRename:
-                cell.identifier = NSUserInterfaceItemIdentifier("studioRename")
-                cell.onClick = { [weak self, weak cell] in self?.activate(.studioRename, cell: cell) }
-                label.stringValue = "Rename"
-                icon.image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: nil)
+            case .convertFormat:
+                cell.onClick = { [weak self, weak cell] in self?.activate(.convertFormat, cell: cell) }
+                label.stringValue = "Convert Format"
+                icon.image = NSImage(systemSymbolName: "arrow.triangle.2.circlepath", accessibilityDescription: nil)
+                icon.contentTintColor = Palette.textSecondary
+            case .metadataCleaner:
+                cell.onClick = { [weak self, weak cell] in self?.activate(.metadataCleaner, cell: cell) }
+                label.stringValue = "Metadata Cleaner"
+                icon.image = NSImage(systemSymbolName: "hand.raised", accessibilityDescription: nil)
                 icon.contentTintColor = Palette.textSecondary
             case .section:
                 break
@@ -3109,8 +4069,6 @@ private final class DetailContainerViewController: NSViewController {
 // MARK: - Split Controller
 private final class AppSplitViewController: NSSplitViewController {
     let studio = StudioViewController()
-    let video = VideoCompressViewController()
-    let rename = RenameViewController()
     let sidebar: SidebarViewController
 
     init() {
@@ -3122,27 +4080,14 @@ private final class AppSplitViewController: NSSplitViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        addSplitViewItem(NSSplitViewItem(sidebarWithViewController: sidebar))
-
-        let controllers = [studio, video, rename]
+        let controllers = [studio]
         let detailController = DetailContainerViewController(controllers: controllers)
 
         let detailItem = NSSplitViewItem(viewController: detailController)
-        detailItem.minimumThickness = 800
+        detailItem.minimumThickness = 640
         addSplitViewItem(detailItem)
 
-        sidebar.onSelect = { item in
-            let index: Int
-            switch item {
-            case .studioStudio: index = 0
-            case .studioVideo: index = 1
-            case .studioRename: index = 2
-            case .section: return
-            }
-            detailController.show(at: index)
-        }
         detailController.show(at: 0)
-        sidebar.selectItem(.studioStudio)
     }
 }
 
@@ -3156,8 +4101,8 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         split = AppSplitViewController()
 
         let screenFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        let windowWidth = min(1360, max(1040, screenFrame.width * 0.92))
-        let windowHeight = min(900, max(640, screenFrame.height))
+        let windowWidth = min(FigmaLayout.canvasWidth, max(1100, screenFrame.width - 40))
+        let windowHeight = min(FigmaLayout.canvasHeight, max(640, screenFrame.height - 24))
 
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: windowWidth, height: windowHeight),
@@ -3166,24 +4111,68 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
         window.title = "LumaShrink"
-        window.contentMinSize = NSSize(width: 1080, height: 720)
-        window.minSize = NSSize(width: 1080, height: 720)
+        window.contentMinSize = NSSize(width: 1100, height: 620)
+        window.minSize = NSSize(width: 1100, height: 620)
+        window.contentMaxSize = NSSize(width: screenFrame.width, height: screenFrame.height)
+        window.maxSize = NSSize(width: screenFrame.width, height: screenFrame.height)
         window.isRestorable = false
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
+        window.standardWindowButton(.closeButton)?.isHidden = true
+        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        window.standardWindowButton(.zoomButton)?.isHidden = true
         window.toolbarStyle = .unifiedCompact
         window.backgroundColor = Palette.window
         window.isOpaque = true
-        window.appearance = NSAppearance(named: .darkAqua)
+        window.appearance = NSAppearance(named: .aqua)
         window.center()
         window.isReleasedWhenClosed = false
         window.contentViewController = split
         configureMainMenu()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        let launchURLs = ProcessInfo.processInfo.arguments.dropFirst()
+            .map { URL(fileURLWithPath: $0) }
+            .filter { FileManager.default.fileExists(atPath: $0.path) }
+        AppLogger.shared.write("Launch media: \(launchURLs.map(\.path).joined(separator: ", "))")
+        if !launchURLs.isEmpty {
+            split.studio.loadViewIfNeeded()
+            split.studio.addURLs(launchURLs)
+        }
+        window.setContentSize(NSSize(width: windowWidth, height: windowHeight))
+        window.center()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        split.studio.loadViewIfNeeded()
+        split.studio.addURLs(urls)
+        window.makeKeyAndOrderFront(nil)
+        application.activate(ignoringOtherApps: true)
+    }
+
+    @objc private func showGettingStarted() {
+        let alert = NSAlert()
+        alert.messageText = "Getting started with LumaShrink"
+        alert.informativeText = "1. Add images, videos, or a folder.\n2. Choose an intent or open Advanced controls.\n3. Select an output folder.\n4. Optimize and review the before/after preview.\n\nLumaShrink creates suffixed copies by default. Keep your originals until you have reviewed every output."
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "Got it")
+        alert.runModal()
+    }
+
+    @objc private func showDiagnosticLogs() {
+        let logs = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Logs/ImageCompressor", isDirectory: true)
+        try? FileManager.default.createDirectory(at: logs, withIntermediateDirectories: true)
+        NSWorkspace.shared.activateFileViewerSelecting([logs])
+    }
+
+    @objc private func contactSupport() {
+        guard let url = URL(string: "mailto:support@lumashrink.app?subject=LumaShrink%20support") else { return }
+        NSWorkspace.shared.open(url)
+    }
 
     private func configureMainMenu() {
         let main = NSMenu()
@@ -3192,8 +4181,6 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         let appItem = NSMenuItem(); main.addItem(appItem)
         let appMenu = NSMenu(title: "LumaShrink"); appItem.submenu = appMenu
         appMenu.addItem(withTitle: "About LumaShrink", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
-        appMenu.addItem(.separator())
-        addMenu("Preferences…", to: appMenu, key: ",", target: nil, action: nil)
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Hide LumaShrink", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         let hideOthers = appMenu.addItem(withTitle: "Hide Others", action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
@@ -3205,29 +4192,21 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         // ── File ──
         let fileItem = NSMenuItem(); main.addItem(fileItem)
         let fileMenu = NSMenu(title: "File"); fileItem.submenu = fileMenu
-        fileMenu.addItem(withTitle: "New Queue", action: nil, keyEquivalent: "n")
+        addMenu("New Queue", to: fileMenu, key: "n", target: split.studio, action: #selector(StudioViewController.clearAll))
         fileMenu.addItem(.separator())
-        addMenu("Add Images…", to: fileMenu, key: "o", target: split.studio, action: #selector(StudioViewController.addFiles))
+        addMenu("Add Media…", to: fileMenu, key: "o", target: split.studio, action: #selector(StudioViewController.addFiles))
         addMenu("Add Folder…", to: fileMenu, key: "o", modifiers: [.command, .shift], target: split.studio, action: #selector(StudioViewController.addFolder))
-        addMenu("Add Videos…", to: fileMenu, key: "v", modifiers: [.command, .shift], target: split.video, action: #selector(VideoCompressViewController.chooseFiles))
         fileMenu.addItem(.separator())
         addMenu("Choose Output Folder…", to: fileMenu, key: "s", target: split.studio, action: #selector(StudioViewController.chooseOutputFolder))
         addMenu("Open Output Folder", to: fileMenu, key: ".", target: split.studio, action: #selector(StudioViewController.openOutputFolder))
-        fileMenu.addItem(.separator())
-        addMenu("Choose Files for Rename…", to: fileMenu, key: "r", modifiers: [.command, .shift], target: split.rename, action: #selector(RenameViewController.chooseFiles))
-        fileMenu.addItem(.separator())
-        addMenu("Reload Session", to: fileMenu, key: "r", target: nil, action: nil)
         fileMenu.addItem(.separator())
         addMenu("Close Window", to: fileMenu, key: "w", target: nil, action: #selector(NSWindow.performClose(_:)))
 
         // ── Actions ──
         let actionItem = NSMenuItem(); main.addItem(actionItem)
         let actionMenu = NSMenu(title: "Actions"); actionItem.submenu = actionMenu
-        addMenu("Compress Now", to: actionMenu, key: "\r", target: split.studio, action: #selector(StudioViewController.startCompression))
+        addMenu("Optimize Now", to: actionMenu, key: "\r", target: split.studio, action: #selector(StudioViewController.startCompression))
         addMenu("Clear Queue", to: actionMenu, key: "\u{8}", modifiers: [.command, .shift], target: split.studio, action: #selector(StudioViewController.clearAll))
-        actionMenu.addItem(.separator())
-        addMenu("Choose Extension Files…", to: actionMenu, key: "e", modifiers: [.command, .shift], target: split.rename, action: #selector(RenameViewController.chooseFiles))
-        addMenu("Change Extension", to: actionMenu, key: "e", target: split.rename, action: #selector(RenameViewController.applyRename))
 
         // ── Edit ──
         let editItem = NSMenuItem(); main.addItem(editItem)
@@ -3259,8 +4238,10 @@ final class ImageCompressorAppDelegate: NSObject, NSApplicationDelegate {
         // ── Help ──
         let helpItem = NSMenuItem(); main.addItem(helpItem)
         let helpMenu = NSMenu(title: "Help"); helpItem.submenu = helpMenu
-        helpMenu.addItem(withTitle: "LumaShrink Help", action: nil, keyEquivalent: "")
+        addMenu("Getting Started", to: helpMenu, key: "?", modifiers: [.command, .shift], target: self, action: #selector(showGettingStarted))
+        addMenu("Show Diagnostic Logs", to: helpMenu, key: "", modifiers: [], target: self, action: #selector(showDiagnosticLogs))
         helpMenu.addItem(.separator())
+        addMenu("Contact Support", to: helpMenu, key: "", modifiers: [], target: self, action: #selector(contactSupport))
 
         NSApp.mainMenu = main
     }

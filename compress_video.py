@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -12,7 +13,6 @@ from pathlib import Path
 
 
 DEFAULT_TARGET_BYTES = 1_000_000
-MAX_RECOMMENDED_INPUT_BYTES = 10_000_000
 GOOD_QUALITY_CQ = 45
 QUALITY_ATTEMPTS = ("18", "20", "21")
 
@@ -228,7 +228,7 @@ def build_video_args(source: Path, encoder: str, quality: str) -> list[str]:
     ]
 
 
-def compress_video(source: Path, output: Path, target_bytes: int) -> tuple[bool, list[str]]:
+def _compress_video_quality_fallback(source: Path, output: Path, target_bytes: int) -> tuple[bool, list[str]]:
     ffmpeg = require_tool("ffmpeg")
     ffprobe = require_tool("ffprobe")
     duration = get_duration(ffprobe, source)
@@ -308,11 +308,109 @@ def compress_video(source: Path, output: Path, target_bytes: int) -> tuple[bool,
         return True, lines
 
 
+def video_has_audio(ffprobe: str, source: Path) -> bool:
+    result = run([
+        ffprobe, "-v", "error", "-select_streams", "a:0",
+        "-show_entries", "stream=index", "-of", "csv=p=0", str(source),
+    ])
+    return result.returncode == 0 and bool(result.stdout.strip())
+
+
+def compress_video(
+    source: Path,
+    output: Path,
+    target_bytes: int,
+    keep_audio: bool = True,
+    keep_metadata: bool = False,
+) -> tuple[bool, list[str]]:
+    """Encode a predictable MP4 toward the requested maximum size."""
+    ffmpeg = require_tool("ffmpeg")
+    ffprobe = require_tool("ffprobe")
+    duration = get_duration(ffprobe, source)
+    source_size = source.stat().st_size
+    target_bytes = max(int(target_bytes), 64 * 1024)
+    output = output.with_suffix(".mp4")
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    lines = [
+        f"Source: {source.name} | {human_size(source_size)} | {duration:.1f}s",
+        f"Target: {human_size(target_bytes)} | H.264 MP4 target-bitrate mode",
+    ]
+
+    if source.suffix.lower() == ".mp4" and source_size <= target_bytes and keep_audio and keep_metadata:
+        shutil.copy2(source, output)
+        lines.append(f"[OK] {source.name} -> {output.name} | already under target; copied without re-encoding.")
+        return True, lines
+
+    has_audio = keep_audio and video_has_audio(ffprobe, source)
+    total_bitrate = max(64_000, int(target_bytes * 8 * 0.92 / max(duration, 0.1)))
+    audio_bitrate = min(96_000, max(32_000, int(total_bitrate * 0.18))) if has_audio and total_bitrate >= 160_000 else 0
+    video_bitrate = max(64_000, total_bitrate - audio_bitrate)
+    best_path: Path | None = None
+    best_size: int | None = None
+
+    with tempfile.TemporaryDirectory(prefix="lumashrink-video-") as tmp_name:
+        tmp = Path(tmp_name)
+        for attempt in range(3):
+            candidate = tmp / f"candidate-{attempt}.mp4"
+            passlog = tmp / f"pass-{attempt}"
+            common = [
+                "-y", "-i", str(source), "-map", "0:v:0", "-c:v", "libx264",
+                "-preset", "medium", "-profile:v", "main", "-pix_fmt", "yuv420p",
+                "-b:v", str(video_bitrate), "-maxrate", str(video_bitrate),
+                "-bufsize", str(video_bitrate * 2), "-passlogfile", str(passlog),
+            ]
+            first = run([ffmpeg, *common, "-pass", "1", "-an", "-f", "mp4", os.devnull])
+            if first.returncode != 0:
+                lines.append(f"[ERROR] Video analysis pass failed: {first.stderr.strip()[-500:]}")
+                return False, lines
+
+            second_args = [ffmpeg, *common, "-pass", "2"]
+            if audio_bitrate:
+                second_args.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", str(audio_bitrate)])
+            else:
+                second_args.append("-an")
+            second_args.extend(["-map_metadata", "0" if keep_metadata else "-1"])
+            second_args.extend(["-movflags", "+faststart", str(candidate)])
+            second = run(second_args)
+            if second.returncode != 0 or not candidate.exists():
+                lines.append(f"[ERROR] Video encode failed: {second.stderr.strip()[-500:]}")
+                return False, lines
+
+            size = candidate.stat().st_size
+            lines.append(f"Attempt {attempt + 1}: {human_size(size)} at {video_bitrate // 1000} kbps video bitrate")
+            if best_size is None or size < best_size:
+                best_path, best_size = candidate, size
+            if size <= target_bytes:
+                best_path, best_size = candidate, size
+                break
+            ratio = target_bytes / max(size, 1)
+            video_bitrate = max(48_000, int(video_bitrate * ratio * 0.90))
+            if audio_bitrate and video_bitrate <= 64_000:
+                audio_bitrate = 0
+
+        if best_path is None or best_size is None:
+            lines.append("[ERROR] No video output was produced.")
+            return False, lines
+        shutil.copy2(best_path, output)
+
+    status = "OK" if best_size <= target_bytes else "BEST EFFORT"
+    lines.append(f"[{status}] {source.name} -> {output.name} | {human_size(source_size)} -> {human_size(best_size)}")
+    if status == "BEST EFFORT":
+        lines.append("The requested target is too small for the source duration at the minimum practical bitrate.")
+    return True, lines
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Compress a video to around 1 MB or less.")
+    parser = argparse.ArgumentParser(description="Compress a video toward a requested maximum size.")
     parser.add_argument("input", type=Path)
     parser.add_argument("output_dir", nargs="?", type=Path)
     parser.add_argument("-s", "--size", default="auto")
+    parser.add_argument("-t", "--target-bytes", type=int)
+    parser.add_argument("--keep-audio", dest="keep_audio", action="store_true", default=True)
+    parser.add_argument("--no-audio", dest="keep_audio", action="store_false")
+    parser.add_argument("--keep-metadata", dest="keep_metadata", action="store_true", default=False)
+    parser.add_argument("--no-metadata", dest="keep_metadata", action="store_false")
     args = parser.parse_args()
 
     source = args.input.expanduser().resolve()
@@ -322,17 +420,21 @@ def main() -> int:
 
     try:
         size_text = args.size.strip().lower()
-        target_bytes = parse_size("1mb") if size_text == "auto" else parse_size(args.size)
-        output = output_path_for(source, args.output_dir.expanduser().resolve() if args.output_dir else None)
-        if source.stat().st_size > MAX_RECOMMENDED_INPUT_BYTES:
-            print(
-                f"[WARN] {source.name} is {human_size(source.stat().st_size)}. "
-                "This block is tuned for videos around 10 MB or less."
-            )
-        _, lines = compress_video(source, output, target_bytes)
+        target_bytes = args.target_bytes or (parse_size("1mb") if size_text == "auto" else parse_size(args.size))
+        if args.target_bytes is not None:
+            if args.output_dir is None:
+                raise ValueError("An output file is required with --target-bytes.")
+            output = args.output_dir.expanduser().resolve()
+        else:
+            output = output_path_for(source, args.output_dir.expanduser().resolve() if args.output_dir else None)
+        success, lines = compress_video(
+            source, output, target_bytes,
+            keep_audio=args.keep_audio,
+            keep_metadata=args.keep_metadata,
+        )
         for line in lines:
             print(line)
-        return 0
+        return 0 if success else 1
     except Exception as error:
         print(f"[ERROR] {error}", file=sys.stderr)
         return 1
